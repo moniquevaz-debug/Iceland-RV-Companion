@@ -1,0 +1,2535 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<meta name="theme-color" content="#0d111e"/>
+<title>🚐 Iceland RV Companion v3.1</title>
+<link href="https://fonts.googleapis.com/css2?family=Bentham&family=IBM+Plex+Mono:wght@400;500;600&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<style>
+/* ═══════════════════════════════════════════
+   DESIGN TOKENS
+═══════════════════════════════════════════ */
+:root{
+  /* Deeper, richer darks */
+  --ink:#07080f; --deep:#0d0f1a;
+  --surface:#0f1120;
+  /* Glassmorphism card */
+  --card:rgba(255,255,255,.035);
+  --card-hover:rgba(255,255,255,.06);
+  --border:rgba(140,200,230,.11);
+  --border-accent:rgba(59,232,176,.22);
+  /* Palette */
+  --ice:#dff0f8; --muted:#5a7a96; --gl:#7abcd8;
+  --aur:#3be8b0; --aur-dim:#27b085;
+  --gold:#f0c040; --red:#ef5f5f; --ora:#f0a030; --grn:#5dd47a;
+  /* Typography */
+  --fb:'DM Sans',sans-serif;
+  --fm:'IBM Plex Mono',monospace;
+  --fs:'Bookman Old Style','Bentham',Bentham,'URW Bookman L','Bookman',Georgia,serif;
+  /* Safe areas */
+  --st:env(safe-area-inset-top,0px);
+  --sb:env(safe-area-inset-bottom,0px);
+  --bnav:66px;
+  /* Cinematic easing */
+  --ease-out-expo:cubic-bezier(0.16,1,0.3,1);
+  --ease-in-out-quart:cubic-bezier(0.76,0,0.24,1);
+  --ease-dramatic:cubic-bezier(0.22,1,0.36,1);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html{height:100%;-webkit-text-size-adjust:100%;}
+body{
+  height:100%;background:var(--ink);color:var(--ice);
+  font-family:var(--fb);font-weight:300;overflow:hidden;
+  -webkit-tap-highlight-color:transparent;
+  -webkit-font-smoothing:antialiased;
+  -moz-osx-font-smoothing:grayscale;
+}
+/* Cinematic aurora atmosphere — three layered gradients + slow drift */
+body::before{
+  content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
+  background:
+    radial-gradient(ellipse 90% 55% at 8% -5%,rgba(59,232,176,.09),transparent 55%),
+    radial-gradient(ellipse 70% 50% at 92% 8%,rgba(100,60,200,.11),transparent 52%),
+    radial-gradient(ellipse 60% 70% at 45% 105%,rgba(20,40,80,.6),transparent 55%),
+    radial-gradient(ellipse 40% 35% at 75% 55%,rgba(59,232,176,.04),transparent 45%);
+  animation:aur 18s var(--ease-in-out-quart) infinite alternate;
+}
+body::after{
+  content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
+  background:
+    radial-gradient(ellipse 100% 8% at 50% 0%,rgba(59,232,176,.06),transparent 100%),
+    radial-gradient(ellipse 100% 4% at 50% 100%,rgba(10,20,50,.8),transparent 100%);
+}
+@keyframes aur{
+  0%  {filter:hue-rotate(0deg) brightness(1);}
+  50% {filter:hue-rotate(12deg) brightness(1.04);}
+  100%{filter:hue-rotate(25deg) brightness(.97);}
+}
+
+/* ═══════════════════════════════════════════
+   APP SHELL — MOBILE FIRST
+═══════════════════════════════════════════ */
+.app{
+  position:relative;z-index:1;
+  display:flex;flex-direction:column;
+  height:100vh;height:100dvh;
+  overflow:hidden;
+}
+.top-area{flex-shrink:0;display:flex;flex-direction:column;}
+.left-col{
+  flex:1;min-height:0;
+  display:flex;flex-direction:column;
+  overflow:hidden;
+  background:rgba(7,8,15,.88);
+}
+.right-col{display:none;}
+
+/* ═══════════════════════════════════════════
+   TOP BAR
+═══════════════════════════════════════════ */
+.topbar{
+  display:flex;align-items:center;gap:12px;
+  padding:calc(12px + var(--st)) 18px 12px;
+  background:rgba(7,8,15,.96);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);
+  border-bottom:1px solid rgba(59,232,176,.08);flex-shrink:0;z-index:100;
+  position:relative;
+}
+/* Thin aurora line at top of topbar */
+.topbar::after{
+  content:'';position:absolute;top:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent 0%,rgba(59,232,176,.4) 40%,rgba(100,60,200,.3) 70%,transparent 100%);
+}
+.tb-icon{font-size:1.5rem;filter:drop-shadow(0 0 10px rgba(59,232,176,.6));flex-shrink:0;}
+.tb-title{
+  font-family:var(--fs);font-size:1.18rem;font-weight:600;font-style:italic;
+  letter-spacing:.01em;white-space:nowrap;
+  background:linear-gradient(125deg,#dff0f8 0%,#3be8b0 55%,#a8f0de 100%);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+}
+.tb-ver{
+  font-family:var(--fm);font-size:.44rem;color:var(--aur);opacity:.6;
+  border:1px solid rgba(59,232,176,.18);border-radius:3px;padding:2px 6px;
+  letter-spacing:.08em;flex-shrink:0;
+}
+.tb-spacer{flex:1;}
+.gps-btn{
+  display:flex;align-items:center;gap:5px;
+  font-family:var(--fm);font-size:.55rem;padding:7px 11px;
+  border-radius:20px;border:1px solid rgba(140,200,230,.2);
+  background:transparent;color:var(--muted);cursor:pointer;
+  transition:all .2s;white-space:nowrap;-webkit-appearance:none;
+}
+.gps-btn:active{transform:scale(.95);}
+.gps-btn.on{border-color:rgba(59,232,176,.4);color:var(--aur);background:rgba(59,232,176,.08);}
+.gps-btn.off{border-color:rgba(239,95,95,.35);color:var(--red);background:rgba(239,95,95,.07);}
+.gps-btn.err{border-color:rgba(240,192,64,.35);color:var(--gold);background:rgba(240,192,64,.06);}
+.gps-dot{width:6px;height:6px;border-radius:50%;background:currentColor;flex-shrink:0;}
+.gps-btn.on .gps-dot{animation:blink 1.6s infinite;}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.15}}
+
+/* ═══════════════════════════════════════════
+   SEARCH PANEL
+═══════════════════════════════════════════ */
+.search-sheet{
+  background:rgba(7,8,15,.97);border-bottom:1px solid rgba(59,232,176,.07);
+  padding:14px 18px;flex-shrink:0;
+}
+.sel-row{display:flex;gap:8px;margin-bottom:10px;}
+.sel-wrap{flex:1;display:flex;flex-direction:column;gap:3px;min-width:0;}
+.sel-label{font-family:var(--fm);font-size:.5rem;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;}
+select{
+  width:100%;background:rgba(255,255,255,.04);
+  border:1px solid rgba(140,200,230,.13);border-radius:6px;
+  padding:11px 28px 11px 13px;color:var(--ice);
+  font-size:.85rem;font-family:var(--fs);font-style:italic;cursor:pointer;
+  appearance:none;-webkit-appearance:none;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%235a7a96'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 10px center;
+  outline:none;transition:border-color .5s var(--ease-dramatic),background .4s;
+}
+select:focus{border-color:rgba(59,232,176,.4);background:rgba(59,232,176,.03);}
+select option{background:#0d0f1a;color:var(--ice);}
+.action-row{display:flex;align-items:center;gap:8px;}
+.rchips{display:flex;gap:4px;flex:1;flex-wrap:wrap;}
+.rc{
+  font-family:var(--fm);font-size:.58rem;padding:7px 10px;border-radius:20px;
+  border:1px solid rgba(140,200,230,.15);color:var(--muted);
+  background:transparent;cursor:pointer;transition:all .15s;-webkit-appearance:none;
+}
+.rc.on{background:rgba(59,232,176,.12);border-color:rgba(59,232,176,.4);color:var(--aur);}
+.btn-go{
+  padding:11px 22px;border:none;border-radius:8px;
+  font-family:var(--fs);font-size:.9rem;font-weight:600;font-style:italic;
+  background:linear-gradient(135deg,#3be8b0 0%,#1fd4a0 100%);color:#07080f;
+  box-shadow:0 4px 24px rgba(59,232,176,.28),0 1px 0 rgba(255,255,255,.15) inset;
+  cursor:pointer;white-space:nowrap;
+  transition:box-shadow .5s var(--ease-dramatic),transform .35s var(--ease-out-expo),opacity .3s;
+  -webkit-appearance:none;flex-shrink:0;letter-spacing:.01em;
+}
+.btn-go:hover:not(:disabled){
+  box-shadow:0 6px 32px rgba(59,232,176,.45),0 1px 0 rgba(255,255,255,.15) inset;
+  transform:translateY(-1px);
+}
+.btn-go:active:not(:disabled){transform:scale(.96) translateY(0);}
+.btn-go:disabled{opacity:.25;cursor:not-allowed;box-shadow:none;}
+
+/* ═══════════════════════════════════════════
+   ROUTE SUMMARY BAR
+═══════════════════════════════════════════ */
+.route-summary{
+  display:none;padding:11px 18px;
+  background:linear-gradient(135deg,rgba(59,232,176,.06) 0%,rgba(7,8,15,0) 70%);
+  border-bottom:1px solid rgba(59,232,176,.1);
+  flex-shrink:0;
+  position:relative;
+}
+.route-summary::before{
+  content:'';position:absolute;left:0;top:0;bottom:0;width:2px;
+  background:linear-gradient(180deg,rgba(59,232,176,.7),rgba(59,232,176,.15));
+}
+.route-summary.show{display:block;}
+.rs-route{display:flex;align-items:center;gap:8px;margin-bottom:5px;flex-wrap:wrap;}
+.rs-from{color:var(--aur);font-weight:600;font-size:.85rem;}
+.rs-arr{color:var(--muted);}
+.rs-to{color:var(--gold);font-weight:600;font-size:.85rem;}
+.rs-stats{display:flex;gap:14px;flex-wrap:wrap;}
+.rs-stat{font-family:var(--fm);font-size:.6rem;display:flex;gap:4px;}
+.rs-key{color:var(--muted);}
+.rs-val{color:var(--ice);}
+
+/* Night timeline */
+.ntl{
+  padding:8px 16px;border-bottom:1px solid var(--border);
+  display:flex;gap:4px;overflow-x:auto;scrollbar-width:none;flex-shrink:0;
+}
+.ntl::-webkit-scrollbar{display:none;}
+.np{
+  flex-shrink:0;width:32px;height:32px;border-radius:50%;
+  border:1px solid rgba(140,200,230,.12);display:flex;align-items:center;
+  justify-content:center;font-family:var(--fs);font-size:.75rem;font-weight:600;
+  color:var(--muted);cursor:pointer;background:transparent;-webkit-appearance:none;
+  transition:all .5s var(--ease-dramatic);
+}
+.np:hover{border-color:rgba(140,200,230,.3);color:var(--gl);}
+.np.vis{border-color:var(--gl);background:rgba(140,200,230,.07);color:var(--gl);}
+.np.act{
+  border-color:var(--aur);background:rgba(59,232,176,.12);color:var(--aur);
+  box-shadow:0 0 12px rgba(59,232,176,.25);
+}
+
+/* ═══════════════════════════════════════════
+   TABS
+═══════════════════════════════════════════ */
+.tabs{
+  display:flex;border-bottom:1px solid rgba(59,232,176,.08);flex-shrink:0;
+  background:rgba(7,8,15,.94);backdrop-filter:blur(12px);
+}
+.tab{
+  flex:1;padding:13px 4px 11px;
+  font-family:var(--fs);font-size:.78rem;font-weight:400;font-style:italic;
+  letter-spacing:.02em;color:var(--muted);
+  cursor:pointer;text-align:center;background:none;border:none;
+  border-bottom:2px solid transparent;
+  transition:color .45s var(--ease-dramatic), border-color .45s var(--ease-dramatic);
+  -webkit-appearance:none;position:relative;
+}
+.tab:hover{color:rgba(223,240,248,.6);}
+.tab.on{color:var(--aur);border-bottom-color:var(--aur);}
+.tbadge{
+  position:absolute;top:6px;right:calc(50% - 22px);
+  font-size:.44rem;padding:1px 4px;border-radius:8px;
+  font-family:var(--fm);min-width:14px;text-align:center;display:none;
+}
+.tbadge-red{background:rgba(239,95,95,.2);color:var(--red);}
+
+/* ═══════════════════════════════════════════
+   PANELS
+═══════════════════════════════════════════ */
+.panels{flex:1;min-height:0;position:relative;overflow:hidden;}
+.panel{
+  position:absolute;inset:0;overflow-y:auto;display:none;
+  -webkit-overflow-scrolling:touch;
+  padding-bottom:8px;
+  scroll-behavior:smooth;
+}
+.panel.on{display:block;}
+/* Cinematic scroll-triggered entry */
+.anim-ready{
+  opacity:0;transform:translateY(18px);
+  transition:opacity .7s var(--ease-out-expo), transform .7s var(--ease-out-expo);
+}
+.anim-in{opacity:1;transform:translateY(0);}
+
+/* ═══════════════════════════════════════════
+   GAS PANEL
+═══════════════════════════════════════════ */
+.brand-bar{
+  position:sticky;top:0;z-index:10;
+  padding:8px 16px;background:rgba(13,17,30,.96);backdrop-filter:blur(12px);
+  border-bottom:1px solid var(--border);
+  display:none;flex-wrap:wrap;gap:5px;align-items:center;
+}
+.brand-bar.show{display:flex;}
+.bl{font-family:var(--fm);font-size:.5rem;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-right:2px;}
+.fb{
+  font-family:var(--fm);font-size:.6rem;padding:5px 11px;border-radius:14px;
+  border:1px solid rgba(140,200,230,.15);color:var(--muted);
+  background:transparent;cursor:pointer;transition:all .15s;white-space:nowrap;-webkit-appearance:none;
+}
+.fb.on{background:rgba(240,192,64,.12);border-color:rgba(240,192,64,.38);color:var(--gold);}
+.gas-hd{
+  padding:10px 16px 6px;display:flex;align-items:center;
+  border-bottom:1px solid var(--border);background:rgba(13,17,30,.95);
+}
+.gas-hd-t{font-family:var(--fm);font-size:.56rem;letter-spacing:2px;text-transform:uppercase;color:var(--muted);}
+.cpill{
+  font-family:var(--fm);font-size:.58rem;background:rgba(59,232,176,.1);
+  color:var(--aur);border-radius:20px;padding:2px 9px;margin-left:auto;display:none;
+}
+/* Gas cards */
+.gc{
+  background:var(--card);
+  border:1px solid rgba(140,200,230,.08);
+  border-left:2px solid rgba(59,232,176,.18);
+  border-radius:0 10px 10px 0;
+  padding:14px 15px 14px 16px;margin:10px 14px 0;cursor:pointer;
+  transition:background .5s var(--ease-dramatic),
+             border-color .5s var(--ease-dramatic),
+             transform .4s var(--ease-out-expo),
+             box-shadow .5s var(--ease-dramatic);
+  animation:sli .55s var(--ease-out-expo) both;
+  -webkit-tap-highlight-color:transparent;
+  position:relative;overflow:hidden;
+}
+.gc::before{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(135deg,rgba(59,232,176,.04) 0%,transparent 60%);
+  opacity:0;transition:opacity .4s var(--ease-dramatic);
+  pointer-events:none;
+}
+.gc:hover{
+  background:var(--card-hover);border-left-color:rgba(59,232,176,.55);
+  transform:translateX(3px);
+  box-shadow:-3px 0 20px rgba(59,232,176,.08);
+}
+.gc:hover::before{opacity:1;}
+.gc:active{transform:translateX(1px);}
+@keyframes sli{from{opacity:0;transform:translateX(-16px) translateY(4px)}to{opacity:1;transform:translateX(0) translateY(0)}}
+.gct{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:4px;}
+.gcn{font-family:var(--fs);font-size:1.02rem;font-weight:600;font-style:italic;color:var(--ice);flex:1;padding-right:8px;line-height:1.25;letter-spacing:.01em;}
+.gcd{font-family:var(--fm);font-size:.64rem;background:rgba(59,232,176,.1);color:var(--aur);border-radius:12px;padding:3px 8px;white-space:nowrap;flex-shrink:0;}
+.gca{font-size:.72rem;color:var(--muted);margin-bottom:5px;}
+.wdump{display:flex;gap:4px;margin-bottom:5px;flex-wrap:wrap;}
+.wdtag{font-family:var(--fm);font-size:.55rem;border-radius:8px;padding:3px 8px;border:1px solid rgba(93,212,122,.3);background:rgba(93,212,122,.08);color:var(--grn);}
+.gcm{display:flex;align-items:center;gap:5px;flex-wrap:wrap;}
+.tag{font-family:var(--fm);font-size:.57rem;border-radius:9px;padding:3px 7px;}
+.t-g{background:rgba(59,232,176,.1);color:var(--aur);}
+.t-y{background:rgba(240,192,64,.1);color:var(--gold);}
+.gclinks{margin-left:auto;display:flex;gap:8px;}
+.ml{
+  font-family:var(--fm);font-size:.62rem;color:var(--gl);text-decoration:none;
+  padding:5px 10px;border-radius:8px;border:1px solid rgba(140,200,230,.15);
+  background:rgba(140,200,230,.05);transition:all .15s;
+}
+.ml:active{background:rgba(140,200,230,.12);}
+/* Camp footer */
+.cdp{padding:12px 16px;border-top:1px solid var(--border);display:none;margin-top:8px;}
+.cdp.show{display:block;}
+.cdpt{font-family:var(--fm);font-size:.52rem;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:4px;}
+.cdpn{font-family:var(--fs);font-size:1.1rem;font-weight:300;font-style:italic;color:var(--gold);margin-bottom:4px;letter-spacing:.01em;}
+.cdpi{font-size:.72rem;color:var(--muted);}
+
+/* ═══════════════════════════════════════════
+   WEATHER PANEL
+═══════════════════════════════════════════ */
+.wx-warn{
+  background:rgba(239,95,95,.09);border:1px solid rgba(239,95,95,.28);
+  border-radius:10px;padding:10px 13px;margin:10px 14px 0;
+  font-family:var(--fm);font-size:.67rem;color:#f08060;line-height:1.6;animation:sli .25s ease;
+}
+.wx-warn.mod{background:rgba(240,160,48,.08);border-color:rgba(240,160,48,.3);color:#f0b060;}
+.wx-loc{font-family:var(--fm);font-size:.55rem;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);padding:12px 16px 5px;}
+.wx-now{
+  display:flex;align-items:center;gap:16px;
+  background:var(--card);border:1px solid rgba(140,200,230,.08);border-radius:10px;
+  padding:16px 18px;margin:0 14px;animation:sli .55s var(--ease-out-expo) both;
+  box-shadow:0 8px 32px rgba(0,0,0,.35);
+}
+.wx-ico{font-size:2.8rem;line-height:1;flex-shrink:0;}
+.wx-big{font-family:var(--fs);font-size:2.6rem;font-weight:300;font-style:italic;color:var(--ice);line-height:1;letter-spacing:-.01em;}
+.wx-desc{font-size:.76rem;color:var(--gl);margin-top:3px;}
+.wx-feels{font-family:var(--fm);font-size:.6rem;color:var(--muted);margin-top:2px;}
+.wx-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin:8px 14px 0;}
+.wx-stat{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:10px 12px;animation:sli .25s ease both;}
+.wx-sk{font-family:var(--fm);font-size:.53rem;color:var(--muted);margin-bottom:3px;}
+.wx-sv{font-family:var(--fm);font-size:.78rem;color:var(--ice);font-weight:500;}
+.wx-strip{display:flex;gap:6px;overflow-x:auto;padding:8px 14px;scrollbar-width:none;}
+.wx-strip::-webkit-scrollbar{display:none;}
+.wx-dc{
+  flex-shrink:0;background:var(--card);border:1px solid var(--border);border-radius:10px;
+  padding:10px 12px;text-align:center;min-width:68px;animation:sli .25s ease both;
+}
+.wx-dd{font-family:var(--fm);font-size:.57rem;color:var(--muted);margin-bottom:5px;}
+.wx-di{font-size:1.5rem;margin-bottom:4px;}
+.wx-dhi{font-family:var(--fm);font-size:.74rem;color:var(--ice);font-weight:600;}
+.wx-dlo{font-family:var(--fm);font-size:.62rem;color:var(--muted);}
+.wx-dw{font-family:var(--fm);font-size:.55rem;color:var(--gl);margin-top:3px;}
+.wx-src{font-family:var(--fm);font-size:.57rem;color:var(--muted);padding:8px 16px 4px;line-height:1.7;}
+.wx-src a{color:var(--gl);}
+
+/* ═══════════════════════════════════════════
+   ROADS PANEL
+═══════════════════════════════════════════ */
+.rn{
+  background:var(--card);border:1px solid rgba(140,200,230,.1);border-radius:12px;
+  padding:12px 14px;margin:8px 14px 0;animation:sli .25s ease both;
+}
+.rn.cl{border-color:rgba(239,95,95,.35);background:rgba(239,95,95,.05);}
+.rn.wa{border-color:rgba(240,160,48,.35);background:rgba(240,160,48,.05);}
+.rn-hd{display:flex;align-items:flex-start;gap:9px;margin-bottom:6px;}
+.rn-ico{font-size:1.2rem;line-height:1.25;flex-shrink:0;}
+.rn-title{font-family:var(--fs);font-size:.96rem;font-weight:600;font-style:italic;color:var(--ice);line-height:1.35;letter-spacing:.01em;}
+.rn-body{font-size:.72rem;color:var(--gl);line-height:1.65;margin-bottom:6px;}
+.rn-tags{display:flex;gap:5px;flex-wrap:wrap;}
+.rntag{font-family:var(--fm);font-size:.55rem;border-radius:8px;padding:3px 8px;}
+.rt-r{background:rgba(239,95,95,.14);color:var(--red);}
+.rt-o{background:rgba(240,160,48,.14);color:var(--ora);}
+.rt-b{background:rgba(140,200,230,.12);color:var(--gl);}
+.rn-time{font-family:var(--fm);font-size:.55rem;color:var(--muted);margin-top:5px;}
+.alt-box{
+  background:rgba(59,232,176,.05);border:1px solid rgba(59,232,176,.2);
+  border-radius:12px;padding:12px 14px;margin:8px 14px 0;
+  font-size:.73rem;color:var(--ice);line-height:1.7;animation:sli .25s ease;
+}
+.alt-box strong{color:var(--aur);}
+.road-links{
+  font-family:var(--fm);font-size:.59rem;color:var(--muted);
+  padding:10px 16px;line-height:1.9;border-top:1px solid var(--border);margin-top:10px;
+}
+.road-links a{color:var(--gl);}
+
+/* ═══════════════════════════════════════════
+   MAP — MOBILE PANEL & DESKTOP
+═══════════════════════════════════════════ */
+#map-panel{
+  flex:1;min-height:0;
+  display:none;flex-direction:column;overflow:hidden;
+  position:relative;
+}
+.app.map-active .left-col{display:none;}
+.app.map-active #map-panel{display:flex;}
+#map-mobile{flex:1;min-height:0;width:100%;}
+#map-container{width:100%;height:100%;position:relative;}
+#map{width:100%;height:100%;}
+#map-canvas{width:100%;height:100%;}
+.leaflet-container{width:100%!important;height:100%!important;}
+
+.map-fab{
+  position:absolute;z-index:500;
+  width:46px;height:46px;border-radius:50%;cursor:pointer;
+  background:rgba(13,17,30,.94);backdrop-filter:blur(12px);
+  border:1.5px solid rgba(140,200,230,.3);font-size:1.2rem;
+  display:flex;align-items:center;justify-content:center;
+  transition:all .2s;box-shadow:0 4px 16px rgba(0,0,0,.55);-webkit-appearance:none;
+}
+.map-fab:active{transform:scale(.92);}
+.map-fab.loc{border-color:var(--aur);background:rgba(59,232,176,.12);}
+.map-fab.locating{animation:locpulse .9s ease-in-out infinite;}
+@keyframes locpulse{0%,100%{box-shadow:0 0 0 0 rgba(59,232,176,.45)}50%{box-shadow:0 0 0 10px rgba(59,232,176,0)}}
+
+/* GPS user dot */
+.udot{
+  width:22px;height:22px;border-radius:50%;
+  background:rgba(59,232,176,.18);border:2px solid var(--aur);
+  display:flex;align-items:center;justify-content:center;
+  animation:ping 2s ease-out infinite;
+}
+.udot-c{width:9px;height:9px;border-radius:50%;background:var(--aur);box-shadow:0 0 8px var(--aur);}
+@keyframes ping{0%{box-shadow:0 0 0 0 rgba(59,232,176,.7)}70%{box-shadow:0 0 0 14px rgba(59,232,176,0)}100%{box-shadow:0 0 0 0 rgba(59,232,176,0)}}
+
+/* ═══════════════════════════════════════════
+   BOTTOM NAV (mobile only)
+═══════════════════════════════════════════ */
+.bnav{
+  display:flex;background:rgba(7,8,15,.98);
+  border-top:1px solid rgba(59,232,176,.07);flex-shrink:0;
+  padding-bottom:var(--sb);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+}
+.bn{
+  flex:1;display:flex;flex-direction:column;align-items:center;
+  justify-content:center;gap:4px;padding:10px 4px;
+  font-family:var(--fs);font-size:.65rem;font-style:italic;letter-spacing:.02em;
+  color:var(--muted);cursor:pointer;background:none;border:none;
+  transition:color .45s var(--ease-dramatic);-webkit-appearance:none;position:relative;
+}
+.bn.on{color:var(--aur);}
+.bn-ico{font-size:1.3rem;line-height:1;transition:transform .4s var(--ease-out-expo);}
+.bn.on .bn-ico{transform:translateY(-1px);}
+.bn-lbl{font-size:.6rem;}
+.bn-badge{
+  position:absolute;top:6px;right:calc(50% - 18px);
+  font-size:.42rem;padding:1px 4px;border-radius:8px;
+  font-family:var(--fm);background:rgba(239,95,95,.2);color:var(--red);display:none;
+}
+
+/* ═══════════════════════════════════════════
+   TOAST
+═══════════════════════════════════════════ */
+.toast{
+  position:fixed;bottom:calc(var(--bnav) + var(--sb) + 12px);
+  left:14px;right:14px;z-index:3000;
+  background:rgba(7,8,15,.98);border:1px solid rgba(240,192,64,.25);
+  border-left:3px solid rgba(240,192,64,.7);
+  border-radius:0 10px 10px 0;padding:14px 16px;
+  font-family:var(--fm);font-size:.68rem;color:var(--ice);
+  box-shadow:0 12px 40px rgba(0,0,0,.8),-4px 0 20px rgba(240,192,64,.1);
+  line-height:1.8;display:none;backdrop-filter:blur(20px);
+}
+.toast.show{display:block;animation:tIn .3s ease;}
+@keyframes tIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+.toast-ttl{color:var(--gold);font-weight:600;margin-bottom:5px;font-size:.72rem;}
+.toast-x{float:right;cursor:pointer;color:var(--muted);margin-left:8px;font-size:.95rem;}
+.toast ol{margin:5px 0 5px 14px;color:var(--gl);}
+.toast ol li{margin-bottom:3px;}
+
+/* ═══════════════════════════════════════════
+   SHARED STATES
+═══════════════════════════════════════════ */
+.sbox{
+  text-align:center;padding:40px 20px;color:var(--muted);
+  font-family:var(--fm);font-size:.7rem;line-height:2.2;
+}
+.sbox-ico{font-size:2.4rem;display:block;margin-bottom:10px;opacity:.4;}
+.sbox a{color:var(--gl);}
+.spinner{
+  display:flex;align-items:center;justify-content:center;gap:10px;
+  padding:30px;color:var(--muted);font-family:var(--fm);font-size:.68rem;
+}
+.sp{
+  width:14px;height:14px;
+  border:2px solid rgba(140,200,230,.18);border-top-color:var(--gl);
+  border-radius:50%;animation:rot .8s linear infinite;
+}
+@keyframes rot{to{transform:rotate(360deg)}}
+
+/* ═══════════════════════════════════════════
+   LEAFLET POPUP OVERRIDES
+═══════════════════════════════════════════ */
+.leaflet-popup-content-wrapper{
+  background:#141928!important;border:1px solid rgba(140,200,230,.2)!important;
+  border-radius:12px!important;color:var(--ice)!important;
+  font-family:'IBM Plex Sans',sans-serif!important;
+  box-shadow:0 8px 26px rgba(0,0,0,.6)!important;
+}
+.leaflet-popup-tip{background:#141928!important;}
+.leaflet-popup-content{margin:11px 13px!important;min-width:155px;}
+.pn{font-weight:600;font-size:.88rem;margin-bottom:3px;color:var(--ice);}
+.pa{font-size:.7rem;color:#6a8faa;margin-bottom:4px;}
+.pi{font-size:.68rem;color:var(--gold);margin-bottom:3px;}
+.ph{font-size:.65rem;color:var(--aur);margin-bottom:6px;}
+.plink{
+  font-family:'IBM Plex Mono',monospace;font-size:.64rem;color:var(--aur);
+  text-decoration:none;padding:4px 10px;border-radius:8px;
+  background:rgba(59,232,176,.08);border:1px solid rgba(59,232,176,.2);
+}
+
+/* ═══════════════════════════════════════════
+   DESKTOP (≥768px)
+═══════════════════════════════════════════ */
+@media(min-width:768px){
+  .app{
+    display:grid;
+    grid-template-rows:auto 1fr;
+    grid-template-columns:440px 1fr;
+    grid-template-areas:"top top""left right";
+  }
+  .top-area{grid-area:top;border-bottom:1px solid var(--border);}
+  .left-col{
+    grid-area:left;
+    border-right:1px solid var(--border);
+    backdrop-filter:blur(20px);
+  }
+  .right-col{
+    grid-area:right;display:block;
+    position:relative;overflow:hidden;
+  }
+  /* On desktop the map lives in right-col, not map-panel */
+  #map-panel{display:none!important;}
+  .app.map-active .left-col{display:flex!important;}
+  #map-container{position:absolute;inset:0;display:block;}
+  #map{height:100%;}
+  .map-fab{bottom:24px;right:20px;position:fixed;}
+  .bnav{display:none;}
+  .btn-go{padding:10px 22px;}
+  select{font-size:.82rem;}
+  .toast{left:auto;right:20px;max-width:320px;bottom:90px;}
+}
+@media(min-width:1100px){
+  .app{grid-template-columns:480px 1fr;}
+}
+
+/* ═══════════════════════════════════════════
+   AURORA PANEL
+═══════════════════════════════════════════ */
+.au-card{
+  background:rgba(59,232,176,.06);
+  border:1px solid rgba(59,232,176,.25);border-radius:12px;
+  padding:14px 15px;margin:10px 14px 0;animation:sli .25s ease both;
+}
+.au-card.low{border-color:rgba(140,200,230,.2);background:rgba(140,200,230,.04);}
+.au-card.med{border-color:rgba(240,192,64,.35);background:rgba(240,192,64,.06);}
+.au-card.high{border-color:rgba(59,232,176,.45);background:rgba(59,232,176,.08);}
+.au-card.epic{border-color:rgba(180,100,255,.55);background:rgba(180,100,255,.1);}
+.au-hd{display:flex;align-items:center;gap:9px;margin-bottom:8px;}
+.au-ico{font-size:1.6rem;line-height:1;flex-shrink:0;}
+.au-title{font-family:var(--fb);font-size:.88rem;font-weight:600;color:var(--ice);line-height:1.3;}
+.au-sub{font-family:var(--fm);font-size:.58rem;color:var(--muted);margin-top:2px;}
+.au-kp-row{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
+.au-kp-val{font-family:var(--fs);font-size:2.2rem;font-weight:700;line-height:1;color:var(--aur);}
+.au-card.low .au-kp-val{color:var(--muted);}
+.au-card.med .au-kp-val{color:var(--gold);}
+.au-card.epic .au-kp-val{color:#b464ff;}
+.au-kp-lbl{font-family:var(--fm);font-size:.55rem;color:var(--muted);}
+.au-kp-storm{font-family:var(--fm);font-size:.62rem;padding:3px 9px;border-radius:10px;
+  background:rgba(59,232,176,.12);color:var(--aur);border:1px solid rgba(59,232,176,.28);}
+.au-card.low .au-kp-storm{background:rgba(140,200,230,.08);color:var(--muted);border-color:rgba(140,200,230,.15);}
+.au-card.med .au-kp-storm{background:rgba(240,192,64,.1);color:var(--gold);border-color:rgba(240,192,64,.3);}
+.au-card.epic .au-kp-storm{background:rgba(180,100,255,.12);color:#b464ff;border-color:rgba(180,100,255,.35);}
+.au-bar-wrap{margin-bottom:10px;}
+.au-bar-lbl{font-family:var(--fm);font-size:.52rem;color:var(--muted);margin-bottom:3px;}
+.au-bar-track{height:8px;border-radius:4px;background:rgba(255,255,255,.07);overflow:hidden;}
+.au-bar-fill{height:100%;border-radius:4px;transition:width .6s ease;
+  background:linear-gradient(90deg,var(--aur),#7cf0d0);}
+.au-card.low .au-bar-fill{background:linear-gradient(90deg,var(--muted),var(--gl));}
+.au-card.med .au-bar-fill{background:linear-gradient(90deg,var(--ora),var(--gold));}
+.au-card.epic .au-bar-fill{background:linear-gradient(90deg,#7c3fff,#b464ff);}
+.au-verdict{font-size:.73rem;color:var(--gl);line-height:1.65;margin-bottom:10px;}
+.au-card.low .au-verdict{color:var(--muted);}
+.au-card.med .au-verdict{color:#f0c878;}
+.au-card.epic .au-verdict{color:#c890ff;}
+.au-strip{display:flex;gap:5px;overflow-x:auto;scrollbar-width:none;padding-bottom:4px;}
+.au-strip::-webkit-scrollbar{display:none;}
+.au-dc{
+  flex-shrink:0;background:rgba(255,255,255,.04);border:1px solid rgba(140,200,230,.12);
+  border-radius:9px;padding:7px 9px;text-align:center;min-width:52px;
+}
+.au-dc.act{border-color:rgba(59,232,176,.35);background:rgba(59,232,176,.07);}
+.au-dc.med{border-color:rgba(240,192,64,.3);background:rgba(240,192,64,.06);}
+.au-dc.epic{border-color:rgba(180,100,255,.35);background:rgba(180,100,255,.08);}
+.au-dt{font-family:var(--fm);font-size:.5rem;color:var(--muted);margin-bottom:3px;}
+.au-dk{font-family:var(--fs);font-size:.95rem;font-weight:700;color:var(--aur);}
+.au-dc.low .au-dk{color:var(--muted);}
+.au-dc.med .au-dk{color:var(--gold);}
+.au-dc.epic .au-dk{color:#b464ff;}
+.au-dsrc{font-family:var(--fm);font-size:.55rem;color:var(--muted);
+  padding:6px 15px 0;line-height:1.7;}
+.au-dsrc a{color:var(--gl);}
+.au-night-warn{
+  font-family:var(--fm);font-size:.63rem;color:var(--gold);
+  background:rgba(240,192,64,.07);border:1px solid rgba(240,192,64,.2);
+  border-radius:8px;padding:7px 11px;margin-top:8px;line-height:1.6;
+}
+
+
+/* ═══════════════════════════════════════════
+   AURORA OVERLAY
+═══════════════════════════════════════════ */
+#aurora-overlay{
+  position:fixed;inset:0;z-index:4000;
+  display:none;flex-direction:column;
+  background:rgba(2,3,8,.92);
+  backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);
+  animation:auOverIn .6s var(--ease-out-expo) both;
+}
+#aurora-overlay.show{display:flex;}
+@keyframes auOverIn{
+  from{opacity:0;transform:scale(1.03);}
+  to{opacity:1;transform:scale(1);}
+}
+#aurora-canvas{
+  position:absolute;inset:0;width:100%;height:100%;
+  opacity:.75;
+}
+.au-overlay-panel{
+  position:relative;z-index:1;
+  margin:auto;width:min(92vw,480px);
+  background:rgba(7,8,15,.82);
+  border:1px solid rgba(59,232,176,.2);
+  border-radius:16px;padding:22px 22px 18px;
+  backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+  box-shadow:0 20px 60px rgba(0,0,0,.7),0 0 80px rgba(59,232,176,.06);
+  overflow-y:auto;max-height:88vh;
+}
+.au-ov-close{
+  position:absolute;top:14px;right:16px;
+  font-size:1.1rem;color:var(--muted);cursor:pointer;
+  background:none;border:none;-webkit-appearance:none;
+  transition:color .3s;line-height:1;padding:4px;
+}
+.au-ov-close:hover{color:var(--ice);}
+.au-ov-title{
+  font-family:var(--fs);font-size:1.45rem;font-weight:600;
+  color:var(--aur);margin-bottom:4px;letter-spacing:.01em;
+}
+.au-ov-sub{
+  font-family:var(--fm);font-size:.55rem;color:var(--muted);
+  letter-spacing:.08em;text-transform:uppercase;margin-bottom:18px;
+}
+.au-ov-kp-big{
+  display:flex;align-items:baseline;gap:8px;margin-bottom:16px;
+  padding:14px 16px;
+  background:rgba(59,232,176,.06);border:1px solid rgba(59,232,176,.15);
+  border-radius:10px;
+}
+.au-ov-kp-num{
+  font-family:var(--fs);font-size:3.2rem;font-weight:600;
+  line-height:1;color:var(--aur);
+}
+.au-ov-kp-info{display:flex;flex-direction:column;gap:2px;}
+.au-ov-kp-scale{
+  font-family:var(--fm);font-size:.58rem;color:var(--muted);
+}
+.au-ov-kp-storm{
+  font-family:var(--fm);font-size:.72rem;font-weight:600;color:var(--aur);
+}
+.au-ov-verdict{
+  font-size:.8rem;line-height:1.75;color:var(--gl);
+  margin-bottom:18px;padding:0 2px;
+}
+/* Legend */
+.au-legend-title{
+  font-family:var(--fs);font-size:.88rem;font-weight:600;
+  color:var(--ice);margin-bottom:10px;letter-spacing:.01em;
+}
+.au-legend-row{
+  display:grid;grid-template-columns:40px 80px 1fr;
+  align-items:center;gap:8px;margin-bottom:8px;
+}
+.au-legend-kp{
+  font-family:var(--fs);font-size:1.05rem;font-weight:600;
+  text-align:center;
+}
+.au-legend-bar{
+  height:8px;border-radius:4px;
+}
+.au-legend-desc{
+  font-family:var(--fm);font-size:.57rem;color:var(--muted);line-height:1.5;
+}
+.au-legend-divider{
+  height:1px;background:rgba(140,200,230,.08);
+  margin:10px 0;
+}
+.au-ov-src{
+  font-family:var(--fm);font-size:.52rem;color:var(--muted);
+  margin-top:14px;line-height:1.8;border-top:1px solid rgba(140,200,230,.08);
+  padding-top:10px;
+}
+.au-ov-src a{color:var(--gl);}
+.au-view-btn{
+  display:inline-flex;align-items:center;gap:6px;
+  margin-top:10px;font-family:var(--fs);font-size:.78rem;
+  font-style:italic;padding:8px 16px;border-radius:8px;
+  border:1px solid rgba(59,232,176,.3);color:var(--aur);
+  background:rgba(59,232,176,.07);cursor:pointer;
+  transition:all .4s var(--ease-dramatic);-webkit-appearance:none;
+}
+.au-view-btn:hover{background:rgba(59,232,176,.14);border-color:rgba(59,232,176,.5);}
+
+</style>
+</head>
+<body>
+<div class="app" id="app">
+
+<!-- ═══ TOP AREA ═══ -->
+<div class="top-area">
+  <div class="topbar">
+    <span class="tb-icon">🚐</span>
+    <div>
+      <div class="tb-title">Iceland RV Companion</div>
+    </div>
+    <span class="tb-ver">v3.1</span>
+    <div class="tb-spacer"></div>
+    <button class="gps-btn off" id="gps-btn" onclick="toggleGPS()" title="Tap to enable GPS tracking">
+      <div class="gps-dot"></div><span id="gps-lbl">GPS OFF</span>
+    </button>
+  </div>
+  <div class="search-sheet">
+    <div class="sel-row">
+      <div class="sel-wrap">
+        <span class="sel-label">📍 Departure</span>
+        <select id="sel-from"><option value="">From camp…</option></select>
+      </div>
+      <div class="sel-wrap">
+        <span class="sel-label">🏁 Destination</span>
+        <select id="sel-to"><option value="">To camp…</option></select>
+      </div>
+    </div>
+    <div class="action-row">
+      <div class="rchips">
+        <button class="rc" onclick="setR(10000,this)">10 km</button>
+        <button class="rc on" onclick="setR(25000,this)">25 km</button>
+        <button class="rc" onclick="setR(50000,this)">50 km</button>
+        <button class="rc" onclick="setR(100000,this)">100 km</button>
+      </div>
+      <button class="btn-go" id="btn-go" onclick="doSearch()" onmousedown="playSearchChime()" ontouchstart="playSearchChime()" disabled>⛽ Search</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ LEFT COL ═══ -->
+<div class="left-col">
+
+  <div class="route-summary" id="route-summary">
+    <div class="rs-route">
+      <span class="rs-from" id="rb-from">—</span>
+      <span class="rs-arr">→</span>
+      <span class="rs-to" id="rb-to">—</span>
+    </div>
+    <div class="rs-stats">
+      <div class="rs-stat"><span class="rs-key">🛣</span><span class="rs-val" id="rb-dist">—</span></div>
+      <div class="rs-stat"><span class="rs-key">⏱</span><span class="rs-val" id="rb-time">—</span></div>
+      <div class="rs-stat"><span class="rs-key">⛽</span><span class="rs-val" id="rb-cnt">—</span></div>
+      <div class="rs-stat"><span class="rs-key">🚧</span><span class="rs-val" id="rb-alerts">—</span></div>
+    </div>
+  </div>
+
+  <div class="ntl" id="ntl"></div>
+
+  <div class="tabs" id="desktop-tabs">
+    <button class="tab on" onclick="openTab('gas',this)">⛽ Gas</button>
+    <button class="tab"    onclick="openTab('wx',this)" id="tab-wx">🌤 Weather
+      <span class="tbadge" id="aurora-tbadge" style="background:rgba(59,232,176,.18);color:var(--aur);"></span>
+    </button>
+    <button class="tab"    onclick="openTab('roads',this)">🚧 Roads
+      <span class="tbadge tbadge-red" id="road-tbadge"></span>
+    </button>
+  </div>
+
+  <div class="panels">
+
+    <!-- GAS -->
+    <div class="panel on" id="panel-gas">
+      <div class="brand-bar" id="brand-bar">
+        <span class="bl">Brand:</span>
+        <button class="fb on" onclick="setBrand('ALL',this)">All</button>
+        <button class="fb" onclick="setBrand('N1',this)">N1</button>
+        <button class="fb" onclick="setBrand('Orkan',this)">Orkan</button>
+        <button class="fb" onclick="setBrand('Olís',this)">Olís</button>
+        <button class="fb" onclick="setBrand('ÓB',this)">ÓB</button>
+        <button class="fb" onclick="setBrand('Atlantsolía',this)">Atlantsolía</button>
+      </div>
+      <div class="gas-hd">
+        <span class="gas-hd-t">⛽ Gas Stations</span>
+        <span class="cpill" id="cpill"></span>
+      </div>
+      <div id="gas-list">
+        <div class="sbox">
+          <span class="sbox-ico">🗺️</span>
+          Pick departure &amp; destination,<br/>then tap <strong style="color:var(--aur)">Search</strong> to find gas.<br/>
+          <span style="font-size:.62rem;opacity:.5;">Fully offline · 55+ stations · No API key</span>
+        </div>
+      </div>
+      <div class="cdp" id="cdp">
+        <div class="cdpt">Next Stop</div>
+        <div class="cdpn" id="cdp-name">—</div>
+        <div class="cdpi" id="cdp-note">—</div>
+      </div>
+    </div>
+
+    <!-- WEATHER -->
+    <div class="panel" id="panel-wx">
+      <div id="aurora-content"></div>
+      <div id="wx-content">
+        <div class="sbox"><span class="sbox-ico">🌤️</span>Search a route to load<br/>live weather at both camps.</div>
+      </div>
+    </div>
+
+    <!-- ROADS -->
+    <div class="panel" id="panel-roads">
+      <div id="road-content">
+        <div class="sbox"><span class="sbox-ico">🛣️</span>Search a route to check<br/>live road conditions &amp; closures.</div>
+      </div>
+      <div class="road-links" id="road-links" style="display:none">
+        Live: <a href="https://umferdin.is/en" target="_blank">umferdin.is</a> ·
+        <a href="https://en.vedur.is" target="_blank">vedur.is</a> ·
+        <a href="https://safetravel.is" target="_blank">safetravel.is</a><br/>
+        ☎ Road hotline <strong style="color:var(--aur)">1777</strong> · Emergency <strong style="color:var(--red)">112</strong>
+      </div>
+    </div>
+
+  </div><!-- /panels -->
+</div><!-- /left-col -->
+
+<!-- ═══ RIGHT COL — map on desktop ═══ -->
+<div class="right-col">
+  <div id="map-container">
+    <div id="map"><div id="map-canvas" style="width:100%;height:100%;"></div></div>
+    <button class="map-fab" id="loc-fab" onclick="toggleGPS()">📍</button>
+  </div>
+</div>
+
+<!-- ═══ MAP PANEL — full screen on mobile ═══ -->
+<div id="map-panel">
+  <div id="map-mobile"></div>
+  <button class="map-fab" id="loc-fab-mob" onclick="toggleGPS()"
+    style="bottom:14px;right:14px;">📍</button>
+</div>
+
+<!-- ═══ BOTTOM NAV ═══ -->
+<nav class="bnav">
+  <button class="bn on" id="bn-gas"   onclick="mobileTab('gas',this)">
+    <span class="bn-ico">⛽</span><span class="bn-lbl">Gas</span>
+  </button>
+  <button class="bn" id="bn-wx" onclick="mobileTab('wx',this)">
+    <span class="bn-ico">🌤</span><span class="bn-lbl">Weather</span>
+    <span class="bn-badge" id="aurora-badge" style="background:rgba(59,232,176,.2);color:var(--aur);"></span>
+  </button>
+  <button class="bn" id="bn-roads" onclick="mobileTab('roads',this)">
+    <span class="bn-ico">🚧</span><span class="bn-lbl">Roads</span>
+    <span class="bn-badge" id="bn-badge"></span>
+  </button>
+  <button class="bn" id="bn-map" onclick="mobileTab('map',this)">
+    <span class="bn-ico">🗺️</span><span class="bn-lbl">Map</span>
+  </button>
+</nav>
+
+<!-- Toast -->
+<div class="toast" id="toast">
+  <span class="toast-x" onclick="closeToast()">✕</span>
+  <div class="toast-ttl">📍 Enable Location</div>
+  <div id="toast-body"></div>
+</div>
+
+
+<!-- ═══ AURORA OVERLAY ═══ -->
+<div id="aurora-overlay">
+  <canvas id="aurora-canvas"></canvas>
+  <div class="au-overlay-panel" id="aurora-panel">
+    <button class="au-ov-close" onclick="closeAuroraOverlay()">✕</button>
+    <div class="au-ov-title">🌌 Aurora Borealis</div>
+    <div class="au-ov-sub">Iceland · Live Kp Forecast · NOAA SWPC</div>
+    <div class="au-ov-kp-big" id="ov-kp-big">
+      <div class="au-ov-kp-num" id="ov-kp-num">—</div>
+      <div class="au-ov-kp-info">
+        <div class="au-ov-kp-scale">Kp Index (0–9 scale)</div>
+        <div class="au-ov-kp-storm" id="ov-kp-storm">—</div>
+      </div>
+    </div>
+    <div class="au-ov-verdict" id="ov-verdict">—</div>
+    <div class="au-legend-title">Visibility Guide for Iceland (63–66°N)</div>
+    <div id="aurora-legend"></div>
+    <div class="au-ov-src">
+      🛰 Data: <a href="https://www.swpc.noaa.gov/products/planetary-k-index" target="_blank">NOAA Space Weather Prediction Center</a><br/>
+      Aurora visibility depends on Kp index, cloud cover, and light pollution.<br/>
+      Always check <a href="https://en.vedur.is/weather/forecasts/aurora/" target="_blank">Veðurstofa Íslands (vedur.is)</a> for Iceland-specific forecasts.
+    </div>
+  </div>
+</div>
+
+</div><!-- /app -->
+
+<script>
+// ═══════════════════════════════════════════════════════════
+// CAMPSITES
+// ═══════════════════════════════════════════════════════════
+const CAMPS=[
+  {n:1,name:"Selfoss Campsite",           lat:63.9329,lng:-21.0092,region:"South",  note:"Base for Golden Circle & Þingvellir day trips"},
+  {n:2,name:"Skógafoss Campsite",         lat:63.5319,lng:-19.5117,region:"South",  note:"Wakes up to waterfall mist every morning"},
+  {n:3,name:"Kirkjubæjarklaustur Camping",lat:63.7835,lng:-18.0559,region:"South",  note:"Near Vatnajökull glacier edge — fumaroles visible"},
+  {n:4,name:"Vestrahorn Camping",         lat:64.2548,lng:-14.9985,region:"East",   note:"Stokksnes — best mountain-beach landscape in Iceland"},
+  {n:5,name:"Egilsstaðir Campsite",       lat:65.2665,lng:-14.3948,region:"East",   note:"Largest service hub in East Iceland"},
+  {n:6,name:"Akureyri / Camping Hamrar",  lat:65.6781,lng:-18.0928,region:"North",  note:"Capital of the North — hot pool & great services"},
+  {n:7,name:"Búðardalur Campsite",        lat:65.0851,lng:-21.7799,region:"West",   note:"Gateway to the Westfjords"},
+  {n:8,name:"Bjarteyjarsandur Campsite",  lat:64.6254,lng:-21.9500,region:"West",   note:"Peaceful farm camp with glacier views"},
+  {n:9,name:"Reykjavík Campsite",         lat:64.1303,lng:-21.8697,region:"Capital",note:"Laugardalur — classic city campsite"},
+];
+
+// ═══════════════════════════════════════════════════════════
+// GAS DATABASE (55+ stations — works 100% offline)
+// ═══════════════════════════════════════════════════════════
+const GAS=[
+  {name:"N1 Ármúli",              brand:"N1",         lat:64.1378,lng:-21.8731,town:"Reykjavík",              h24:false,waste:{b:false,g:false}},
+  {name:"Orkan Bústaðavegur",     brand:"Orkan",      lat:64.1231,lng:-21.9167,town:"Reykjavík",              h24:true, waste:{b:false,g:false}},
+  {name:"Olís Skútuvogur",        brand:"Olís",       lat:64.1439,lng:-22.0044,town:"Reykjavík",              h24:false,waste:{b:true, g:true}},
+  {name:"N1 Grensásvegur",        brand:"N1",         lat:64.1262,lng:-21.8699,town:"Reykjavík",              h24:true, waste:{b:false,g:false}},
+  {name:"ÓB Lágmúli",             brand:"ÓB",         lat:64.1351,lng:-21.8622,town:"Reykjavík",              h24:false,waste:{b:false,g:false}},
+  {name:"Atlantsolía Reykjavík",  brand:"Atlantsolía",lat:64.1468,lng:-21.9432,town:"Reykjavík",              h24:true, waste:{b:true, g:true}},
+  {name:"N1 Kópavogur",           brand:"N1",         lat:64.1056,lng:-21.8959,town:"Kópavogur",              h24:true, waste:{b:false,g:true}},
+  {name:"Orkan Hafnarfjörður",    brand:"Orkan",      lat:64.0667,lng:-21.9422,town:"Hafnarfjörður",          h24:true, waste:{b:true, g:true}},
+  {name:"N1 Garðabær",            brand:"N1",         lat:64.0851,lng:-21.9554,town:"Garðabær",               h24:false,waste:{b:false,g:false}},
+  {name:"N1 Keflavík Airport",    brand:"N1",         lat:63.9934,lng:-22.6201,town:"Ásbrú / Airport",        h24:true, waste:{b:false,g:false}},
+  {name:"ÓB Keflavík",            brand:"ÓB",         lat:63.9853,lng:-22.5559,town:"Keflavík",               h24:true, waste:{b:false,g:false}},
+  {name:"N1 Keflavík Town",       brand:"N1",         lat:63.9887,lng:-22.5614,town:"Keflavík",               h24:true, waste:{b:true, g:true}},
+  {name:"N1 Selfoss",             brand:"N1",         lat:63.9310,lng:-20.9981,town:"Selfoss",                h24:true, waste:{b:true, g:true}},
+  {name:"Orkan Selfoss",          brand:"Orkan",      lat:63.9289,lng:-21.0067,town:"Selfoss",                h24:true, waste:{b:false,g:true}},
+  {name:"Olís Selfoss",           brand:"Olís",       lat:63.9341,lng:-21.0112,town:"Selfoss",                h24:false,waste:{b:false,g:false}},
+  {name:"N1 Hveragerði",          brand:"N1",         lat:63.9987,lng:-21.1839,town:"Hveragerði",             h24:false,waste:{b:false,g:false}},
+  {name:"N1 Hvolsvöllur",         brand:"N1",         lat:63.7524,lng:-20.2266,town:"Hvolsvöllur",            h24:true, waste:{b:true, g:true}},
+  {name:"Orkan Hvolsvöllur",      brand:"Orkan",      lat:63.7501,lng:-20.2244,town:"Hvolsvöllur",            h24:true, waste:{b:false,g:true}},
+  {name:"N1 Vík",                 brand:"N1",         lat:63.4186,lng:-19.0065,town:"Vík í Mýrdal",           h24:true, waste:{b:true, g:true}},
+  {name:"Olís Vík",               brand:"Olís",       lat:63.4198,lng:-19.0091,town:"Vík í Mýrdal",           h24:false,waste:{b:false,g:false}},
+  {name:"N1 Skógar",              brand:"N1",         lat:63.5289,lng:-19.4998,town:"Skógar",                 h24:false,waste:{b:false,g:false}},
+  {name:"N1 Kirkjubæjarklaustur", brand:"N1",         lat:63.7806,lng:-18.0607,town:"Kirkjubæjarklaustur",    h24:true, waste:{b:true, g:true}},
+  {name:"Olís Kirkjubæjarklaustur",brand:"Olís",      lat:63.7831,lng:-18.0573,town:"Kirkjubæjarklaustur",    h24:false,waste:{b:false,g:false}},
+  {name:"N1 Höfn",                brand:"N1",         lat:64.2536,lng:-15.2116,town:"Höfn",                   h24:true, waste:{b:true, g:true}},
+  {name:"Orkan Höfn",             brand:"Orkan",      lat:64.2521,lng:-15.2089,town:"Höfn",                   h24:true, waste:{b:false,g:true}},
+  {name:"Atlantsolía Höfn",       brand:"Atlantsolía",lat:64.2548,lng:-15.2133,town:"Höfn",                   h24:true, waste:{b:true, g:true}},
+  {name:"N1 Djúpivogur",          brand:"N1",         lat:64.6547,lng:-14.2819,town:"Djúpivogur",             h24:false,waste:{b:false,g:false}},
+  {name:"Orkan Breiðdalsvík",     brand:"Orkan",      lat:64.7947,lng:-13.9981,town:"Breiðdalsvík",           h24:false,waste:{b:false,g:false}},
+  {name:"N1 Egilsstaðir",         brand:"N1",         lat:65.2683,lng:-14.3917,town:"Egilsstaðir",            h24:true, waste:{b:true, g:true}},
+  {name:"Orkan Egilsstaðir",      brand:"Orkan",      lat:65.2661,lng:-14.3944,town:"Egilsstaðir",            h24:true, waste:{b:false,g:true}},
+  {name:"Olís Egilsstaðir",       brand:"Olís",       lat:65.2701,lng:-14.3901,town:"Egilsstaðir",            h24:false,waste:{b:false,g:false}},
+  {name:"N1 Seyðisfjörður",       brand:"N1",         lat:65.2591,lng:-13.9787,town:"Seyðisfjörður",          h24:false,waste:{b:false,g:false}},
+  {name:"N1 Akureyri North",      brand:"N1",         lat:65.6921,lng:-18.1076,town:"Akureyri",               h24:true, waste:{b:true, g:true}},
+  {name:"N1 Akureyri South",      brand:"N1",         lat:65.6754,lng:-18.1001,town:"Akureyri",               h24:true, waste:{b:true, g:true}},
+  {name:"Orkan Akureyri",         brand:"Orkan",      lat:65.6831,lng:-18.0977,town:"Akureyri",               h24:true, waste:{b:false,g:true}},
+  {name:"Olís Akureyri",          brand:"Olís",       lat:65.6841,lng:-18.1121,town:"Akureyri",               h24:false,waste:{b:false,g:false}},
+  {name:"ÓB Akureyri",            brand:"ÓB",         lat:65.6798,lng:-18.0889,town:"Akureyri",               h24:true, waste:{b:false,g:false}},
+  {name:"N1 Mývatn",              brand:"N1",         lat:65.6396,lng:-16.9158,town:"Reykjahlíð (Mývatn)",    h24:false,waste:{b:false,g:false}},
+  {name:"N1 Húsavík",             brand:"N1",         lat:66.0451,lng:-17.3388,town:"Húsavík",                h24:true, waste:{b:true, g:true}},
+  {name:"Orkan Húsavík",          brand:"Orkan",      lat:66.0432,lng:-17.3369,town:"Húsavík",                h24:true, waste:{b:false,g:true}},
+  {name:"N1 Varmahlíð",           brand:"N1",         lat:65.5469,lng:-19.4741,town:"Varmahlíð",              h24:false,waste:{b:false,g:false}},
+  {name:"N1 Blönduós",            brand:"N1",         lat:65.6628,lng:-20.2944,town:"Blönduós",               h24:true, waste:{b:true, g:false}},
+  {name:"Olís Blönduós",          brand:"Olís",       lat:65.6615,lng:-20.2921,town:"Blönduós",               h24:false,waste:{b:false,g:false}},
+  {name:"N1 Búðardalur",          brand:"N1",         lat:65.0899,lng:-21.7749,town:"Búðardalur",             h24:false,waste:{b:true, g:true}},
+  {name:"Orkan Búðardalur",       brand:"Orkan",      lat:65.0877,lng:-21.7801,town:"Búðardalur",             h24:false,waste:{b:false,g:false}},
+  {name:"N1 Borgarnes",           brand:"N1",         lat:64.5391,lng:-21.9159,town:"Borgarnes",              h24:true, waste:{b:true, g:true}},
+  {name:"Orkan Borgarnes",        brand:"Orkan",      lat:64.5371,lng:-21.9131,town:"Borgarnes",              h24:true, waste:{b:false,g:true}},
+  {name:"N1 Akranes",             brand:"N1",         lat:64.3201,lng:-22.0701,town:"Akranes",                h24:true, waste:{b:false,g:true}},
+  {name:"Orkan Akranes",          brand:"Orkan",      lat:64.3222,lng:-22.0689,town:"Akranes",                h24:true, waste:{b:true, g:true}},
+  {name:"N1 Stykkishólmur",       brand:"N1",         lat:65.0736,lng:-22.7279,town:"Stykkishólmur",          h24:false,waste:{b:false,g:false}},
+  {name:"N1 Ólafsvík",            brand:"N1",         lat:64.8951,lng:-23.7139,town:"Ólafsvík",               h24:false,waste:{b:false,g:false}},
+  {name:"N1 Mosfellsbær",         brand:"N1",         lat:64.1669,lng:-21.6984,town:"Mosfellsbær",            h24:false,waste:{b:false,g:false}},
+  {name:"N1 Flúðir",              brand:"N1",         lat:64.1358,lng:-20.3209,town:"Flúðir",                 h24:false,waste:{b:false,g:false}},
+  {name:"N1 Laugarvatn",          brand:"N1",         lat:64.2178,lng:-20.7317,town:"Laugarvatn",             h24:false,waste:{b:false,g:false}},
+  {name:"N1 Geysir",              brand:"N1",         lat:64.3096,lng:-20.3022,town:"Geysir",                 h24:false,waste:{b:false,g:false}},
+  {name:"N1 Dalvík",              brand:"N1",         lat:65.9742,lng:-18.5289,town:"Dalvík",                 h24:false,waste:{b:false,g:false}},
+];
+
+// ═══════════════════════════════════════════════════════════
+// ROAD NOTICES (curated fallback — shown if live fetch fails)
+// ═══════════════════════════════════════════════════════════
+const ROAD_NOTICES=[
+  {id:"rvk-volcanic",sev:"cl",icon:"🔴",
+   title:"Reykjanes — Grindavík roads CLOSED",
+   body:"All roads into Grindavík remain closed due to ongoing volcanic hazard. Route 43 open only to the Blue Lagoon junction.",
+   tags:["CLOSED","Volcanic zone","Rte 43 partial"],
+   legs:[[7,8],[8,0],[0,7],[8,7],[0,8],[7,0]],
+   updated:"March 2026 — ongoing"},
+  {id:"sandur-wind",sev:"wa",icon:"⚠️",
+   title:"Skeiðarársandur (Rte 1, Klaustur→Höfn) — Sand & wind hazard",
+   body:"Iceland's most notorious wind zone. Gusts above 20 m/s cause severe sandblasting that permanently damages paint and glass. Pull off and wait if warnings are active.",
+   tags:["Strong gusts","Sandblasting","Rte 1"],
+   legs:[[2,3],[3,2],[3,4],[4,3]],
+   updated:"Year-round — check vedur.is before crossing"},
+  {id:"east-passes",sev:"wa",icon:"⚠️",
+   title:"East Fjord passes (Rte 92/93/96) — Narrow & snow risk",
+   body:"Single-lane mountain roads with steep drops and no guardrails. Snow possible into late May. Passing places are infrequent — pull over for oncoming vehicles.",
+   tags:["Narrow road","Snow possible","Single lane"],
+   legs:[[3,4],[4,3],[4,5],[5,4]],
+   updated:"October – June risk"},
+  {id:"north-ice",sev:"wa",icon:"⚠️",
+   title:"North Rte 1 (Akureyri ↔ Mývatn) — Black ice & drifting snow",
+   body:"The plateau between Akureyri and Mývatn (500m elevation) ices overnight outside summer. Drifting snow can reduce visibility to near-zero in minutes.",
+   tags:["Black ice","Drifting snow","Oct–Apr"],
+   legs:[[4,5],[5,4],[5,6],[6,5]],
+   updated:"October – April seasonal risk"},
+  {id:"f-roads",sev:"in",icon:"ℹ️",
+   title:"F-Roads — RVs & 2WD strictly PROHIBITED",
+   body:"Any F-prefix road (F26, F35, F88…) requires a proper high-clearance 4WD. Rental insurance is universally void on F-roads. Opening is typically late June to mid-September.",
+   tags:["RV prohibited","4WD only","June–Sept only"],
+   legs:"all",
+   updated:"Check vegagerdin.is/fjallvegir"},
+  {id:"app-112",sev:"in",icon:"📱",
+   title:"Download 112 Iceland app before you drive",
+   body:"Registers your GPS location with Search & Rescue and calls emergency services even without phone signal. Works offline. Free on iOS and Android. Non-negotiable safety tool.",
+   tags:["Safety essential","Works offline","Free"],
+   legs:"all",
+   updated:"Always relevant"},
+];
+
+const ALT_ROUTES={
+  "0-1":"Route 1 south. Well maintained year-round.",
+  "1-2":"Route 1 east via Hvolsvöllur. Watch for ash haze near Eyjafjallajökull.",
+  "2-3":"After Klaustur, Route 1 crosses Skeiðarársandur — the only option. Check wind before departing.",
+  "3-4":"East fjords: Route 1 via Egilsstaðir if mountain passes are snow-blocked.",
+  "4-5":"Route 1 north. If the plateau is icy, Route 68 via coast adds 25 min but lower elevation.",
+  "5-6":"Héðinsfjarðargöng tunnel (Rte 76, ~1800 ISK toll) avoids the Óxnadalur mountain road.",
+  "6-7":"Route 1 west then Rte 54 through Snæfellsnes. Watch for westerly crosswinds on the peninsula.",
+  "7-8":"Route 54 to Borgarnes, then Rte 1 south. Hvalfjörður tunnel (Rte 47, ~1200 ISK) saves 20 min.",
+  "8-0":"Route 1 north to Reykjavík. Or Rte 47 along Hvalfjörður fjord — free, scenic, +20 min.",
+};
+
+// ═══════════════════════════════════════════════════════════
+// WMO WEATHER CODES (Open-Meteo)
+// ═══════════════════════════════════════════════════════════
+const WX_DESC={
+  0:"Clear sky",1:"Mainly clear",2:"Partly cloudy",3:"Overcast",
+  45:"Foggy",48:"Freezing fog",51:"Light drizzle",53:"Drizzle",55:"Heavy drizzle",
+  61:"Light rain",63:"Rain",65:"Heavy rain",71:"Light snow",73:"Snowfall",75:"Heavy snow",
+  77:"Snow grains",80:"Light showers",81:"Showers",82:"Violent showers",
+  85:"Snow showers",86:"Heavy snow showers",95:"Thunderstorm",96:"Thunderstorm + hail",99:"Severe thunderstorm"
+};
+const WX_ICON={
+  0:"☀️",1:"🌤️",2:"⛅",3:"☁️",45:"🌫️",48:"🌫️",
+  51:"🌦️",53:"🌦️",55:"🌧️",61:"🌧️",63:"🌧️",65:"🌧️",
+  71:"🌨️",73:"❄️",75:"❄️",77:"🌨️",80:"🌦️",81:"🌧️",82:"⛈️",
+  85:"🌨️",86:"❄️",95:"⛈️",96:"⛈️",99:"⛈️"
+};
+
+// ═══════════════════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════════════════
+let map, R=25000;
+let gasMarkers=[],routeLine=null,bgDots=[];
+let lastGas=[],activeBrand='ALL';
+let userMk=null,userCirc=null,watchId=null;
+let curFrom=null,curTo=null,curFi=null,curTi=null;
+let mapVisible=false;
+
+// ═══════════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════════
+(function init(){
+  // Populate dropdowns
+  const sf=document.getElementById('sel-from');
+  const st=document.getElementById('sel-to');
+  CAMPS.forEach((c,i)=>{
+    const txt=`N${c.n}: ${c.name}`;
+    sf.innerHTML+=`<option value="${i}">${txt}</option>`;
+    st.innerHTML+=`<option value="${i}">${txt}</option>`;
+  });
+  sf.addEventListener('change',()=>{checkReady();playScrollSound();});
+  st.addEventListener('change',()=>{checkReady();playScrollSound();});
+
+  // Night timeline pills
+  const tl=document.getElementById('ntl');
+  CAMPS.forEach((c,i)=>{
+    const d=document.createElement('button');
+    d.className='np';d.id='np'+i;d.textContent=c.n;d.title=c.name;
+    d.onclick=()=>{sf.value=i;checkReady();};
+    tl.appendChild(d);
+  });
+
+  // Init Leaflet into desktop container
+  map=L.map('map-canvas',{zoomControl:false,preferCanvas:true}).setView([65.0,-18.5],6);
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',{
+    attribution:'© <a href="https://openstreetmap.org">OSM</a> © <a href="https://carto.com">CARTO</a>',
+    subdomains:'abcd',maxZoom:19
+  }).addTo(map);
+  L.control.zoom({position:'topright'}).addTo(map);
+
+  // Camp markers
+  CAMPS.forEach(c=>{
+    const ico=L.divIcon({className:'',
+      html:`<div style="width:28px;height:28px;border-radius:50%;background:rgba(140,200,230,.12);border:2px solid #8cc8e6;display:flex;align-items:center;justify-content:center;font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:700;color:#d6eef8;box-shadow:0 0 8px rgba(140,200,230,.22);">${c.n}</div>`,
+      iconSize:[28,28],iconAnchor:[14,14]});
+    const wz=`https://www.waze.com/ul?ll=${c.lat},${c.lng}&navigate=yes`;
+    const gm=`https://www.google.com/maps/search/?api=1&query=${c.lat},${c.lng}`;
+    L.marker([c.lat,c.lng],{icon:ico}).addTo(map)
+      .bindPopup(`<div class="pn">🏕️ ${c.name}</div>
+        <div class="pa">${c.region} · Night ${c.n}</div>
+        <div class="ph" style="color:#6a8faa;font-style:italic;font-size:.66rem;">${c.note}</div>
+        <div style="display:flex;gap:8px;margin-top:6px;">
+          <a class="plink" href="${wz}" target="_blank">Waze ↗</a>
+          <a class="plink" href="${gm}" target="_blank">GMaps ↗</a>
+        </div>`);
+  });
+
+  showBgDots();
+
+  // Responsive map: desktop uses right-col, mobile uses map-panel
+  const mq=window.matchMedia('(min-width:768px)');
+  mq.addEventListener('change',e=>handleMQ(e.matches));
+  handleMQ(mq.matches);
+})();
+
+function handleMQ(isDesktop){
+  const desktopEl=document.getElementById('map');
+  const mobileEl=document.getElementById('map-mobile');
+  const target=isDesktop?desktopEl:mobileEl;
+  const mc=map.getContainer();
+  if(mc.parentNode!==target){
+    mc.style.width='100%';
+    mc.style.height='100%';
+    target.appendChild(mc);
+  }
+  setTimeout(()=>map.invalidateSize(),80);
+}
+
+// ═══════════════════════════════════════════════════════════
+// HELPERS
+// ═══════════════════════════════════════════════════════════
+const c2f=c=>Math.round(c*9/5+32);
+const wDir=deg=>['N','NE','E','SE','S','SW','W','NW'][Math.round(deg/45)%8];
+
+function checkReady(){
+  const f=document.getElementById('sel-from').value;
+  const t=document.getElementById('sel-to').value;
+  document.getElementById('btn-go').disabled=!(f!==''&&t!==''&&f!==t);
+}
+function setR(r,el){
+  R=r;
+  document.querySelectorAll('.rc').forEach(b=>b.classList.remove('on'));
+  el.classList.add('on');
+  if(lastGas.length) renderGas(lastGas);
+}
+function setBrand(br,el){
+  activeBrand=br;
+  document.querySelectorAll('.fb').forEach(b=>b.classList.remove('on'));
+  el.classList.add('on');
+  if(lastGas.length) renderGas(lastGas);
+}
+function openTab(id,el){
+  document.querySelectorAll('#desktop-tabs .tab').forEach(t=>t.classList.remove('on'));
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('on'));
+  el.classList.add('on');
+  document.getElementById('panel-'+id).classList.add('on');
+  if(TAB_SOUNDS[id]) TAB_SOUNDS[id]();
+}
+function mobileTab(id,el){
+  document.querySelectorAll('.bn').forEach(b=>b.classList.remove('on'));
+  el.classList.add('on');
+  if(TAB_SOUNDS[id]) TAB_SOUNDS[id]();
+  const app=document.getElementById('app');
+  const mp=document.getElementById('map-panel');
+  if(id==='map'){
+    mapVisible=true;
+    app.classList.add('map-active');
+    document.querySelectorAll('.panel').forEach(p=>p.classList.remove('on'));
+    // Move Leaflet container into mobile panel
+    const mob=document.getElementById('map-mobile');
+    const mc=map.getContainer();
+    mc.style.width='100%';mc.style.height='100%';
+    if(mc.parentNode!==mob) mob.appendChild(mc);
+    // Force tile reload: invalidate at 0ms (layout), 80ms, and 300ms (slow devices)
+    map.invalidateSize();
+    setTimeout(()=>map.invalidateSize(),80);
+    setTimeout(()=>{ map.invalidateSize(); map._resetView(map.getCenter(),map.getZoom()); },320);
+    return;
+  }
+  mapVisible=false;
+  app.classList.remove('map-active');
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('on'));
+  document.getElementById('panel-'+id).classList.add('on');
+  // Sync desktop tabs
+  document.querySelectorAll('#desktop-tabs .tab').forEach((t,i)=>{
+    t.classList.toggle('on',['gas','wx','roads'][i]===id);
+  });
+}
+
+function haversine(la1,lo1,la2,lo2){
+  const R=6371000,r=Math.PI/180;
+  const dp=(la2-la1)*r,dl=(lo2-lo1)*r;
+  const a=Math.sin(dp/2)**2+Math.cos(la1*r)*Math.cos(la2*r)*Math.sin(dl/2)**2;
+  return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
+}
+function ptSeg(plat,plng,alat,alng,blat,blng){
+  const dx=blng-alng,dy=blat-alat,ls=dx*dx+dy*dy;
+  if(!ls)return haversine(plat,plng,alat,alng);
+  let t=((plng-alng)*dx+(plat-alat)*dy)/ls;
+  t=Math.max(0,Math.min(1,t));
+  return haversine(plat,plng,alat+t*dy,alng+t*dx);
+}
+function showBgDots(){
+  GAS.forEach(s=>{
+    const ico=L.divIcon({className:'',
+      html:`<div style="width:8px;height:8px;border-radius:50%;background:rgba(240,192,64,.18);border:1.5px solid rgba(240,192,64,.4);"></div>`,
+      iconSize:[8,8],iconAnchor:[4,4]});
+    bgDots.push(L.marker([s.lat,s.lng],{icon:ico,interactive:false}).addTo(map));
+  });
+}
+function clearBgDots(){bgDots.forEach(m=>map.removeLayer(m));bgDots=[];}
+function clearMap(){
+  gasMarkers.forEach(m=>map.removeLayer(m));gasMarkers=[];
+  if(routeLine){map.removeLayer(routeLine);routeLine=null;}
+}
+
+// ═══════════════════════════════════════════════════════════
+// MAIN SEARCH
+// ═══════════════════════════════════════════════════════════
+async function doSearch(){
+  curFi=parseInt(document.getElementById('sel-from').value);
+  curTi=parseInt(document.getElementById('sel-to').value);
+  curFrom=CAMPS[curFi];curTo=CAMPS[curTi];
+
+  clearMap();clearBgDots();
+  activeBrand='ALL';
+  document.querySelectorAll('.fb').forEach(b=>b.classList.remove('on'));
+  document.querySelector('.fb').classList.add('on');
+
+  // Route summary
+  document.getElementById('route-summary').classList.add('show');
+  document.getElementById('rb-from').textContent=curFrom.name.split(' ')[0];
+  document.getElementById('rb-to').textContent=curTo.name.split(' ')[0];
+  const dist=haversine(curFrom.lat,curFrom.lng,curTo.lat,curTo.lng);
+  document.getElementById('rb-dist').textContent=(dist/1000*1.35).toFixed(0)+' km';
+  document.getElementById('rb-time').textContent=Math.round(dist/1000*1.35/70*60)+' min';
+
+  // Timeline
+  document.querySelectorAll('.np').forEach((p,i)=>{
+    p.classList.remove('act','vis');
+    if(i<curFi)p.classList.add('vis');
+    if(i===curFi)p.classList.add('act');
+  });
+
+  // Camp footer
+  document.getElementById('cdp').classList.add('show');
+  document.getElementById('cdp-name').textContent=curTo.name;
+  document.getElementById('cdp-note').textContent='💡 '+curTo.note;
+
+  // Route line
+  routeLine=L.polyline([[curFrom.lat,curFrom.lng],[curTo.lat,curTo.lng]],
+    {color:'#3be8b0',weight:3,opacity:.75,dashArray:'8 6'}).addTo(map);
+  map.fitBounds([[curFrom.lat,curFrom.lng],[curTo.lat,curTo.lng]],{padding:[60,60]});
+
+  // Gas
+  lastGas=GAS.map(s=>({...s,rd:ptSeg(s.lat,s.lng,curFrom.lat,curFrom.lng,curTo.lat,curTo.lng)}))
+    .filter(s=>s.rd<=R).sort((a,b)=>a.rd-b.rd);
+  document.getElementById('brand-bar').classList.add('show');
+  renderGas(lastGas);
+
+  // Reset all badges before async fetches
+  ['aurora-tbadge','aurora-badge'].forEach(id=>{
+    const b=document.getElementById(id); if(b) b.style.display='none';
+  });
+  // Reset road badges before async fetch (prevents stale counts)
+  document.getElementById('road-tbadge').textContent='';
+  document.getElementById('road-tbadge').style.display='none';
+  document.getElementById('bn-badge').textContent='';
+  document.getElementById('bn-badge').style.display='none';
+  document.getElementById('rb-alerts').textContent='—';
+
+  // Async: weather, aurora + roads
+  fetchWeather(curFrom,curTo);
+  fetchAurora();
+  fetchRoads(curFi,curTi);
+
+  // Mobile: show gas tab
+  if(window.innerWidth<768){
+    mobileTab('gas',document.getElementById('bn-gas'));
+  }
+}
+
+// ═══════════════════════════════════════════════════════════
+// GAS RENDER
+// ═══════════════════════════════════════════════════════════
+function renderGas(stations){
+  const filtered=activeBrand==='ALL'?stations:stations.filter(s=>s.brand===activeBrand);
+  gasMarkers.forEach(m=>map.removeLayer(m));gasMarkers=[];
+  const list=document.getElementById('gas-list');
+  const pill=document.getElementById('cpill');
+
+  if(!filtered.length){
+    list.innerHTML=`<div class="sbox"><span class="sbox-ico">😔</span>No stations within ${R/1000} km.<br/>Try a larger radius.</div>`;
+    pill.style.display='none';
+    document.getElementById('rb-cnt').textContent='0';
+    return;
+  }
+  pill.textContent=filtered.length+' found';
+  pill.style.display='inline-block';
+  document.getElementById('rb-cnt').textContent=filtered.length;
+  list.innerHTML='';
+
+  filtered.forEach((s,idx)=>{
+    const wz=`https://www.waze.com/ul?ll=${s.lat},${s.lng}&navigate=yes`;
+    const gm=`https://www.google.com/maps/search/?api=1&query=${s.lat},${s.lng}`;
+    let wasteHTML='';
+    if(s.waste?.b||s.waste?.g){
+      const w=[];
+      if(s.waste.b)w.push('🪣 Black water dump');
+      if(s.waste.g)w.push('💧 Grey water dump');
+      wasteHTML=`<div class="wdump">${w.map(x=>`<span class="wdtag">${x}</span>`).join('')}</div>`;
+    }
+    const card=document.createElement('div');
+    card.className='gc';
+    card.style.animationDelay=(idx*18)+'ms';
+    card.innerHTML=`
+      <div class="gct">
+        <span class="gcn">⛽ ${s.name}</span>
+        <span class="gcd">${(s.rd/1000).toFixed(1)} km</span>
+      </div>
+      <div class="gca">📍 ${s.town}</div>
+      ${wasteHTML}
+      <div class="gcm">
+        ${s.brand?`<span class="tag t-y">${s.brand}</span>`:''}
+        ${s.h24?`<span class="tag t-g">24/7</span>`:''}
+        <div class="gclinks">
+          <a class="ml" href="${wz}" target="_blank" onclick="event.stopPropagation()">Waze</a>
+          <a class="ml" href="${gm}" target="_blank" onclick="event.stopPropagation()">Maps</a>
+        </div>
+      </div>`;
+    card.addEventListener('click',()=>{
+      if(window.innerWidth<768) mobileTab('map',document.getElementById('bn-map'));
+      setTimeout(()=>map.setView([s.lat,s.lng],14,{animate:true}),150);
+    });
+    list.appendChild(card);
+
+    // Map marker
+    const mico=L.divIcon({className:'',
+      html:`<div style="width:24px;height:24px;border-radius:50%;background:rgba(240,192,64,.14);border:2px solid #f0c040;display:flex;align-items:center;justify-content:center;font-size:12px;box-shadow:0 0 10px rgba(240,192,64,.28);">⛽</div>`,
+      iconSize:[24,24],iconAnchor:[12,12]});
+    const wPop=s.waste?.b||s.waste?.g
+      ?`<div style="font-size:.63rem;color:#5dd47a;margin-bottom:4px;">${[s.waste.b?'🪣 Black':'',s.waste.g?'💧 Grey':''].filter(Boolean).join(' · ')}</div>`:'';
+    gasMarkers.push(L.marker([s.lat,s.lng],{icon:mico}).addTo(map)
+      .bindPopup(`<div class="pn">⛽ ${s.name}</div>
+        <div class="pa">📍 ${s.town}</div>
+        <div class="pi">${s.brand}${s.h24?' · 24/7':''}</div>
+        ${wPop}
+        <div style="display:flex;gap:8px;margin-top:4px;">
+          <a class="plink" href="${wz}" target="_blank">Waze ↗</a>
+          <a class="plink" href="${gm}" target="_blank">GMaps ↗</a>
+        </div>`));
+  });
+  observeCards('.gc');
+}
+
+// ═══════════════════════════════════════════════════════════
+// WEATHER — Open-Meteo (free, CORS-open, no API key)
+// All current field names as of 2024+ API version:
+//   weather_code, wind_speed_10m, wind_direction_10m, cloud_cover
+// ═══════════════════════════════════════════════════════════
+async function fetchWeather(from,to){
+  const el=document.getElementById('wx-content');
+  el.innerHTML='<div class="spinner"><div class="sp"></div>Loading weather…</div>';
+  const locs=[
+    {label:from.name.split(' ')[0]+' (Departure)',lat:from.lat,lng:from.lng},
+    {label:to.name.split(' ')[0]+' (Destination)',lat:to.lat,lng:to.lng},
+  ];
+  // Use allSettled so one failed location never hides the other's data
+  const settled=await Promise.allSettled(locs.map(async loc=>{
+    const abort=typeof AbortSignal.timeout==='function'
+      ? AbortSignal.timeout(10000)
+      : (()=>{const ac=new AbortController();setTimeout(()=>ac.abort(),10000);return ac.signal;})();
+    const u='https://api.open-meteo.com/v1/forecast'
+      +'?latitude='+loc.lat+'&longitude='+loc.lng
+      +'&current=temperature_2m,apparent_temperature,weather_code,'
+      +'wind_speed_10m,wind_direction_10m,precipitation,relative_humidity_2m,cloud_cover'
+      +'&daily=weather_code,temperature_2m_max,temperature_2m_min,'
+      +'wind_speed_10m_max,precipitation_sum,precipitation_probability_max'
+      +'&wind_speed_unit=ms&timezone=Atlantic%2FReykjavik&forecast_days=6';
+    const r=await fetch(u,{signal:abort});
+    if(!r.ok) throw new Error('HTTP '+r.status);
+    return{loc,data:await r.json()};
+  }));
+  const results=settled.filter(s=>s.status==='fulfilled').map(s=>s.value);
+  const failures=settled.filter(s=>s.status==='rejected');
+  if(results.length===0){
+    el.innerHTML=`<div class="sbox"><span class="sbox-ico">🌤️</span>
+      Weather unavailable<br/>
+      <span style="opacity:.55;font-size:.62rem;">${failures[0]?.reason?.message||'Network error'}</span><br/>
+      Check <a href="https://en.vedur.is" target="_blank">en.vedur.is</a> for official forecasts.</div>`;
+    return;
+  }
+  if(failures.length>0){
+    const warn=document.createElement('div');
+    warn.style.cssText='font-family:var(--fm);font-size:.57rem;color:var(--ora);padding:6px 16px 2px;';
+    warn.textContent='⚠ Weather for one location unavailable — showing partial data.';
+    el.appendChild(warn);
+  }
+  renderWeather(results);
+}
+
+function renderWeather(results){
+  const el=document.getElementById('wx-content');
+  el.innerHTML='';
+  let anyWarn=false;
+  // Reset weather tab colour from any previous warning search
+  const wxTab=document.querySelector('#desktop-tabs .tab:nth-child(2)');
+  if(wxTab) wxTab.style.color='';
+
+  results.forEach((res,ri)=>{
+    const c=res.data.current, d=res.data.daily;
+    const code=c.weather_code;
+    const tempC=c.temperature_2m, feelC=c.apparent_temperature;
+    const tempF=c2f(tempC), feelF=c2f(feelC);
+    const wind=c.wind_speed_10m, wdir=wDir(c.wind_direction_10m);
+    const prec=c.precipitation, hum=c.relative_humidity_2m;
+    const cloudCov=c.cloud_cover;
+    const ico=WX_ICON[code]||'🌡️', desc=WX_DESC[code]||'—';
+
+    // Safety warnings
+    const warns=[];
+    if(wind>=25)      warns.push({s:'s',m:`🚨 SEVERE WIND: ${wind} m/s ${wdir} — consider delaying travel`});
+    else if(wind>=15) warns.push({s:'m',m:`💨 Strong wind: ${wind} m/s ${wdir} — reduce speed, grip wheel firmly`});
+    if([71,73,75,77,85,86].includes(code)) warns.push({s:'m',m:'❄️ Active snowfall — road may be icy or unploughed'});
+    if([95,96,99].includes(code))          warns.push({s:'s',m:'⛈️ Thunderstorm — seek shelter, avoid open highlands'});
+    if(tempC<=0&&code<70)                  warns.push({s:'m',m:`🧊 Below freezing (${tempF}°F) — black ice risk on bridges & shaded roads`});
+    if(prec>8)                             warns.push({s:'m',m:`🌊 Heavy rain (${prec} mm) — watch for flash flooding on lower roads`});
+    if(hum>90&&tempC<5)                    warns.push({s:'m',m:'🌫️ High humidity + cold — freezing fog risk near coast & valleys'});
+    if(warns.length) anyWarn=true;
+
+    const hdg=document.createElement('div');
+    hdg.className='wx-loc';
+    hdg.textContent=(ri===0?'🚦 ':' 🏁 ')+res.loc.label;
+    el.appendChild(hdg);
+
+    warns.forEach(w=>{
+      const wd=document.createElement('div');
+      wd.className='wx-warn'+(w.s==='s'?'':' mod');
+      wd.style.animationDelay=(ri*80)+'ms';
+      wd.textContent=w.m;
+      el.appendChild(wd);
+    });
+
+    // Current conditions card
+    const now=document.createElement('div');
+    now.className='wx-now';
+    now.style.animationDelay=(ri*80+40)+'ms';
+    now.innerHTML=`
+      <span class="wx-ico">${ico}</span>
+      <div>
+        <div class="wx-big">${tempF}°F</div>
+        <div class="wx-desc">${desc}</div>
+        <div class="wx-feels">Feels like ${feelF}°F &nbsp;·&nbsp; ${tempC}°C</div>
+      </div>`;
+    el.appendChild(now);
+
+    // Stats grid
+    const sg=document.createElement('div');
+    sg.className='wx-grid';
+    sg.style.animationDelay=(ri*80+55)+'ms';
+    const windMph=Math.round(wind*2.237);
+    [
+      ['💨 Wind',`${windMph} mph (${wind} m/s) ${wdir}`],
+      ['💧 Humidity',`${hum}%`],
+      ['🌧 Precipitation',`${(prec*0.0394).toFixed(2)} in (${prec} mm)`],
+      ['☁️ Cloud cover',`${cloudCov}%`],
+    ].forEach(([k,v])=>{
+      sg.innerHTML+=`<div class="wx-stat"><div class="wx-sk">${k}</div><div class="wx-sv">${v}</div></div>`;
+    });
+    el.appendChild(sg);
+
+    // 6-day forecast strip
+    const strip=document.createElement('div');
+    strip.className='wx-strip';
+    d.time.slice(0,6).forEach((dt,i)=>{
+      const lbl=i===0?'Today':new Date(dt+'T12:00').toLocaleDateString('en',{weekday:'short'});
+      const hiF=c2f(d.temperature_2m_max[i]), loF=c2f(d.temperature_2m_min[i]);
+      const wMax=Math.round(d.wind_speed_10m_max[i]*2.237);
+      const dc=document.createElement('div');
+      dc.className='wx-dc';
+      dc.style.animationDelay=(ri*80+i*22)+'ms';
+      dc.innerHTML=`
+        <div class="wx-dd">${lbl}</div>
+        <div class="wx-di">${WX_ICON[d.weather_code[i]]||'🌡️'}</div>
+        <div class="wx-dhi">${hiF}°F</div>
+        <div class="wx-dlo">${loF}°F</div>
+        <div class="wx-dw">${wMax} mph</div>
+        ${d.precipitation_probability_max[i]!=null
+          ?`<div class="wx-dw" style="color:#8cc8e6;">${d.precipitation_probability_max[i]}% 💧</div>`:''}`;
+      strip.appendChild(dc);
+    });
+    el.appendChild(strip);
+  });
+
+  const src=document.createElement('div');
+  src.className='wx-src';
+  src.innerHTML='🌡️ Live weather: <a href="https://open-meteo.com" target="_blank">Open-Meteo</a>'
+    +' (free, no API key) · °F · mph · Updates each search';
+  el.appendChild(src);
+  observeCards('.wx-now,.wx-stat,.wx-warn,.au-card');
+
+  if(anyWarn){
+    const tb=document.querySelector('#desktop-tabs .tab:nth-child(2)');
+    if(tb) tb.style.color='#f0a030';
+  }
+}
+
+// ═══════════════════════════════════════════════════════════
+// ROAD CONDITIONS
+//
+// Strategy A — apis.is/safetravel (CORS-open Icelandic public API)
+// Strategy B — allorigins.win CORS proxy → vegagerdin.is JSON agent
+//
+// Why previous endpoints failed:
+//  • umferdin.is/api/* = private Next.js routes, not a public API
+//  • gagnaveita.vegagerdin.is = no CORS headers + HTTP-only (blocked by browsers)
+// ═══════════════════════════════════════════════════════════
+async function fetchRoads(fi,ti){
+  const el=document.getElementById('road-content');
+  el.innerHTML='<div class="spinner"><div class="sp"></div>Checking road conditions…</div>';
+  document.getElementById('road-links').style.display='block';
+
+  let liveData=null, liveSource=null;
+
+  // Strategy A: apis.is — Icelandic public API hub, CORS-open
+  try{
+    const _sigA=typeof AbortSignal.timeout==='function'
+      ? AbortSignal.timeout(8000)
+      : (()=>{const ac=new AbortController();setTimeout(()=>ac.abort(),8000);return ac.signal;})();
+    const r=await fetch('https://apis.is/safetravel',{signal:_sigA});
+    if(r.ok){
+      const j=await r.json();
+      const arr=j.results||j.items||(Array.isArray(j)?j:null);
+      if(arr&&arr.length){liveData=arr;liveSource='safetravel';}
+    }
+  }catch(_){}
+
+  // Strategy B: vegagerdin.is JSON via allorigins CORS proxy
+  if(!liveData){
+    try{
+      const target='https://www.vegagerdin.is/vefur2.nsf/Faerd_listi_JSON?OpenAgent&lang=en';
+      const proxy='https://api.allorigins.win/raw?url='+encodeURIComponent(target);
+      const _sigB=typeof AbortSignal.timeout==='function'
+        ? AbortSignal.timeout(10000)
+        : (()=>{const ac=new AbortController();setTimeout(()=>ac.abort(),10000);return ac.signal;})();
+      const r=await fetch(proxy,{signal:_sigB});
+      if(r.ok){
+        const text=await r.text();
+        let parsed=null;
+        try{parsed=JSON.parse(text);}catch(_){}
+        if(parsed){
+          const arr=Array.isArray(parsed)?parsed
+            :(parsed.items||parsed.Faerd||parsed.data||null);
+          if(arr&&arr.length){liveData=arr;liveSource='vegagerdin';}
+        }
+      }
+    }catch(_){}
+  }
+
+  renderRoads(fi,ti,liveData,liveSource);
+}
+
+function renderRoads(fi,ti,liveData,liveSource){
+  const el=document.getElementById('road-content');
+  el.innerHTML='';
+  let cnt=0;
+  // Minimal HTML escape to prevent XSS from live API data
+  const esc=s=>String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+
+  if(liveData&&Array.isArray(liveData)&&liveData.length){
+    // ── LIVE DATA ──
+    const srcLabel=liveSource==='safetravel'?'safetravel.is':'vegagerdin.is';
+    const ok=document.createElement('div');
+    ok.style.cssText='font-family:var(--fm);font-size:.58rem;color:var(--aur);padding:8px 16px 4px;';
+    ok.innerHTML=`✅ Live road data from <a href="https://umferdin.is/en" target="_blank" style="color:var(--gl);">${srcLabel}</a>`;
+    el.appendChild(ok);
+
+    // Normalise both API shapes into a common object
+    function norm(f){
+      if(f.title||f.alertType){
+        const t=(f.alertType||'').toLowerCase();
+        return{
+          title:f.title||f.alertType||'Safety Alert',
+          body: f.description||f.text||f.body||'',
+          road: f.road||f.roadNumber||'',
+          sev:  t.includes('clos')?'cl':t.includes('warn')?'wa':'',
+          ico:  t.includes('clos')?'🔴':t.includes('warn')?'⚠️':'ℹ️',
+          updated:f.updated||f.date||f.timestamp||'',
+        };
+      }
+      // vegagerdin Faerd shape
+      const code=f.FaerdTexti||f.Faerd||1;
+      const sev=code===6?'cl':code>=3?'wa':'';
+      const ico=code===6?'🔴':code===4?'🧊':code===5?'❄️':code===3?'🌨️':code===2?'🌧️':'ℹ️';
+      const label={1:'Dry/Good',2:'Wet',3:'Slush/Snow',4:'Ice',5:'Snow-covered',6:'CLOSED',7:'Unknown'}[code]||'—';
+      return{
+        title:(f.Thjodvegur?'Rte '+f.Thjodvegur+' ':'')+( f.Heiti||f.VegNafn||'Road section'),
+        body: f.FaerdLysing||f.Lysing||label,
+        road: f.Thjodvegur||'',
+        sev,ico,
+        updated:f.Dagsetning||'',
+      };
+    }
+
+    const normed=liveData.map(norm);
+    const notable=normed.filter(n=>n.sev||n.body.length>3).slice(0,15);
+
+    if(notable.length===0){
+      const good=document.createElement('div');
+      good.className='rn';
+      good.innerHTML=`<div class="rn-hd"><span class="rn-ico">✅</span>
+        <span class="rn-title">All monitored roads are clear</span></div>
+        <div class="rn-body">No closures, ice, or snow reported right now. Drive safely!</div>`;
+      el.appendChild(good);cnt++;
+    }else{
+      notable.forEach((n,i)=>{
+        const cls=n.sev;
+        const div=document.createElement('div');
+        div.className='rn '+(cls||'');div.style.animationDelay=(i*28)+'ms';
+        div.innerHTML=`<div class="rn-hd">
+          <span class="rn-ico">${n.ico}</span>
+          <span class="rn-title">${esc(n.title)}</span></div>
+          <div class="rn-body">${esc(n.body)}</div>
+          <div class="rn-tags">
+            ${cls?`<span class="rntag rt-${cls==='cl'?'r':'o'}">${cls==='cl'?'CLOSED':'WARNING'}</span>`:''}
+            ${n.road?`<span class="rntag rt-b">Rte ${esc(n.road)}</span>`:''}
+          </div>
+          ${n.updated?`<div class="rn-time">${esc(n.updated)}</div>`:''}`;
+        el.appendChild(div);cnt++;
+      });
+    }
+    const summ=document.createElement('div');
+    summ.style.cssText='font-family:var(--fm);font-size:.56rem;color:var(--muted);padding:4px 16px 8px;';
+    summ.textContent=`${notable.length} alert${notable.length!==1?'s':''} · ${liveData.length} entries from API`;
+    el.appendChild(summ);
+
+  }else{
+    // ── CURATED FALLBACK ──
+    const fb=document.createElement('div');
+    fb.style.cssText='font-family:var(--fm);font-size:.58rem;color:var(--ora);padding:8px 16px 4px;line-height:1.7;';
+    fb.innerHTML=`⚠ Live fetch failed — showing curated safety alerts.<br/>
+      <span style="color:var(--muted);">Live data requires HTTPS. If you opened this as a local file,
+      host it at <a href="https://tiiny.host" target="_blank" style="color:var(--gl);">tiiny.host</a> (free, drag &amp; drop).</span>`;
+    el.appendChild(fb);
+
+    const seen=new Set();
+    const relevant=ROAD_NOTICES.filter(n=>n.legs==='all'||n.legs.some(l=>(l[0]===fi&&l[1]===ti)||(l[0]===ti&&l[1]===fi)));
+    const general=ROAD_NOTICES.filter(n=>n.legs==='all');
+    [...relevant,...general].filter(n=>{if(seen.has(n.id))return false;seen.add(n.id);return true;})
+      .forEach((n,i)=>{
+        const cls=n.sev==='cl'?'cl':n.sev==='wa'?'wa':'';
+        const div=document.createElement('div');
+        div.className='rn '+(cls||'');div.style.animationDelay=(i*30)+'ms';
+        div.innerHTML=`<div class="rn-hd"><span class="rn-ico">${n.icon}</span>
+          <span class="rn-title">${n.title}</span></div>
+          <div class="rn-body">${n.body}</div>
+          <div class="rn-tags">${n.tags.map(t=>`<span class="rntag rt-${cls==='cl'?'r':cls==='wa'?'o':'b'}">${t}</span>`).join('')}</div>
+          <div class="rn-time">${n.updated}</div>`;
+        el.appendChild(div);cnt++;
+      });
+  }
+
+  // Alternative route suggestion
+  const alt=ALT_ROUTES[`${fi}-${ti}`]||ALT_ROUTES[`${ti}-${fi}`];
+  if(alt){
+    const ab=document.createElement('div');
+    ab.className='alt-box';
+    ab.innerHTML=`<strong>🔀 Route suggestion</strong><br/>${alt}`;
+    el.appendChild(ab);
+  }
+
+  // Quick links box
+  const lb=document.createElement('div');
+  lb.className='alt-box';
+  lb.innerHTML=`<strong>📡 Always check before driving:</strong><br/>
+    <a href="https://umferdin.is/en" target="_blank" style="color:var(--aur);">umferdin.is</a> — Live road conditions<br/>
+    <a href="https://en.vedur.is" target="_blank" style="color:var(--aur);">en.vedur.is</a> — Met Office forecast<br/>
+    <a href="https://safetravel.is" target="_blank" style="color:var(--aur);">safetravel.is</a> — Safety alerts<br/>
+    ☎ Road hotline <strong style="color:var(--aur);">1777</strong> · Emergency <strong style="color:var(--red);">112</strong>`;
+  el.appendChild(lb);
+  observeCards('.rn,.alt-box');
+
+  // Update badges
+  if(cnt>0){
+    const tb=document.getElementById('road-tbadge');
+    tb.textContent=cnt;tb.style.display='inline-block';
+    const bnb=document.getElementById('bn-badge');
+    bnb.textContent=cnt;bnb.style.display='block';
+    document.getElementById('rb-alerts').textContent=cnt+' alert'+(cnt!==1?'s':'');
+  }
+}
+
+// ═══════════════════════════════════════════════════════════
+// GEOLOCATION
+// ═══════════════════════════════════════════════════════════
+// ── GPS toggle: tap once to enable, tap again to disable ──
+let gpsActive=false;
+
+function toggleGPS(){
+  if(gpsActive || gpsFixing){
+    playGpsOffSound();
+    stopGPS();
+  } else {
+    playGpsOnSound();
+    startGPS();
+  }
+}
+
+let gpsFixing=false;   // true during the acquisition window (FIXING…)
+
+function startGPS(){
+  closeToast();
+  if(!navigator.geolocation){
+    setGPS('NO GPS','idle',false);
+    showToast('Geolocation is not supported by this browser.');
+    return;
+  }
+  gpsFixing=true;
+  setGPS('FIXING…','fixing',false);
+  setFabState('locating');
+  if(watchId!==null){navigator.geolocation.clearWatch(watchId);watchId=null;}
+  navigator.geolocation.getCurrentPosition(onLocOK,onLocErr,
+    {enableHighAccuracy:true,timeout:15000,maximumAge:20000});
+}
+
+function stopGPS(){
+  gpsFixing=false;
+  gpsActive=false;
+  if(watchId!==null){navigator.geolocation.clearWatch(watchId);watchId=null;}
+  if(userMk){map.removeLayer(userMk);userMk=null;}
+  if(userCirc){map.removeLayer(userCirc);userCirc=null;}
+  setGPS('GPS OFF','off',false);
+  setFabState('off');
+  closeToast();
+}
+
+function setFabState(state){
+  ['loc-fab','loc-fab-mob'].forEach(id=>{
+    const f=document.getElementById(id);
+    if(!f) return;
+    f.classList.remove('locating','loc');
+    if(state==='locating') f.classList.add('locating');
+    else if(state==='on')  f.classList.add('loc');
+  });
+}
+
+function onLocOK(pos){
+  gpsFixing=false;
+  const lat=pos.coords.latitude,lng=pos.coords.longitude,acc=pos.coords.accuracy;
+  setFabState('on');
+  if(userMk){map.removeLayer(userMk);userMk=null;}
+  if(userCirc){map.removeLayer(userCirc);userCirc=null;}
+  userCirc=L.circle([lat,lng],{
+    radius:Math.min(acc,5000),color:'#3be8b0',
+    fillColor:'#3be8b0',fillOpacity:.05,weight:1,opacity:.28,dashArray:'5 5'
+  }).addTo(map);
+  const ico=L.divIcon({className:'',
+    html:`<div class="udot"><div class="udot-c"></div></div>`,
+    iconSize:[22,22],iconAnchor:[11,11]});
+  userMk=L.marker([lat,lng],{icon:ico,zIndexOffset:9999}).addTo(map)
+    .bindPopup(`<div class="pn">📍 You are here</div>
+      <div class="pa">Accuracy ±${Math.round(acc)} m</div>
+      <div class="ph">Tap GPS OFF in toolbar to stop tracking</div>`);
+  if(lat>62&&lat<68&&lng>-26&&lng<-12) map.setView([lat,lng],10,{animate:true});
+  gpsActive=true;
+  setGPS('GPS ON','on',false);
+  watchId=navigator.geolocation.watchPosition(p=>{
+    if(userMk)userMk.setLatLng([p.coords.latitude,p.coords.longitude]);
+    if(userCirc){
+      userCirc.setLatLng([p.coords.latitude,p.coords.longitude]);
+      userCirc.setRadius(Math.min(p.coords.accuracy,5000));
+    }
+  },null,{enableHighAccuracy:true,maximumAge:8000});
+}
+
+function onLocErr(err){
+  gpsActive=false;
+  gpsFixing=false;
+  setFabState('off');
+  const isFile=location.protocol==='file:';
+  const ua=navigator.userAgent;
+  const isMob=/Mobi|Android/i.test(ua);
+  const isSaf=/Safari/.test(ua)&&!/Chrome/.test(ua);
+  const isChr=/Chrome/.test(ua)&&!/Edge/.test(ua);
+  if(err.code===1){
+    setGPS('DENIED','err',false);
+    let steps='';
+    if(isFile)            steps=`<br/><span style="color:#f08060;">⚠ Running as local file. Upload to <a href="https://tiiny.host" target="_blank" style="color:var(--gold);">tiiny.host</a> to enable GPS.</span>`;
+    else if(isMob&&isSaf) steps=`<ol><li>iPhone Settings → Safari → Location → Allow</li><li>Reload</li></ol>`;
+    else if(isMob)        steps=`<ol><li>Tap 🔒 in address bar → Permissions → Location → Allow</li><li>Reload</li></ol>`;
+    else if(isChr)        steps=`<ol><li>Tap 🔒 in address bar → Site settings → Location → Allow</li><li>Reload</li></ol>`;
+    else if(isSaf)        steps=`<ol><li>Safari → Settings for this site → Location → Allow</li><li>Reload</li></ol>`;
+    else                  steps=`<ol><li>Click 🔒 lock icon → allow Location</li><li>Reload</li></ol>`;
+    showToast('<b>Location access denied.</b>'+steps);
+  }else if(err.code===2){
+    setGPS('NO SIGNAL','idle',false);
+    showToast('No GPS signal. Enable location services and tap 📍.');
+  }else{
+    setGPS('TIMEOUT','idle',false);
+    showToast('Location timed out. Tap 📍 to retry.');
+  }
+}
+
+// state: 'on' | 'off' | 'fixing' | 'err' | 'idle'
+function setGPS(lbl,state,_unused){
+  const b=document.getElementById('gps-btn');
+  document.getElementById('gps-lbl').textContent=lbl;
+  b.classList.remove('on','off','err');
+  if(state==='on')    b.classList.add('on');
+  else if(state==='off') b.classList.add('off');
+  else if(state==='err') b.classList.add('err');
+}
+function showToast(html){
+  document.getElementById('toast-body').innerHTML=html;
+  document.getElementById('toast').classList.add('show');
+  clearTimeout(window._tt);
+  window._tt=setTimeout(closeToast,20000);
+}
+
+// ═══════════════════════════════════════════════════════════
+// TAB SOUNDS — Web Audio API (no files, fully synthesized)
+// Lazy-init AudioContext on first call (browser autoplay policy)
+// ═══════════════════════════════════════════════════════════
+let _ac = null;
+function getAC(){
+  if(!_ac || _ac.state==='closed'){
+    try{ _ac = new (window.AudioContext||window.webkitAudioContext)(); }catch(_){}
+  }
+  if(_ac && _ac.state==='suspended') _ac.resume();
+  return _ac;
+}
+
+// ── GAS ⛽ — pump thunk + liquid gurgle ─────────────────────────────────
+// A short low-pitched "clunk" (mechanical click) followed by a
+// filtered noise burst that sounds like liquid rushing into a tank.
+function playGasSound(){
+  const ac=getAC(); if(!ac) return;
+  const now=ac.currentTime;
+
+  // Mechanical thunk: short sine click at ~80 Hz, fast decay
+  const osc=ac.createOscillator();
+  const thunkGain=ac.createGain();
+  osc.type='sine'; osc.frequency.setValueAtTime(80,now);
+  osc.frequency.exponentialRampToValueAtTime(40,now+0.08);
+  thunkGain.gain.setValueAtTime(0.5,now);
+  thunkGain.gain.exponentialRampToValueAtTime(0.001,now+0.12);
+  osc.connect(thunkGain); thunkGain.connect(ac.destination);
+  osc.start(now); osc.stop(now+0.13);
+
+  // Liquid gurgle: band-passed white noise, sweeping down
+  const bufLen=ac.sampleRate*0.35;
+  const buf=ac.createBuffer(1,bufLen,ac.sampleRate);
+  const data=buf.getChannelData(0);
+  for(let i=0;i<bufLen;i++) data[i]=(Math.random()*2-1);
+  const src=ac.createBufferSource();
+  src.buffer=buf;
+  const filter=ac.createBiquadFilter();
+  filter.type='bandpass';
+  filter.frequency.setValueAtTime(900,now+0.1);
+  filter.frequency.exponentialRampToValueAtTime(300,now+0.4);
+  filter.Q.value=3.5;
+  const gurgGain=ac.createGain();
+  gurgGain.gain.setValueAtTime(0.0,now+0.08);
+  gurgGain.gain.linearRampToValueAtTime(0.28,now+0.14);
+  gurgGain.gain.exponentialRampToValueAtTime(0.001,now+0.42);
+  src.connect(filter); filter.connect(gurgGain); gurgGain.connect(ac.destination);
+  src.start(now+0.08); src.stop(now+0.45);
+}
+
+// ── WEATHER 🌤 — soft wind whoosh ──────────────────────────────────────
+// Filtered noise sweep: frequency rises then falls like a gust of wind.
+// A gentle high-shelf shimmer on top for the "airy" feel.
+function playWeatherSound(){
+  const ac=getAC(); if(!ac) return;
+  const now=ac.currentTime;
+
+  // Wind body: bandpass noise
+  const bufLen=ac.sampleRate*0.55;
+  const buf=ac.createBuffer(1,bufLen,ac.sampleRate);
+  const data=buf.getChannelData(0);
+  for(let i=0;i<bufLen;i++) data[i]=(Math.random()*2-1);
+  const src=ac.createBufferSource();
+  src.buffer=buf;
+
+  const bp=ac.createBiquadFilter();
+  bp.type='bandpass';
+  bp.frequency.setValueAtTime(200,now);
+  bp.frequency.exponentialRampToValueAtTime(1800,now+0.22);
+  bp.frequency.exponentialRampToValueAtTime(350,now+0.52);
+  bp.Q.value=1.2;
+
+  const windGain=ac.createGain();
+  windGain.gain.setValueAtTime(0.0,now);
+  windGain.gain.linearRampToValueAtTime(0.32,now+0.18);
+  windGain.gain.exponentialRampToValueAtTime(0.001,now+0.54);
+
+  src.connect(bp); bp.connect(windGain); windGain.connect(ac.destination);
+  src.start(now); src.stop(now+0.56);
+
+  // High shimmer: short sine at ~1200 Hz, very soft
+  const shimmer=ac.createOscillator();
+  const shGain=ac.createGain();
+  shimmer.type='sine'; shimmer.frequency.setValueAtTime(1200,now+0.1);
+  shimmer.frequency.linearRampToValueAtTime(900,now+0.35);
+  shGain.gain.setValueAtTime(0.0,now+0.08);
+  shGain.gain.linearRampToValueAtTime(0.07,now+0.18);
+  shGain.gain.exponentialRampToValueAtTime(0.001,now+0.38);
+  shimmer.connect(shGain); shGain.connect(ac.destination);
+  shimmer.start(now+0.08); shimmer.stop(now+0.4);
+}
+
+// ── ROADS 🚧 — construction warning beep ──────────────────────────────
+// Two short beeps like a reversing vehicle / road warning signal.
+// First tone slightly higher than second — classic alert pair.
+function playRoadsSound(){
+  const ac=getAC(); if(!ac) return;
+  const now=ac.currentTime;
+
+  [[0, 880, 0.13],[0.18, 740, 0.13]].forEach(([delay,freq,dur])=>{
+    const osc=ac.createOscillator();
+    const g=ac.createGain();
+    osc.type='square';
+    osc.frequency.setValueAtTime(freq,now+delay);
+    // Slight detune for a more "industrial" feel
+    osc.detune.setValueAtTime(8,now+delay);
+    g.gain.setValueAtTime(0.0,now+delay);
+    g.gain.linearRampToValueAtTime(0.22,now+delay+0.012);
+    g.gain.setValueAtTime(0.22,now+delay+dur-0.02);
+    g.gain.linearRampToValueAtTime(0.0,now+delay+dur);
+
+    // Low-pass to soften the square wave harshness
+    const lp=ac.createBiquadFilter();
+    lp.type='lowpass'; lp.frequency.value=1400;
+
+    osc.connect(lp); lp.connect(g); g.connect(ac.destination);
+    osc.start(now+delay); osc.stop(now+delay+dur+0.01);
+  });
+}
+
+// ── MAP 🗺️ — soft map "pop" (bonus) ────────────────────────────────────
+// A gentle low-mid sine pop, like a pin dropping on a map.
+function playMapSound(){
+  const ac=getAC(); if(!ac) return;
+  const now=ac.currentTime;
+  const osc=ac.createOscillator();
+  const g=ac.createGain();
+  osc.type='sine';
+  osc.frequency.setValueAtTime(320,now);
+  osc.frequency.exponentialRampToValueAtTime(180,now+0.14);
+  g.gain.setValueAtTime(0.35,now);
+  g.gain.exponentialRampToValueAtTime(0.001,now+0.18);
+  osc.connect(g); g.connect(ac.destination);
+  osc.start(now); osc.stop(now+0.2);
+}
+
+// ── AURORA 🌌 — shimmer chime (bonus) ──────────────────────────────────
+// Three ascending sine tones, soft and ethereal.
+function playAuroraSound(){
+  const ac=getAC(); if(!ac) return;
+  const now=ac.currentTime;
+  [0,0.12,0.24].forEach((delay,i)=>{
+    const freq=[523,659,784][i]; // C5, E5, G5
+    const osc=ac.createOscillator();
+    const g=ac.createGain();
+    osc.type='sine';
+    osc.frequency.setValueAtTime(freq,now+delay);
+    g.gain.setValueAtTime(0.0,now+delay);
+    g.gain.linearRampToValueAtTime(0.14,now+delay+0.03);
+    g.gain.exponentialRampToValueAtTime(0.001,now+delay+0.55);
+    osc.connect(g); g.connect(ac.destination);
+    osc.start(now+delay); osc.stop(now+delay+0.6);
+  });
+}
+
+// Tab ID → sound function map
+
+
+// ── CINEMATIC ENTRY OBSERVER ───────────────────────────────────────────
+// Staggered fade-in-up on cards as they enter the viewport.
+const _io = new IntersectionObserver((entries)=>{
+  entries.forEach(e=>{
+    if(e.isIntersecting){
+      e.target.classList.add('anim-in');
+      _io.unobserve(e.target);
+    }
+  });
+},{threshold:0.08,rootMargin:'0px 0px -20px 0px'});
+
+function observeCards(selector){
+  // Small delay so elements are in the DOM before observing
+  setTimeout(()=>{
+    document.querySelectorAll(selector+':not(.anim-in)').forEach((el,i)=>{
+      el.classList.add('anim-ready');
+      // Stagger: each card 60ms later than previous
+      setTimeout(()=> _io.observe(el), i*40);
+    });
+  },30);
+}
+
+
+// ── GPS ON SOUND — warm ascending two-tone chime ──────────────────────
+// Like a satellite locking on: two clean tones rising
+function playGpsOnSound(){
+  const ac=getAC(); if(!ac) return;
+  const now=ac.currentTime;
+  [[0,523.25,0.32],[0.16,783.99,0.48]].forEach(([delay,freq,dur])=>{
+    const osc=ac.createOscillator();
+    const g=ac.createGain();
+    osc.type='sine';
+    osc.frequency.setValueAtTime(freq,now+delay);
+    g.gain.setValueAtTime(0,now+delay);
+    g.gain.linearRampToValueAtTime(0.2,now+delay+0.02);
+    g.gain.exponentialRampToValueAtTime(0.001,now+delay+dur);
+    osc.connect(g); g.connect(ac.destination);
+    osc.start(now+delay); osc.stop(now+delay+dur+0.01);
+  });
+}
+
+// ── GPS OFF SOUND — soft descending fade ──────────────────────────────
+// Like a signal dropping: tone descends and dissolves
+function playGpsOffSound(){
+  const ac=getAC(); if(!ac) return;
+  const now=ac.currentTime;
+  const osc=ac.createOscillator();
+  const g=ac.createGain();
+  osc.type='sine';
+  osc.frequency.setValueAtTime(440,now);
+  osc.frequency.exponentialRampToValueAtTime(220,now+0.35);
+  g.gain.setValueAtTime(0.18,now);
+  g.gain.exponentialRampToValueAtTime(0.001,now+0.4);
+  osc.connect(g); g.connect(ac.destination);
+  osc.start(now); osc.stop(now+0.42);
+}
+
+// ── DROPDOWN SCROLL 🎚 — soft mechanical tick ──────────────────────────
+// A very short, quiet click — like a mechanical scroll wheel detent.
+// Two layers: a tiny high-frequency "tick" + a subtle body resonance.
+function playScrollSound(){
+  const ac=getAC(); if(!ac) return;
+  const now=ac.currentTime;
+
+  // Tick: very short sine at ~1800 Hz, near-instant decay
+  const tick=ac.createOscillator();
+  const tg=ac.createGain();
+  tick.type='sine';
+  tick.frequency.setValueAtTime(1800,now);
+  tick.frequency.exponentialRampToValueAtTime(900,now+0.025);
+  tg.gain.setValueAtTime(0.18,now);
+  tg.gain.exponentialRampToValueAtTime(0.001,now+0.03);
+  tick.connect(tg); tg.connect(ac.destination);
+  tick.start(now); tick.stop(now+0.04);
+
+  // Body: low resonant thud at ~200 Hz, soft
+  const body=ac.createOscillator();
+  const bg=ac.createGain();
+  body.type='sine';
+  body.frequency.setValueAtTime(200,now);
+  body.frequency.exponentialRampToValueAtTime(120,now+0.04);
+  bg.gain.setValueAtTime(0.12,now);
+  bg.gain.exponentialRampToValueAtTime(0.001,now+0.05);
+  body.connect(bg); bg.connect(ac.destination);
+  body.start(now); body.stop(now+0.06);
+}
+
+// ── SEARCH CHIME 🔔 — bright ascending arpeggio ────────────────────────
+// Three clean sine tones rising quickly — like a confirmation chime.
+// Inspired by "initiating a journey" — bright, positive, forward-moving.
+function playSearchChime(){
+  const ac=getAC(); if(!ac) return;
+  // Only play when button is enabled
+  if(document.getElementById('btn-go')?.disabled) return;
+  const now=ac.currentTime;
+
+  // Three tones: E5 → G#5 → B5 (E major arpeggio — clear & uplifting)
+  const notes=[
+    {f:659.25, t:0,    dur:0.28},
+    {f:830.61, t:0.10, dur:0.26},
+    {f:987.77, t:0.20, dur:0.45},
+  ];
+
+  notes.forEach(({f,t,dur})=>{
+    const osc=ac.createOscillator();
+    const g=ac.createGain();
+    // Slight triangle wave for warmth
+    osc.type='triangle';
+    osc.frequency.setValueAtTime(f,now+t);
+    g.gain.setValueAtTime(0.0,now+t);
+    g.gain.linearRampToValueAtTime(0.22,now+t+0.018);
+    g.gain.setValueAtTime(0.22,now+t+dur*0.55);
+    g.gain.exponentialRampToValueAtTime(0.001,now+t+dur);
+    osc.connect(g); g.connect(ac.destination);
+    osc.start(now+t); osc.stop(now+t+dur+0.01);
+  });
+}
+
+const TAB_SOUNDS={gas:playGasSound, wx:playWeatherSound, roads:playRoadsSound, map:playMapSound};
+
+
+// ═══════════════════════════════════════════════════════════
+// AURORA CANVAS ANIMATION
+// Layered curtain effect using sine-wave bands of color
+// Each band oscillates in opacity, position, and hue
+// ═══════════════════════════════════════════════════════════
+
+let _auroraRAF = null;
+
+const AURORA_BANDS = [
+  // {color, yBase (0-1), speed, amplitude, phase, opacity}
+  {h:165, s:85, l:55, yBase:.35, speed:.0007, amp:.09, phase:0,    alpha:.55},
+  {h:180, s:90, l:50, yBase:.42, speed:.0011, amp:.07, phase:1.2,  alpha:.45},
+  {h:150, s:80, l:60, yBase:.28, speed:.0009, amp:.11, phase:2.4,  alpha:.38},
+  {h:200, s:70, l:55, yBase:.50, speed:.0006, amp:.06, phase:0.8,  alpha:.28},
+  {h:270, s:60, l:55, yBase:.22, speed:.0013, amp:.08, phase:3.1,  alpha:.20},
+  {h:160, s:95, l:48, yBase:.38, speed:.0005, amp:.13, phase:1.7,  alpha:.35},
+];
+
+function drawAuroraFrame(canvas, ts){
+  const dpr = window.devicePixelRatio || 1;
+  const ctx = canvas.getContext('2d');
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  const W = canvas.offsetWidth || canvas.width / dpr;
+  const H = canvas.offsetHeight || canvas.height / dpr;
+  ctx.clearRect(0, 0, W, H);
+
+  // Star field background
+  ctx.fillStyle = 'rgba(2,3,12,1)';
+  ctx.fillRect(0, 0, W, H);
+
+  // Draw stars (seeded — same every frame)
+  const starCount = Math.floor(W * H / 1800);
+  for(let i = 0; i < starCount; i++){
+    // Simple deterministic pseudo-random from index
+    const sx = ((i * 7919 + 13) % W);
+    const sy = ((i * 4321 + 97) % H);
+    const sr = (i % 5) < 1 ? 1.2 : 0.6;
+    const pulse = 0.4 + 0.6 * Math.abs(Math.sin(ts * .0008 + i * 0.7));
+    ctx.beginPath();
+    ctx.arc(sx, sy, sr, 0, Math.PI * 2);
+    ctx.fillStyle = `rgba(200,220,255,${pulse * 0.7})`;
+    ctx.fill();
+  }
+
+  // Draw aurora bands bottom-to-top
+  AURORA_BANDS.forEach((band, bi) => {
+    const yCenter = (band.yBase + band.amp * Math.sin(ts * band.speed + band.phase)) * H;
+    const bandH = H * 0.18;
+
+    // Build gradient for this band
+    const grad = ctx.createLinearGradient(0, yCenter - bandH, 0, yCenter + bandH * 1.6);
+    grad.addColorStop(0, `hsla(${band.h},${band.s}%,${band.l}%,0)`);
+    grad.addColorStop(0.3, `hsla(${band.h},${band.s}%,${band.l}%,${band.alpha * .6})`);
+    grad.addColorStop(0.5, `hsla(${band.h},${band.s}%,${band.l}%,${band.alpha})`);
+    grad.addColorStop(0.7, `hsla(${band.h},${band.s}%,${band.l}%,${band.alpha * .5})`);
+    grad.addColorStop(1, `hsla(${band.h},${band.s}%,${band.l}%,0)`);
+
+    // Undulating curtain via horizontal sine path
+    ctx.beginPath();
+    const segments = 80;
+    const segW = W / segments;
+    ctx.moveTo(0, yCenter - bandH);
+    for(let i = 0; i <= segments; i++){
+      const x = i * segW;
+      const undulate = Math.sin(i * 0.22 + ts * band.speed * 3 + band.phase) * 18
+                     + Math.sin(i * 0.11 + ts * band.speed * 1.7 + bi) * 10;
+      ctx.lineTo(x, yCenter + undulate);
+    }
+    ctx.lineTo(W, yCenter + bandH * 2);
+    ctx.lineTo(0, yCenter + bandH * 2);
+    ctx.closePath();
+    ctx.fillStyle = grad;
+    ctx.globalCompositeOperation = 'screen';
+    ctx.fill();
+    ctx.globalCompositeOperation = 'source-over';
+  });
+
+  // Horizon glow
+  const horizGrad = ctx.createLinearGradient(0, H * .65, 0, H);
+  horizGrad.addColorStop(0, 'rgba(20,80,50,0)');
+  horizGrad.addColorStop(1, 'rgba(10,40,30,0.55)');
+  ctx.fillStyle = horizGrad;
+  ctx.fillRect(0, H * .65, W, H * .35);
+}
+
+function startAuroraCanvas(){
+  const canvas = document.getElementById('aurora-canvas');
+  if(!canvas) return;
+  // Resize canvas to actual px
+  function resize(){
+    const dpr = window.devicePixelRatio || 1;
+    canvas.width = canvas.offsetWidth * dpr;
+    canvas.height = canvas.offsetHeight * dpr;
+  }
+  resize();
+  window.addEventListener('resize', resize);
+
+  function loop(ts){
+    if(!document.getElementById('aurora-overlay').classList.contains('show')){
+      _auroraRAF = null; return;
+    }
+    drawAuroraFrame(canvas, ts);
+    _auroraRAF = requestAnimationFrame(loop);
+  }
+  _auroraRAF = requestAnimationFrame(loop);
+}
+
+function stopAuroraCanvas(){
+  if(_auroraRAF){ cancelAnimationFrame(_auroraRAF); _auroraRAF = null; }
+}
+
+// ── LEGEND DATA ────────────────────────────────────────────────────────
+const KP_LEGEND = [
+  {kp:'0–1', color:'#3a5a6a', label:'Very quiet',   iceland:'❌ Not visible — oval confined to polar regions above 70°N'},
+  {kp:'2',   color:'#2e6e6a', label:'Quiet',        iceland:'❌ Unlikely — needs exceptional darkness and clear sky'},
+  {kp:'3',   color:'#27a882', label:'Active',       iceland:'🔵 Marginal — faint glow on northern horizon, camera only'},
+  {kp:'4',   color:'#2ccc90', label:'Unsettled',    iceland:'🟡 Possible — visible on horizon, naked eye in darkness'},
+  {kp:'5',   color:'#3be8b0', label:'G1 Minor',     iceland:'✨ Good — curtains visible to naked eye, bring your camera'},
+  {kp:'6',   color:'#60f0c0', label:'G2 Moderate',  iceland:'✨ Good — dynamic display, colours visible across Iceland'},
+  {kp:'7',   color:'#a080ff', label:'G3 Strong',    iceland:'🌌 Exceptional — overhead display, visible from Reykjavík'},
+  {kp:'8',   color:'#c060ff', label:'G4 Severe',    iceland:'🌌 Rare event — full-sky colours, visible to south'},
+  {kp:'9',   color:'#e040ff', label:'G5 Extreme',   iceland:'🌌 Historic — may be visible at unusually low latitudes'},
+];
+
+function buildAuroraLegend(){
+  const el = document.getElementById('aurora-legend');
+  if(!el) return;
+  el.innerHTML = '';
+  KP_LEGEND.forEach((row, i) => {
+    if(i === 2){
+      const div = document.createElement('div');
+      div.className = 'au-legend-divider';
+      const lbl = document.createElement('div');
+      lbl.style.cssText = 'font-family:var(--fm);font-size:.5rem;color:var(--aur);letter-spacing:.08em;text-transform:uppercase;margin-bottom:6px;';
+      lbl.textContent = '── Visible threshold for Iceland ──';
+      el.appendChild(lbl);
+    }
+    const r = document.createElement('div');
+    r.className = 'au-legend-row';
+    r.innerHTML = `
+      <div class="au-legend-kp" style="color:${row.color}">Kp ${row.kp}</div>
+      <div class="au-legend-bar" style="background:${row.color};opacity:.8;"></div>
+      <div class="au-legend-desc"><strong style="color:${row.color}">${row.label}</strong><br/>${row.iceland}</div>`;
+    el.appendChild(r);
+  });
+}
+
+// ── OVERLAY OPEN / CLOSE ────────────────────────────────────────────────
+let _overlayKp = 0, _overlayStorm = '', _overlayVerdict = '';
+
+function openAuroraOverlay(){
+  // Populate with last fetched data
+  document.getElementById('ov-kp-num').textContent = _overlayKp.toFixed(1);
+  document.getElementById('ov-kp-storm').textContent = _overlayStorm;
+  document.getElementById('ov-verdict').textContent = _overlayVerdict;
+
+  // Build legend first, then highlight current row
+  buildAuroraLegend();
+
+  // Highlight the row matching current Kp
+  const legendRows = document.querySelectorAll('#aurora-legend .au-legend-row');
+  legendRows.forEach((r, i) => {
+    const kp = [0,1,2,3,4,5,6,7,8][i] || 0;
+    if(Math.floor(_overlayKp) === kp){
+      r.style.background = 'rgba(59,232,176,.1)';
+      r.style.borderRadius = '6px';
+      r.style.padding = '4px 6px';
+      r.style.outline = '1px solid rgba(59,232,176,.3)';
+    }
+  });
+
+  const ov = document.getElementById('aurora-overlay');
+  ov.classList.add('show');
+  document.body.style.overflow = 'hidden';
+  startAuroraCanvas();
+}
+
+function closeAuroraOverlay(){
+  const ov = document.getElementById('aurora-overlay');
+  ov.classList.remove('show');
+  document.body.style.overflow = '';
+  stopAuroraCanvas();
+}
+
+// Close on backdrop click
+document.addEventListener('DOMContentLoaded', ()=>{
+  const ov = document.getElementById('aurora-overlay');
+  if(ov) ov.addEventListener('click', e => {
+    if(e.target === ov) closeAuroraOverlay();
+  });
+  // ESC key
+  document.addEventListener('keydown', e => {
+    if(e.key === 'Escape') closeAuroraOverlay();
+  });
+});
+
+function closeToast(){document.getElementById('toast')?.classList.remove('show');}
+
+// ═══════════════════════════════════════════════════════════
+// AURORA FORECAST — NOAA SWPC (free, no key, CORS-open)
+// Endpoint: services.swpc.noaa.gov/products/noaa-planetary-k-index.json
+// Shape: [["time_tag","Kp","a_running","station_count"], ["2026-01-14 00:00:00","1.67",...], ...]
+//
+// Iceland latitude 63–66°N Kp visibility thresholds:
+//   Kp < 3  → unlikely (aurora oval too far north)
+//   Kp 3    → possible on northern horizon with camera
+//   Kp 4    → visible on horizon, faint naked eye
+//   Kp 5-6  → G1/G2 storm — clear aurora, good show likely
+//   Kp 7+   → G3+ storm  — exceptional, visible overhead
+// ═══════════════════════════════════════════════════════════
+
+async function fetchAurora(){
+  const el=document.getElementById('aurora-content');
+  el.innerHTML='';
+
+  let rows=null;
+  // Primary: NOAA SWPC direct (CORS-open government endpoint)
+  try{
+    const sig=typeof AbortSignal.timeout==='function'
+      ? AbortSignal.timeout(9000)
+      : (()=>{const ac=new AbortController();setTimeout(()=>ac.abort(),9000);return ac.signal;})();
+    const r=await fetch('https://services.swpc.noaa.gov/products/noaa-planetary-k-index.json',{signal:sig});
+    if(r.ok){
+      const j=await r.json();
+      // j[0] is header row; j[1..] are data rows
+      if(Array.isArray(j)&&j.length>1) rows=j.slice(1);
+    }
+  }catch(_){}
+
+  // Fallback: allorigins CORS proxy
+  if(!rows){
+    try{
+      const target='https://services.swpc.noaa.gov/products/noaa-planetary-k-index.json';
+      const proxy='https://api.allorigins.win/raw?url='+encodeURIComponent(target);
+      const sig2=typeof AbortSignal.timeout==='function'
+        ? AbortSignal.timeout(11000)
+        : (()=>{const ac=new AbortController();setTimeout(()=>ac.abort(),11000);return ac.signal;})();
+      const r2=await fetch(proxy,{signal:sig2});
+      if(r2.ok){
+        const j2=await r2.json();
+        if(Array.isArray(j2)&&j2.length>1) rows=j2.slice(1);
+      }
+    }catch(_){}
+  }
+
+  if(!rows||!rows.length){
+    el.innerHTML=`<div style="font-family:var(--fm);font-size:.6rem;color:var(--muted);
+      padding:8px 16px 0;line-height:1.8;">
+      🌌 Aurora data unavailable · Check
+      <a href="https://www.swpc.noaa.gov/products/planetary-k-index" target="_blank"
+        style="color:var(--gl);">NOAA SWPC</a> directly</div>`;
+    return;
+  }
+
+  renderAurora(rows);
+}
+
+// Kp → card level
+function kpLevel(kp){
+  if(kp>=7) return'epic';
+  if(kp>=5) return'high';
+  if(kp>=3) return'med';
+  return'low';
+}
+
+// Kp → NOAA G-scale label
+function kpStorm(kp){
+  if(kp>=9) return'G5 Extreme';
+  if(kp>=8) return'G4 Severe';
+  if(kp>=7) return'G3 Strong';
+  if(kp>=6) return'G2 Moderate';
+  if(kp>=5) return'G1 Minor';
+  if(kp>=4) return'Unsettled';
+  if(kp>=3) return'Active';
+  if(kp>=2) return'Quiet';
+  return'Very quiet';
+}
+
+// Kp → Iceland-specific visibility verdict
+function kpVerdict(kp){
+  if(kp>=7) return'🌌 EXCEPTIONAL — Aurora should be visible overhead across all of Iceland. Even city-lit skies may show colours. This is a rare event — go outside NOW if clear.';
+  if(kp>=5) return'✨ GOOD CHANCE — Aurora likely visible to the naked eye across Iceland. Head to a dark site away from Reykjavík. Bring your camera.';
+  if(kp>=4) return'🟡 POSSIBLE — Faint aurora on the northern horizon. Camera may catch green/teal. Best visibility after midnight UTC at dark sites.';
+  if(kp>=3) return'🔵 MARGINAL — Aurora may be visible on the horizon with a long-exposure camera. Naked eye unlikely unless very dark and clear skies.';
+  return'❌ UNLIKELY — Kp too low for Iceland\'s latitude. Aurora oval remains well north of 66°N.';
+}
+
+// Iceland polar day warning — aurora only visible in darkness
+// Iceland (64°N) has 24h daylight ~Jun 1–Jul 10
+function polarDayWarning(){
+  const m=new Date().getUTCMonth(); // 0=Jan
+  if(m>=5&&m<=6) return'⚠️ Polar day period — Iceland has near-24h daylight Jun–Jul. Aurora is invisible even when Kp is high.';
+  if(m===4||m===7) return'🌅 Long twilight — Iceland has very short nights in May and August. Aurora viewing window is limited.';
+  return null;
+}
+
+function renderAurora(rows){
+  const el=document.getElementById('aurora-content');
+  el.innerHTML='';
+
+  // Current Kp = last row in the dataset
+  const latest=rows[rows.length-1];
+  const curKp=parseFloat(latest[1]||0);
+  const curTime=latest[0]||'';
+
+  // Next 24h = last 8 rows (8 × 3h = 24h)
+  // NOAA provides observed data; last few entries are most recent
+  const recent=rows.slice(-8);
+  const maxKp=Math.max(...recent.map(r=>parseFloat(r[1]||0)));
+  const forecastKp=Math.max(curKp,maxKp); // use best of current + recent window
+
+  const lvl=kpLevel(forecastKp);
+  const stormLbl=kpStorm(forecastKp);
+
+  // Build card
+  const card=document.createElement('div');
+  card.className='au-card '+lvl;
+
+  const ico=lvl==='epic'?'🌌':lvl==='high'?'✨':lvl==='med'?'🌠':'🌑';
+  const barPct=Math.min(100,Math.round(forecastKp/9*100));
+
+  card.innerHTML=`
+    <div class="au-hd">
+      <span class="au-ico">${ico}</span>
+      <div>
+        <div class="au-title">Aurora Borealis Forecast</div>
+        <div class="au-sub">Iceland · Kp visibility threshold ≥ 3 · Source: NOAA SWPC</div>
+      </div>
+    </div>
+    <div class="au-kp-row">
+      <div>
+        <div class="au-kp-val">${forecastKp.toFixed(1)}</div>
+        <div class="au-kp-lbl">Kp index (0–9)</div>
+      </div>
+      <span class="au-kp-storm">${stormLbl}</span>
+    </div>
+    <div class="au-bar-wrap">
+      <div class="au-bar-lbl">Geomagnetic activity level</div>
+      <div class="au-bar-track"><div class="au-bar-fill" style="width:${barPct}%"></div></div>
+    </div>
+    <div class="au-verdict">${kpVerdict(forecastKp)}</div>
+    <button class="au-view-btn" onclick="openAuroraOverlay()">🌌 View Aurora Details &amp; Legend ↗</button>`;
+
+  // Store for overlay
+  _overlayKp = forecastKp;
+  _overlayStorm = stormLbl;
+  _overlayVerdict = kpVerdict(forecastKp);
+
+  // 24h strip
+  if(recent.length>0){
+    const strip=document.createElement('div');
+    strip.className='au-strip';
+    recent.forEach(row=>{
+      const kp=parseFloat(row[1]||0);
+      const t=row[0]||'';
+      const hhmm=t.split(' ')[1]?t.split(' ')[1].slice(0,5):'';
+      const sl=kpLevel(kp);
+      const dc=document.createElement('div');
+      dc.className='au-dc '+(sl==='low'?'low':sl==='med'?'med':sl==='epic'?'epic':'act');
+      dc.innerHTML=`<div class="au-dt">${hhmm} UTC</div>
+        <div class="au-dk ${sl}">${kp.toFixed(1)}</div>`;
+      strip.appendChild(dc);
+    });
+    card.appendChild(strip);
+  }
+
+  el.appendChild(card);
+
+  // Polar day warning
+  const pdw=polarDayWarning();
+  if(pdw){
+    const wn=document.createElement('div');
+    wn.className='au-night-warn';
+    wn.textContent=pdw;
+    el.appendChild(wn);
+  }
+
+  const src=document.createElement('div');
+  src.className='au-dsrc';
+  src.innerHTML=`🛰 Data: <a href="https://www.swpc.noaa.gov/products/planetary-k-index" target="_blank">NOAA SWPC</a>
+    · Last obs: ${curTime.split('.')[0]} UTC · Updates every 3 hours`;
+  el.appendChild(src);
+
+  // Badge on weather tab + mobile nav when Kp ≥ 3
+  if(forecastKp>=3){
+    const lbl=forecastKp>=5?'Aurora!':'Kp '+forecastKp.toFixed(0);
+    ['aurora-tbadge','aurora-badge'].forEach(id=>{
+      const b=document.getElementById(id);
+      if(b){b.textContent=lbl;b.style.display='inline-block';}
+    });
+  } else {
+    ['aurora-tbadge','aurora-badge'].forEach(id=>{
+      const b=document.getElementById(id);
+      if(b) b.style.display='none';
+    });
+  }
+}
+
+</script>
+</body>
+</html>
