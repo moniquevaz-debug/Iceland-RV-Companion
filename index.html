@@ -1307,7 +1307,7 @@ select option{background:#0d0f1a;color:var(--ice);}
     </div>
 
     <div class="trnsl-footer">
-      Translation via <a href="https://translate.google.com" target="_blank">Google Translate</a> · Works on GitHub Pages &amp; any https:// host · Icelandic ⇄ English / Spanish
+      Translation via <a href="https://mymemory.translated.net" target="_blank">MyMemory</a> · Free · Works from file:// &amp; GitHub Pages · 5 000 chars/day anonymous
     </div>
   </div>
 
@@ -3129,10 +3129,10 @@ function onLangSelectChange(val){
   clearTranslator();
 }
 
-// ── GOOGLE TRANSLATE (gtx endpoint) ────────────────────────────
-// Works from any hosted https:// origin (GitHub Pages, Netlify…).
-// Will not work from file:// due to browser CORS policy — host the
-// app on GitHub Pages and both translator and Roads will work fine.
+// ── MYMEMORY TRANSLATION ───────────────────────────────────────
+// api.mymemory.translated.net sends Access-Control-Allow-Origin:*
+// so it works from file://, GitHub Pages, and any origin.
+// Free anonymous: 5 000 chars/day. Icelandic code: "is" (no locale suffix).
 async function doTranslate(){
   clearTimeout(_trnslDebounce);
   const ta    = document.getElementById('trnsl-input');
@@ -3148,42 +3148,49 @@ async function doTranslate(){
 
   if(goLbl) goLbl.textContent = 'Translating…';
   if(goBtn) goBtn.disabled = true;
+  if(wrap)  wrap.classList.remove('has-result');
   res.textContent = '…';
-  if(note) note.textContent = '';
-  if(wrap) wrap.classList.remove('has-result');
+  if(note)  note.textContent = '';
 
   try {
-    const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=${_trnslFromCode}&tl=${_trnslToCode}&dt=t&q=${encodeURIComponent(text)}`;
+    const url = 'https://api.mymemory.translated.net/get'
+      + '?q='        + encodeURIComponent(text)
+      + '&langpair=' + _trnslFromCode + '|' + _trnslToCode;
+
     const resp = await fetch(url);
-    if(!resp.ok) throw new Error(`HTTP ${resp.status}`);
+    if(!resp.ok) throw new Error('HTTP ' + resp.status);
     const data = await resp.json();
 
-    if(data && data[0] && Array.isArray(data[0])){
-      const translated = data[0].map(seg => seg[0] || '').join('').trim();
-      if(translated){
-        res.textContent = translated;
-        _trnslLastResult = translated;
-        if(wrap) wrap.classList.add('has-result');
-        if(note) note.textContent = `${_trnslFromName} → ${_trnslToName}`;
-        playTranslatorResultSound();
-      } else {
-        throw new Error('Empty translation');
+    // responseStatus 200 = success; 206 = partial; others = error
+    if((data.responseStatus === 200 || data.responseStatus === 206)
+        && data.responseData && data.responseData.translatedText){
+
+      const translated = data.responseData.translatedText.trim();
+
+      // MyMemory returns the original text when it can't translate
+      if(!translated || translated.toLowerCase() === text.toLowerCase()){
+        throw new Error('No translation found for this language pair');
       }
+
+      res.textContent = translated;
+      _trnslLastResult = translated;
+      if(wrap) wrap.classList.add('has-result');
+      if(note) note.textContent = _trnslFromName + ' → ' + _trnslToName + ' · MyMemory';
+      playTranslatorResultSound();
+
     } else {
-      throw new Error('Unexpected response');
+      const detail = data.responseDetails || data.responseStatus || 'Unknown error';
+      throw new Error(String(detail));
     }
+
   } catch(e){
-    const isLocal = location.protocol === 'file:';
-    res.textContent = isLocal ? '— Host the app to enable translation' : '— Translation failed';
-    if(note) note.textContent = isLocal
-      ? 'Upload to GitHub Pages — translator & Roads will both work from https://'
-      : (e.message || 'Check your connection and try again');
+    res.textContent = '— Translation failed';
+    if(note) note.textContent = e.message || 'Check your connection and try again.';
   }
 
   if(goLbl) goLbl.textContent = 'Translate ↗';
   if(goBtn) goBtn.disabled = false;
 }
-
 
 function clearTranslator(){
   const ta  = document.getElementById('trnsl-input');
