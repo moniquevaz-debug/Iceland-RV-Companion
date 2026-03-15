@@ -6,8 +6,8 @@
 <meta name="apple-mobile-web-app-capable" content="yes"/>
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
 <meta name="theme-color" content="#0d111e"/>
-<title>🚐 Iceland RV Companion v3.1</title>
-<link href="https://fonts.googleapis.com/css2?family=Bentham&family=IBM+Plex+Mono:wght@400;500;600&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet"/>
+<title>🚐 Iceland RV Companion v3.5</title>
+  <link href="https://fonts.googleapis.com/css2?family=Bentham&family=IBM+Plex+Mono:wght@400;500;600&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet"/>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"/>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <style>
@@ -93,8 +93,8 @@ body::after{
    TOP BAR
 ═══════════════════════════════════════════ */
 .topbar{
-  display:flex;align-items:center;gap:12px;
-  padding:calc(12px + var(--st)) 18px 12px;
+  display:flex;align-items:flex-start;gap:10px;
+  padding:calc(10px + var(--st)) 14px 10px;
   background:rgba(7,8,15,.96);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);
   border-bottom:1px solid rgba(59,232,176,.08);flex-shrink:0;z-index:100;
   position:relative;
@@ -106,7 +106,7 @@ body::after{
 }
 .tb-icon{font-size:1.5rem;filter:drop-shadow(0 0 10px rgba(59,232,176,.6));flex-shrink:0;}
 .tb-title{
-  font-family:var(--fs);font-size:1.18rem;font-weight:600;font-style:italic;
+  font-family:var(--fs);font-size:1.05rem;font-weight:600;font-style:italic;
   letter-spacing:.01em;white-space:nowrap;
   background:linear-gradient(125deg,#dff0f8 0%,#3be8b0 55%,#a8f0de 100%);
   -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
@@ -740,6 +740,462 @@ select option{background:#0d0f1a;color:var(--ice);}
 }
 .au-view-btn:hover{background:rgba(59,232,176,.14);border-color:rgba(59,232,176,.5);}
 
+
+/* ── DUAL CLOCKS ─────────────────────────────────────────────── */
+.tb-center{display:flex;flex-direction:column;gap:3px;min-width:0;}
+.tb-clocks{
+  display:flex;align-items:center;gap:6px;
+  font-family:var(--fm);font-size:.52rem;color:var(--muted);
+  white-space:nowrap;
+}
+.tb-clock{display:flex;align-items:center;gap:3px;}
+.tb-ck-flag{font-size:.7rem;line-height:1;}
+.tb-ck-time{color:rgba(214,238,248,.7);letter-spacing:.03em;}
+.tb-ck-sep{color:rgba(140,200,230,.25);font-size:.6rem;}
+
+/* ── TOPBAR RIGHT BUTTON GROUP ───────────────────────────────── */
+.tb-right-btns{
+  display:flex;flex-direction:column;align-items:flex-end;gap:6px;flex-shrink:0;
+}
+
+/* ── CURRENCY BUTTON ─────────────────────────────────────────── */
+.curr-btn{
+  display:flex;align-items:center;gap:5px;
+  padding:7px 12px;border-radius:8px;border:none;-webkit-appearance:none;
+  background:rgba(59,232,176,.08);border:1px solid rgba(59,232,176,.22);
+  color:var(--aur);cursor:pointer;
+  font-family:var(--fs);font-size:.72rem;font-style:italic;
+  transition:all .45s var(--ease-dramatic);white-space:nowrap;
+}
+.curr-btn:hover{background:rgba(59,232,176,.15);border-color:rgba(59,232,176,.45);}
+.curr-ico{font-size:.9rem;}
+.curr-lbl{font-size:.65rem;}
+
+/* ── CURRENCY PANEL (dropdown below topbar) ──────────────────── */
+#curr-panel{
+  display:none;flex-direction:column;gap:0;
+  background:rgba(7,8,15,.98);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);
+  border-bottom:1px solid rgba(59,232,176,.12);
+  padding:16px 18px 18px;flex-shrink:0;z-index:90;
+  animation:slideDown .4s var(--ease-out-expo) both;
+}
+#curr-panel.show{display:flex;}
+@keyframes slideDown{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}
+
+.curr-panel-title{
+  font-family:var(--fs);font-size:.95rem;font-style:italic;
+  color:var(--ice);margin-bottom:12px;
+  display:flex;align-items:center;justify-content:space-between;
+}
+.curr-rate-info{
+  font-family:var(--fm);font-size:.52rem;color:var(--muted);
+}
+/* Input row */
+.curr-row{
+  display:flex;align-items:center;gap:10px;margin-bottom:10px;
+}
+.curr-input-wrap{
+  flex:1;display:flex;flex-direction:column;gap:4px;
+}
+.curr-input-label{
+  font-family:var(--fm);font-size:.5rem;letter-spacing:.08em;
+  text-transform:uppercase;color:var(--muted);
+}
+.curr-input{
+  width:100%;background:rgba(255,255,255,.05);
+  border:1px solid rgba(140,200,230,.15);border-radius:6px;
+  padding:10px 12px;color:var(--ice);
+  font-family:var(--fs);font-size:1.1rem;font-style:italic;
+  outline:none;-webkit-appearance:none;
+  transition:border-color .4s var(--ease-dramatic);
+  box-sizing:border-box;
+}
+.curr-input:focus{border-color:rgba(59,232,176,.4);}
+.curr-input::placeholder{color:rgba(140,200,230,.3);}
+/* Swap button */
+.curr-swap-btn{
+  display:flex;flex-direction:column;align-items:center;gap:2px;
+  background:rgba(59,232,176,.07);border:1px solid rgba(59,232,176,.22);
+  border-radius:50%;width:40px;height:40px;flex-shrink:0;
+  cursor:pointer;-webkit-appearance:none;
+  color:var(--aur);font-size:1rem;
+  transition:all .4s var(--ease-dramatic);align-self:flex-end;margin-bottom:0;
+}
+.curr-swap-btn:hover{background:rgba(59,232,176,.18);transform:rotate(180deg);}
+/* Direction label */
+.curr-dir{
+  font-family:var(--fm);font-size:.52rem;color:var(--muted);
+  letter-spacing:.06em;text-align:center;margin-bottom:8px;
+}
+/* Result */
+.curr-result{
+  padding:12px 14px;
+  background:rgba(59,232,176,.06);border:1px solid rgba(59,232,176,.18);
+  border-radius:8px;
+  font-family:var(--fs);font-size:1.5rem;font-style:italic;
+  color:var(--aur);line-height:1.2;
+}
+.curr-result-sub{
+  font-family:var(--fm);font-size:.52rem;color:var(--muted);margin-top:2px;
+}
+.curr-footer{
+  font-family:var(--fm);font-size:.48rem;color:var(--muted);
+  margin-top:10px;line-height:1.8;
+}
+.curr-footer a{color:var(--gl);}
+
+
+/* Aurora card v3.2 — status-hero layout, no inner padding (uses inline) */
+.au-card{padding:0!important;overflow:hidden;}
+.au-card.low{border-color:rgba(140,200,230,.15);}
+.au-card.med{border-color:rgba(240,192,64,.3);}
+.au-card.high,.au-card.epic{border-color:rgba(59,232,176,.4);}
+
+
+/* ── TOPBAR AURORA CANVAS ────────────────────────────────────────
+   Sits absolutely behind all topbar content.
+   Sheer: very low opacity so text remains legible.
+   Content lifted via z-index:1 on direct topbar children.
+──────────────────────────────────────────────────────────────── */
+#topbar-aurora{
+  position:absolute;
+  inset:0;
+  width:100%;height:100%;
+  pointer-events:none;
+  z-index:0;
+  border-radius:0;
+  opacity:.55;           /* sheer — just enough to feel alive */
+}
+/* Lift ALL direct topbar children above canvas */
+.topbar > *:not(#topbar-aurora){
+  position:relative;
+  z-index:1;
+}
+/* Topbar background: transparent so canvas shows through;
+   keep the blur for content below the topbar itself */
+.topbar{
+  background:rgba(7,8,15,.82);
+}
+
+
+/* ── TB BUTTON ROW (currency + translator side by side) ──────── */
+.tb-btn-row{
+  display:flex;align-items:center;gap:6px;flex-wrap:wrap;justify-content:flex-end;
+}
+
+/* ── TRANSLATOR BUTTON ───────────────────────────────────────── */
+.trnsl-btn{
+  display:flex;align-items:center;gap:5px;
+  padding:7px 12px;border-radius:8px;-webkit-appearance:none;
+  background:rgba(160,128,255,.09);border:1px solid rgba(160,128,255,.28);
+  color:#c8a8ff;cursor:pointer;
+  font-family:var(--fs);font-size:.72rem;font-style:italic;
+  transition:all .45s var(--ease-dramatic);white-space:nowrap;
+}
+.trnsl-btn:hover{background:rgba(160,128,255,.18);border-color:rgba(160,128,255,.5);}
+.trnsl-btn.active{background:rgba(160,128,255,.16);border-color:rgba(160,128,255,.55);
+  box-shadow:0 0 14px rgba(160,128,255,.2);}
+.trnsl-ico{font-size:.9rem;}
+.trnsl-lbl{font-size:.65rem;}
+
+/* ── TRANSLATOR PANEL ────────────────────────────────────────── */
+#trnsl-panel{
+  display:none;flex-direction:column;gap:0;
+  background:rgba(7,8,15,.98);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);
+  border-bottom:1px solid rgba(160,128,255,.14);
+  padding:16px 18px 18px;flex-shrink:0;z-index:89;
+  animation:slideDown .4s var(--ease-out-expo) both;
+}
+#trnsl-panel.show{display:flex;}
+
+/* header */
+.trnsl-panel-header{
+  display:flex;align-items:baseline;justify-content:space-between;
+  margin-bottom:12px;
+}
+.trnsl-panel-title{
+  font-family:var(--fs);font-size:.95rem;font-style:italic;color:var(--ice);
+}
+.trnsl-api-note{
+  font-family:var(--fm);font-size:.48rem;color:var(--muted);letter-spacing:.04em;
+}
+
+/* Language pair chips */
+.trnsl-lang-select-wrap{
+  display:flex;flex-direction:column;gap:5px;margin-bottom:12px;
+}
+.trnsl-lang-label{
+  font-family:var(--fm);font-size:.5rem;letter-spacing:.08em;
+  text-transform:uppercase;color:var(--muted);
+}
+.trnsl-lang-select{
+  width:100%;
+  background:rgba(160,128,255,.08);
+  border:1px solid rgba(160,128,255,.28);
+  border-radius:8px;
+  padding:10px 32px 10px 12px;
+  color:#d4b8ff;
+  font-family:var(--fs);font-size:.9rem;font-style:italic;
+  cursor:pointer;
+  appearance:none;-webkit-appearance:none;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23a080ff'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 12px center;
+  background-size:10px 6px;
+  outline:none;
+  transition:border-color .4s var(--ease-dramatic),background .4s;
+}
+.trnsl-lang-select:focus{
+  border-color:rgba(160,128,255,.6);
+  background-color:rgba(160,128,255,.13);
+}
+.trnsl-lang-select option{
+  background:#0d0f1a;color:#d4b8ff;font-style:normal;
+}
+.trnsl-dir-lbl{
+  font-family:var(--fm);font-size:.52rem;letter-spacing:.07em;
+  text-transform:uppercase;color:rgba(160,128,255,.6);
+  margin-bottom:10px;
+}
+
+/* Input wrap */
+.trnsl-input-wrap{
+  background:rgba(255,255,255,.04);border:1px solid rgba(160,128,255,.18);
+  border-radius:8px;overflow:hidden;margin-bottom:10px;
+  transition:border-color .4s var(--ease-dramatic);
+}
+.trnsl-input-wrap:focus-within{border-color:rgba(160,128,255,.45);}
+.trnsl-input-top{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:7px 12px 5px;border-bottom:1px solid rgba(160,128,255,.1);
+}
+.trnsl-input-lang{
+  font-family:var(--fm);font-size:.52rem;color:rgba(200,168,255,.6);letter-spacing:.05em;
+}
+.trnsl-clear-btn{
+  background:none;border:none;color:var(--muted);cursor:pointer;
+  font-size:.7rem;padding:0 2px;-webkit-appearance:none;
+  transition:color .3s;
+}
+.trnsl-clear-btn:hover{color:var(--ice);}
+.trnsl-textarea{
+  width:100%;background:transparent;border:none;outline:none;
+  padding:10px 12px 4px;color:var(--ice);resize:none;
+  font-family:var(--fs);font-size:.9rem;font-style:italic;
+  line-height:1.6;-webkit-appearance:none;box-sizing:border-box;
+  -webkit-text-fill-color:var(--ice);
+}
+.trnsl-textarea::placeholder{color:rgba(160,128,255,.3);font-style:italic;}
+.trnsl-char-count{
+  font-family:var(--fm);font-size:.46rem;color:var(--muted);
+  text-align:right;padding:2px 12px 6px;
+}
+
+/* Translate button */
+.trnsl-go-btn{
+  width:100%;padding:11px;border:none;border-radius:8px;-webkit-appearance:none;
+  background:linear-gradient(135deg,rgba(160,128,255,.25),rgba(120,80,220,.3));
+  border:1px solid rgba(160,128,255,.35);
+  color:#d8bcff;cursor:pointer;
+  font-family:var(--fs);font-size:.88rem;font-style:italic;
+  transition:all .45s var(--ease-dramatic);margin-bottom:12px;
+  box-shadow:0 4px 16px rgba(160,128,255,.12);
+}
+.trnsl-go-btn:hover:not(:disabled){
+  background:linear-gradient(135deg,rgba(160,128,255,.38),rgba(120,80,220,.45));
+  box-shadow:0 6px 24px rgba(160,128,255,.25);transform:translateY(-1px);
+}
+.trnsl-go-btn:disabled{opacity:.35;cursor:not-allowed;}
+
+/* Result */
+.trnsl-result-wrap{
+  background:rgba(160,128,255,.05);border:1px solid rgba(160,128,255,.15);
+  border-radius:8px;overflow:hidden;margin-bottom:10px;
+  transition:border-color .4s var(--ease-dramatic);
+}
+.trnsl-result-wrap.has-result{border-color:rgba(160,128,255,.35);}
+.trnsl-result-top{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:7px 12px 5px;border-bottom:1px solid rgba(160,128,255,.1);
+}
+.trnsl-result-lang{
+  font-family:var(--fm);font-size:.52rem;color:rgba(200,168,255,.6);letter-spacing:.05em;
+}
+.trnsl-copy-btn{
+  background:none;border:none;color:var(--muted);cursor:pointer;
+  font-family:var(--fm);font-size:.52rem;padding:0 2px;-webkit-appearance:none;
+  transition:color .3s;
+}
+.trnsl-copy-btn:hover{color:#c8a8ff;}
+.trnsl-result-text{
+  padding:10px 12px 8px;
+  font-family:var(--fs);font-size:1rem;font-style:italic;
+  color:#d8bcff;line-height:1.65;min-height:38px;
+}
+.trnsl-result-note{
+  font-family:var(--fm);font-size:.48rem;color:var(--muted);
+  padding:0 12px 7px;line-height:1.8;
+}
+
+/* Footer */
+.trnsl-footer{
+  font-family:var(--fm);font-size:.48rem;color:var(--muted);
+  margin-top:4px;line-height:1.8;
+}
+.trnsl-footer a{color:rgba(160,128,255,.7);}
+
+
+/* ── TB-BTN-ROW: currency + translator side by side ─────────── */
+.tb-btn-row{
+  display:flex;align-items:center;gap:6px;
+}
+
+/* ── TRANSLATOR BUTTON ───────────────────────────────────────── */
+.trnsl-btn{
+  display:flex;align-items:center;gap:5px;
+  padding:7px 12px;border-radius:8px;-webkit-appearance:none;
+  background:rgba(160,100,255,.09);border:1px solid rgba(160,100,255,.28);
+  color:#c090ff;cursor:pointer;
+  font-family:var(--fs);font-size:.72rem;font-style:italic;
+  transition:all .45s var(--ease-dramatic);white-space:nowrap;
+}
+.trnsl-btn:hover{background:rgba(160,100,255,.18);border-color:rgba(160,100,255,.5);}
+.trnsl-ico{font-size:.9rem;}
+.trnsl-lbl{font-size:.65rem;}
+
+/* ── TRANSLATOR PANEL ────────────────────────────────────────── */
+#trnsl-panel{
+  display:none;flex-direction:column;gap:0;
+  background:rgba(7,8,15,.98);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);
+  border-bottom:1px solid rgba(160,100,255,.14);
+  padding:16px 18px 18px;flex-shrink:0;z-index:89;
+  animation:slideDown .4s var(--ease-out-expo) both;
+}
+#trnsl-panel.show{display:flex;}
+
+.trnsl-panel-header{
+  display:flex;align-items:baseline;justify-content:space-between;
+  margin-bottom:12px;
+}
+.trnsl-panel-title{
+  font-family:var(--fs);font-size:.95rem;font-style:italic;color:var(--ice);
+}
+.trnsl-api-note{
+  font-family:var(--fm);font-size:.48rem;color:var(--muted);
+}
+
+/* ── LANGUAGE CHIPS ─────────────────────────────────────────── */
+.trnsl-lang-row{
+  display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px;
+}
+.trnsl-lang-chip{
+  padding:6px 12px;border-radius:20px;
+  font-family:var(--fm);font-size:.58rem;letter-spacing:.03em;
+  border:1px solid rgba(160,100,255,.22);
+  background:rgba(160,100,255,.06);color:rgba(200,160,255,.7);
+  cursor:pointer;-webkit-appearance:none;
+  transition:all .35s var(--ease-dramatic);white-space:nowrap;
+}
+.trnsl-lang-chip:hover{background:rgba(160,100,255,.14);color:#c090ff;}
+.trnsl-lang-chip.active{
+  background:rgba(160,100,255,.18);border-color:rgba(160,100,255,.5);
+  color:#d0b0ff;box-shadow:0 0 10px rgba(160,100,255,.2);
+}
+
+/* ── DIRECTION LABEL ─────────────────────────────────────────── */
+.trnsl-dir-lbl{
+  font-family:var(--fm);font-size:.52rem;color:var(--muted);
+  letter-spacing:.06em;margin-bottom:10px;
+  text-transform:uppercase;
+}
+
+/* ── INPUT AREA ─────────────────────────────────────────────── */
+.trnsl-input-wrap{
+  position:relative;margin-bottom:10px;
+  border:1px solid rgba(160,100,255,.18);border-radius:8px;
+  background:rgba(255,255,255,.04);overflow:hidden;
+}
+.trnsl-input-top{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:7px 12px 0;
+}
+.trnsl-input-lang{
+  font-family:var(--fm);font-size:.5rem;letter-spacing:.07em;
+  text-transform:uppercase;color:rgba(200,160,255,.6);
+}
+.trnsl-clear-btn{
+  font-size:.65rem;color:var(--muted);background:none;border:none;
+  cursor:pointer;-webkit-appearance:none;padding:2px 4px;
+  transition:color .25s;line-height:1;
+}
+.trnsl-clear-btn:hover{color:var(--ice);}
+.trnsl-textarea{
+  width:100%;background:transparent;border:none;outline:none;
+  padding:6px 12px 4px;color:var(--ice);resize:none;
+  font-family:var(--fs);font-size:.92rem;font-style:italic;
+  line-height:1.55;box-sizing:border-box;
+  -webkit-appearance:none;
+}
+.trnsl-textarea::placeholder{color:rgba(140,200,230,.28);font-style:italic;}
+.trnsl-char-count{
+  padding:2px 12px 6px;font-family:var(--fm);font-size:.46rem;
+  color:var(--muted);text-align:right;
+}
+
+/* ── TRANSLATE BUTTON ───────────────────────────────────────── */
+.trnsl-go-btn{
+  width:100%;padding:11px;border:none;border-radius:8px;
+  -webkit-appearance:none;cursor:pointer;
+  font-family:var(--fs);font-size:.9rem;font-style:italic;
+  background:linear-gradient(135deg,#9040e0 0%,#6020b0 100%);
+  color:#f0e8ff;letter-spacing:.01em;
+  box-shadow:0 4px 20px rgba(140,60,220,.3);
+  transition:all .4s var(--ease-dramatic);margin-bottom:10px;
+}
+.trnsl-go-btn:hover:not(:disabled){
+  box-shadow:0 6px 28px rgba(140,60,220,.5);transform:translateY(-1px);
+}
+.trnsl-go-btn:disabled{opacity:.35;cursor:not-allowed;}
+
+/* ── RESULT AREA ─────────────────────────────────────────────── */
+.trnsl-result-wrap{
+  border:1px solid rgba(160,100,255,.18);border-radius:8px;
+  background:rgba(160,100,255,.05);padding:10px 13px 12px;
+  margin-bottom:10px;display:none;
+  animation:sli .4s var(--ease-out-expo) both;
+}
+.trnsl-result-wrap.show{display:block;}
+.trnsl-result-top{
+  display:flex;align-items:center;justify-content:space-between;
+  margin-bottom:6px;
+}
+.trnsl-result-lang{
+  font-family:var(--fm);font-size:.5rem;letter-spacing:.07em;
+  text-transform:uppercase;color:rgba(200,160,255,.6);
+}
+.trnsl-copy-btn{
+  font-family:var(--fm);font-size:.52rem;color:rgba(200,160,255,.7);
+  background:rgba(160,100,255,.1);border:1px solid rgba(160,100,255,.2);
+  border-radius:4px;padding:3px 8px;cursor:pointer;-webkit-appearance:none;
+  transition:all .3s;
+}
+.trnsl-copy-btn:hover{background:rgba(160,100,255,.22);color:#d0b0ff;}
+.trnsl-result-text{
+  font-family:var(--fs);font-size:1.02rem;font-style:italic;
+  color:var(--ice);line-height:1.6;word-break:break-word;
+}
+.trnsl-result-note{
+  font-family:var(--fm);font-size:.48rem;color:var(--muted);
+  margin-top:5px;line-height:1.6;
+}
+
+/* ── FOOTER ─────────────────────────────────────────────────── */
+.trnsl-footer{
+  font-family:var(--fm);font-size:.48rem;color:var(--muted);
+  line-height:1.8;border-top:1px solid rgba(160,100,255,.08);
+  padding-top:10px;margin-top:2px;
+}
+.trnsl-footer a{color:rgba(200,160,255,.7);}
+
 </style>
 </head>
 <body>
@@ -748,16 +1204,113 @@ select option{background:#0d0f1a;color:var(--ice);}
 <!-- ═══ TOP AREA ═══ -->
 <div class="top-area">
   <div class="topbar">
+    <canvas id="topbar-aurora" aria-hidden="true"></canvas>
     <span class="tb-icon">🚐</span>
-    <div>
+    <div class="tb-center">
       <div class="tb-title">Iceland RV Companion</div>
+      <div class="tb-clocks">
+        <div class="tb-clock">
+          <span class="tb-ck-flag">🇮🇸</span>
+          <span class="tb-ck-time" id="ck-ice"></span>
+        </div>
+        <div class="tb-ck-sep">·</div>
+        <div class="tb-clock">
+          <span class="tb-ck-flag">🇵🇷</span>
+          <span class="tb-ck-time" id="ck-pr"></span>
+        </div>
+      </div>
     </div>
-    <span class="tb-ver">v3.1</span>
+    <span class="tb-ver">v3.5</span>
     <div class="tb-spacer"></div>
-    <button class="gps-btn off" id="gps-btn" onclick="toggleGPS()" title="Tap to enable GPS tracking">
-      <div class="gps-dot"></div><span id="gps-lbl">GPS OFF</span>
-    </button>
+    <div class="tb-right-btns">
+      <button class="gps-btn off" id="gps-btn" onclick="toggleGPS()" title="Tap to enable GPS tracking">
+        <div class="gps-dot"></div><span id="gps-lbl">GPS OFF</span>
+      </button>
+      <div class="tb-btn-row">
+        <button class="curr-btn" id="curr-btn" onclick="toggleCurrencyPanel()" title="Currency converter">
+          <span class="curr-ico">💱</span><span class="curr-lbl">ISK ⇄ USD</span>
+        </button>
+        <button class="trnsl-btn" id="trnsl-btn" onclick="toggleTranslatorPanel()" title="Translator: Icelandic ⇄ English / Spanish">
+          <span class="trnsl-ico">🗣️</span><span class="trnsl-lbl">Translate</span>
+        </button>
+      </div>
+    </div>
   </div>
+  <!-- ═══ CURRENCY PANEL ═══ -->
+  <div id="curr-panel">
+    <div class="curr-panel-title">
+      <span>💱 Currency Converter</span>
+      <span class="curr-rate-info" id="curr-rate-info">Loading rate…</span>
+    </div>
+    <div class="curr-dir" id="curr-dir">Icelandic Króna → US Dollar</div>
+    <div class="curr-row">
+      <div class="curr-input-wrap">
+        <div class="curr-input-label" id="curr-from-lbl">ISK Amount</div>
+        <input class="curr-input" id="curr-from" type="number" inputmode="decimal" placeholder="0" oninput="convertCurrency()"/>
+      </div>
+      <button class="curr-swap-btn" onclick="swapCurrency()" title="Swap currencies">⇄</button>
+      <div class="curr-input-wrap">
+        <div class="curr-input-label" id="curr-to-lbl">USD Result</div>
+        <div class="curr-result" id="curr-result">—</div>
+      </div>
+    </div>
+    <div class="curr-footer">
+      Rate fetched live from <a href="https://www.exchangerate-api.com" target="_blank">ExchangeRate-API</a> (free tier) · Updates on open · 1 USD ≈ 137–140 ISK historically
+    </div>
+  </div>
+
+  <!-- ═══ TRANSLATOR PANEL ═══ -->
+  <div id="trnsl-panel">
+    <div class="trnsl-panel-header">
+      <div class="trnsl-panel-title">🗣️ Translator</div>
+      <div class="trnsl-api-note">Powered by MyMemory · Free · No login required</div>
+    </div>
+
+    <!-- Language pair dropdown -->
+    <div class="trnsl-lang-select-wrap">
+      <label class="trnsl-lang-label">Translate</label>
+      <select class="trnsl-lang-select" id="trnsl-lang-select" onchange="onLangSelectChange(this.value)">
+        <option value="is|en" selected>🇮🇸 Icelandic → 🇺🇸 English</option>
+        <option value="is|es">🇮🇸 Icelandic → 🇪🇸 Spanish</option>
+        <option value="en|is">🇺🇸 English → 🇮🇸 Icelandic</option>
+        <option value="es|is">🇪🇸 Spanish → 🇮🇸 Icelandic</option>
+      </select>
+    </div>
+
+    <!-- Input -->
+    <div class="trnsl-input-wrap">
+      <div class="trnsl-input-top">
+        <span class="trnsl-input-lang" id="trnsl-from-lang">🇮🇸 Icelandic</span>
+        <button class="trnsl-clear-btn" onclick="clearTranslator()" title="Clear">✕</button>
+      </div>
+      <textarea class="trnsl-textarea" id="trnsl-input"
+        placeholder="Type or paste text here…"
+        rows="3"
+        oninput="onTranslatorInput()"
+        maxlength="500"></textarea>
+      <div class="trnsl-char-count"><span id="trnsl-chars">0</span>/500</div>
+    </div>
+
+    <!-- Translate button -->
+    <button class="trnsl-go-btn" id="trnsl-go-btn" onclick="doTranslate()">
+      <span id="trnsl-go-lbl">Translate ↗</span>
+    </button>
+
+    <!-- Result -->
+    <div class="trnsl-result-wrap" id="trnsl-result-wrap">
+      <div class="trnsl-result-top">
+        <span class="trnsl-result-lang" id="trnsl-to-lang">🇺🇸 English</span>
+        <button class="trnsl-copy-btn" id="trnsl-copy-btn" onclick="copyTranslation()" title="Copy result">⧉ Copy</button>
+      </div>
+      <div class="trnsl-result-text" id="trnsl-result">—</div>
+      <div class="trnsl-result-note" id="trnsl-result-note"></div>
+    </div>
+
+    <div class="trnsl-footer">
+      Translation via <a href="https://translate.google.com" target="_blank">Google Translate</a> · Works on GitHub Pages &amp; any https:// host · Icelandic ⇄ English / Spanish
+    </div>
+  </div>
+
   <div class="search-sheet">
     <div class="sel-row">
       <div class="sel-wrap">
@@ -2034,6 +2587,52 @@ function observeCards(selector){
 }
 
 
+
+// ── CASH REGISTER SOUND ────────────────────────────────────
+// Fired when currency panel opens.
+// Layer 1: metallic coin spin clink  (triangle, 2400Hz→1200Hz, 0.18s)
+// Layer 2: cash drawer thud          (sine,     80Hz,          0.12s)
+// Layer 3: register ding             (sine,     1760Hz,        0.22s, delayed)
+function playCashSound(){
+  const ac = getAC(); if(!ac) return;
+  const now = ac.currentTime;
+
+  // Layer 1 — coin clink
+  const o1 = ac.createOscillator();
+  const g1 = ac.createGain();
+  o1.type = 'triangle';
+  o1.frequency.setValueAtTime(2400, now);
+  o1.frequency.exponentialRampToValueAtTime(1100, now + 0.18);
+  g1.gain.setValueAtTime(0, now);
+  g1.gain.linearRampToValueAtTime(0.22, now + 0.008);
+  g1.gain.exponentialRampToValueAtTime(0.001, now + 0.22);
+  o1.connect(g1); g1.connect(ac.destination);
+  o1.start(now); o1.stop(now + 0.23);
+
+  // Layer 2 — drawer thud (low sine)
+  const o2 = ac.createOscillator();
+  const g2 = ac.createGain();
+  o2.type = 'sine';
+  o2.frequency.setValueAtTime(90, now);
+  o2.frequency.exponentialRampToValueAtTime(40, now + 0.12);
+  g2.gain.setValueAtTime(0, now);
+  g2.gain.linearRampToValueAtTime(0.35, now + 0.01);
+  g2.gain.exponentialRampToValueAtTime(0.001, now + 0.14);
+  o2.connect(g2); g2.connect(ac.destination);
+  o2.start(now); o2.stop(now + 0.15);
+
+  // Layer 3 — register ding (delayed, clean sine)
+  const o3 = ac.createOscillator();
+  const g3 = ac.createGain();
+  o3.type = 'sine';
+  o3.frequency.setValueAtTime(1760, now + 0.06);
+  g3.gain.setValueAtTime(0, now + 0.06);
+  g3.gain.linearRampToValueAtTime(0.18, now + 0.075);
+  g3.gain.exponentialRampToValueAtTime(0.001, now + 0.32);
+  o3.connect(g3); g3.connect(ac.destination);
+  o3.start(now + 0.06); o3.stop(now + 0.33);
+}
+
 // ── GPS ON SOUND — warm ascending two-tone chime ──────────────────────
 // Like a satellite locking on: two clean tones rising
 function playGpsOnSound(){
@@ -2131,6 +2730,119 @@ function playSearchChime(){
 
 const TAB_SOUNDS={gas:playGasSound, wx:playWeatherSound, roads:playRoadsSound, map:playMapSound};
 
+
+
+// ═══════════════════════════════════════════════════════════
+// DUAL CLOCKS — Iceland (GMT+0 / GMT+1 BST) + Puerto Rico (AST UTC-4)
+// Iceland never observes DST — always UTC±0
+// Puerto Rico is always AST (UTC-4)
+// ═══════════════════════════════════════════════════════════
+function formatClock(date, tz){
+  const opts = {
+    timeZone: tz,
+    hour:'2-digit', minute:'2-digit',
+    month:'short', day:'numeric',
+    hour12:true
+  };
+  try {
+    const parts = new Intl.DateTimeFormat('en-US', opts).formatToParts(date);
+    const get = t => (parts.find(p=>p.type===t)||{value:''}).value;
+    return `${get('month')} ${get('day')} · ${get('hour')}:${get('minute')} ${get('dayPeriod')}`;
+  } catch(e){ return '—'; }
+}
+
+function tickClocks(){
+  const now = new Date();
+  const ice = document.getElementById('ck-ice');
+  const pr  = document.getElementById('ck-pr');
+  if(ice) ice.textContent = formatClock(now, 'Atlantic/Reykjavik');
+  if(pr)  pr.textContent  = formatClock(now, 'America/Puerto_Rico');
+}
+tickClocks();
+setInterval(tickClocks, 30000); // update every 30s
+
+// ═══════════════════════════════════════════════════════════
+// CURRENCY CONVERTER — ISK ⇄ USD
+// Uses exchangerate-api.com free endpoint (no key needed for ISK/USD)
+// Falls back to hardcoded rate if fetch fails
+// ═══════════════════════════════════════════════════════════
+let _currRate  = 138.5; // ISK per 1 USD fallback
+let _currDir   = 'ISK_TO_USD'; // or 'USD_TO_ISK'
+let _currPanelOpen = false;
+
+async function fetchExchangeRate(){
+  try {
+    const r = await fetch('https://open.er-api.com/v6/latest/USD');
+    const d = await r.json();
+    if(d && d.rates && d.rates.ISK){
+      _currRate = d.rates.ISK;
+      const info = document.getElementById('curr-rate-info');
+      if(info) info.textContent = `1 USD = ${_currRate.toFixed(1)} ISK · live`;
+    }
+  } catch(e){
+    const info = document.getElementById('curr-rate-info');
+    if(info) info.textContent = `1 USD ≈ ${_currRate.toFixed(1)} ISK · cached`;
+  }
+}
+
+function toggleCurrencyPanel(){
+  _currPanelOpen = !_currPanelOpen;
+  const panel = document.getElementById('curr-panel');
+  // Mutual exclusion — close translator if open
+  if(_currPanelOpen && _trnslPanelOpen){
+    _trnslPanelOpen = false;
+    const tp = document.getElementById('trnsl-panel');
+    const tb = document.getElementById('trnsl-btn');
+    if(tp) tp.classList.remove('show');
+    if(tb) tb.classList.remove('active');
+  }
+  if(_currPanelOpen){
+    playCashSound();
+    panel.classList.add('show');
+    fetchExchangeRate();
+    setTimeout(()=>{ const inp=document.getElementById('curr-from'); if(inp) inp.focus(); },150);
+  } else {
+    panel.classList.remove('show');
+  }
+}
+
+function swapCurrency(){
+  _currDir = _currDir === 'ISK_TO_USD' ? 'USD_TO_ISK' : 'ISK_TO_USD';
+  const fromLbl = document.getElementById('curr-from-lbl');
+  const toLbl   = document.getElementById('curr-to-lbl');
+  const dir     = document.getElementById('curr-dir');
+  const inp     = document.getElementById('curr-from');
+  if(_currDir === 'ISK_TO_USD'){
+    if(fromLbl) fromLbl.textContent = 'ISK Amount';
+    if(toLbl)   toLbl.textContent   = 'USD Result';
+    if(dir)     dir.textContent     = 'Icelandic Króna → US Dollar';
+  } else {
+    if(fromLbl) fromLbl.textContent = 'USD Amount';
+    if(toLbl)   toLbl.textContent   = 'ISK Result';
+    if(dir)     dir.textContent     = 'US Dollar → Icelandic Króna';
+  }
+  if(inp) inp.value = '';
+  const res = document.getElementById('curr-result');
+  if(res){ res.textContent = '—'; res.nextElementSibling && (res.nextElementSibling.textContent=''); }
+  convertCurrency();
+}
+
+function convertCurrency(){
+  const inp = document.getElementById('curr-from');
+  const res = document.getElementById('curr-result');
+  if(!inp || !res) return;
+  const val = parseFloat(inp.value);
+  if(isNaN(val) || val === 0){ res.textContent = '—'; return; }
+  let result, label;
+  if(_currDir === 'ISK_TO_USD'){
+    result = val / _currRate;
+    label  = `$${result.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})} USD`;
+  } else {
+    result = val * _currRate;
+    label  = `${Math.round(result).toLocaleString('en-US')} kr ISK`;
+  }
+  res.textContent = label;
+}
 
 // ═══════════════════════════════════════════════════════════
 // AURORA CANVAS ANIMATION
@@ -2328,6 +3040,308 @@ document.addEventListener('DOMContentLoaded', ()=>{
   });
 });
 
+
+
+// ═══════════════════════════════════════════════════════════
+// TRANSLATOR — MyMemory free API
+// Icelandic ⇄ English / Spanish
+// API: https://api.Puter.js AI (GPT-4o mini) · No key required · Free unlimited use.
+// ═══════════════════════════════════════════════════════════
+
+let _trnslPanelOpen = false;
+let _trnslFromCode  = 'is';
+let _trnslToCode    = 'en';
+let _trnslFromName  = 'Icelandic';
+let _trnslToName    = 'English';
+let _trnslFromFlag  = '🇮🇸';
+let _trnslToFlag    = '🇺🇸';
+let _trnslDebounce  = null;
+let _trnslLastResult = '';
+
+const LANG_META = {
+  is: {name:'Icelandic', flag:'🇮🇸'},
+  en: {name:'English',   flag:'🇺🇸'},
+  es: {name:'Spanish',   flag:'🇪🇸'},
+};
+
+function toggleTranslatorPanel(){
+  _trnslPanelOpen = !_trnslPanelOpen;
+  const panel = document.getElementById('trnsl-panel');
+  const btn   = document.getElementById('trnsl-btn');
+  // Close currency panel if open
+  if(_trnslPanelOpen && _currPanelOpen){
+    _currPanelOpen = false;
+    document.getElementById('curr-panel').classList.remove('show');
+  }
+  if(_trnslPanelOpen){
+    panel.classList.add('show');
+    btn && btn.classList.add('active');
+    playTranslatorOpenSound();
+    setTimeout(()=>{
+      const ta = document.getElementById('trnsl-input');
+      if(ta) ta.focus();
+    },180);
+  } else {
+    panel.classList.remove('show');
+    btn && btn.classList.remove('active');
+  }
+}
+
+// setLangPair kept for compatibility — delegates to onLangSelectChange
+function setLangPair(from, to){
+  const sel = document.getElementById('trnsl-lang-select');
+  const val = from + '|' + to;
+  if(sel) sel.value = val;
+  onLangSelectChange(val);
+}
+
+function onTranslatorInput(){
+  const ta = document.getElementById('trnsl-input');
+  if(!ta) return;
+  const len = ta.value.length;
+  const cc = document.getElementById('trnsl-chars');
+  if(cc) cc.textContent = len;
+  // Debounce: auto-translate 900ms after last keystroke
+  clearTimeout(_trnslDebounce);
+  if(len > 1){
+    _trnslDebounce = setTimeout(doTranslate, 900);
+  }
+}
+
+// onLangSelectChange — handles dropdown value like "is|en"
+function onLangSelectChange(val){
+  const [from, to] = val.split('|');
+  const META = {
+    is:{name:'Icelandic', flag:'🇮🇸'},
+    en:{name:'English',   flag:'🇺🇸'},
+    es:{name:'Spanish',   flag:'🇪🇸'},
+  };
+  _trnslFromCode = from;
+  _trnslToCode   = to;
+  _trnslFromName = META[from].name;
+  _trnslToName   = META[to].name;
+  _trnslFromFlag = META[from].flag;
+  _trnslToFlag   = META[to].flag;
+  const fl = document.getElementById('trnsl-from-lang');
+  const tl = document.getElementById('trnsl-to-lang');
+  if(fl) fl.textContent = `${_trnslFromFlag} ${_trnslFromName}`;
+  if(tl) tl.textContent = `${_trnslToFlag} ${_trnslToName}`;
+  clearTranslator();
+}
+
+// ── GOOGLE TRANSLATE (gtx endpoint) ────────────────────────────
+// Works from any hosted https:// origin (GitHub Pages, Netlify…).
+// Will not work from file:// due to browser CORS policy — host the
+// app on GitHub Pages and both translator and Roads will work fine.
+async function doTranslate(){
+  clearTimeout(_trnslDebounce);
+  const ta    = document.getElementById('trnsl-input');
+  const res   = document.getElementById('trnsl-result');
+  const note  = document.getElementById('trnsl-result-note');
+  const wrap  = document.getElementById('trnsl-result-wrap');
+  const goLbl = document.getElementById('trnsl-go-lbl');
+  const goBtn = document.getElementById('trnsl-go-btn');
+  if(!ta || !res) return;
+
+  const text = ta.value.trim();
+  if(!text){ res.textContent = '—'; return; }
+
+  if(goLbl) goLbl.textContent = 'Translating…';
+  if(goBtn) goBtn.disabled = true;
+  res.textContent = '…';
+  if(note) note.textContent = '';
+  if(wrap) wrap.classList.remove('has-result');
+
+  try {
+    const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=${_trnslFromCode}&tl=${_trnslToCode}&dt=t&q=${encodeURIComponent(text)}`;
+    const resp = await fetch(url);
+    if(!resp.ok) throw new Error(`HTTP ${resp.status}`);
+    const data = await resp.json();
+
+    if(data && data[0] && Array.isArray(data[0])){
+      const translated = data[0].map(seg => seg[0] || '').join('').trim();
+      if(translated){
+        res.textContent = translated;
+        _trnslLastResult = translated;
+        if(wrap) wrap.classList.add('has-result');
+        if(note) note.textContent = `${_trnslFromName} → ${_trnslToName}`;
+        playTranslatorResultSound();
+      } else {
+        throw new Error('Empty translation');
+      }
+    } else {
+      throw new Error('Unexpected response');
+    }
+  } catch(e){
+    const isLocal = location.protocol === 'file:';
+    res.textContent = isLocal ? '— Host the app to enable translation' : '— Translation failed';
+    if(note) note.textContent = isLocal
+      ? 'Upload to GitHub Pages — translator & Roads will both work from https://'
+      : (e.message || 'Check your connection and try again');
+  }
+
+  if(goLbl) goLbl.textContent = 'Translate ↗';
+  if(goBtn) goBtn.disabled = false;
+}
+
+
+function clearTranslator(){
+  const ta  = document.getElementById('trnsl-input');
+  const res = document.getElementById('trnsl-result');
+  const note= document.getElementById('trnsl-result-note');
+  const wrap= document.getElementById('trnsl-result-wrap');
+  const cc  = document.getElementById('trnsl-chars');
+  if(ta)   ta.value = '';
+  if(res)  res.textContent = '—';
+  if(note) note.textContent = '';
+  if(cc)   cc.textContent = '0';
+  if(wrap) wrap.classList.remove('has-result');
+  _trnslLastResult = '';
+  if(ta) ta.focus();
+}
+
+function copyTranslation(){
+  if(!_trnslLastResult) return;
+  if(navigator.clipboard){
+    navigator.clipboard.writeText(_trnslLastResult).then(()=>{
+      const btn = document.getElementById('trnsl-copy-btn');
+      if(btn){ btn.textContent = '✓ Copied'; setTimeout(()=>{ btn.textContent = '⧉ Copy'; },1800); }
+    });
+  }
+}
+
+// ── TRANSLATOR SOUNDS ─────────────────────────────────────────
+// Open: soft shimmer (two ascending notes, triangle wave)
+function playTranslatorOpenSound(){
+  const ac = getAC(); if(!ac) return;
+  const now = ac.currentTime;
+  [[0, 622, 0.28],[0.13, 880, 0.35]].forEach(([delay, freq, dur])=>{
+    const o = ac.createOscillator();
+    const g = ac.createGain();
+    o.type = 'triangle';
+    o.frequency.setValueAtTime(freq, now+delay);
+    g.gain.setValueAtTime(0, now+delay);
+    g.gain.linearRampToValueAtTime(0.14, now+delay+0.015);
+    g.gain.exponentialRampToValueAtTime(0.001, now+delay+dur);
+    o.connect(g); g.connect(ac.destination);
+    o.start(now+delay); o.stop(now+delay+dur+0.01);
+  });
+}
+
+// Result: soft positive chime (sine, E5→A5)
+function playTranslatorResultSound(){
+  const ac = getAC(); if(!ac) return;
+  const now = ac.currentTime;
+  [[0, 659, 0.3],[0.12, 880, 0.4]].forEach(([delay, freq, dur])=>{
+    const o = ac.createOscillator();
+    const g = ac.createGain();
+    o.type = 'sine';
+    o.frequency.setValueAtTime(freq, now+delay);
+    g.gain.setValueAtTime(0, now+delay);
+    g.gain.linearRampToValueAtTime(0.12, now+delay+0.012);
+    g.gain.exponentialRampToValueAtTime(0.001, now+delay+dur);
+    o.connect(g); g.connect(ac.destination);
+    o.start(now+delay); o.stop(now+delay+dur+0.01);
+  });
+}
+
+// ═══════════════════════════════════════════════════════════
+// TOPBAR AURORA — live animated aurora behind the header
+// Lightweight curtain renderer tuned for narrow strip.
+// Bands are horizontal, wide, slowly undulating.
+// opacity is kept very low so text reads clearly above it.
+// ═══════════════════════════════════════════════════════════
+(function initTopbarAurora(){
+  const canvas = document.getElementById('topbar-aurora');
+  if(!canvas) return;
+
+  // Bands: hue, saturation, lightness, vertical center (0=top 1=bottom),
+  //        oscillation speed, vertical amplitude, horizontal phase offset, peak alpha
+  const BANDS = [
+    {h:165, s:90, l:55, yC:.38, spd:.00055, amp:.28, ph:0,    a:.38},
+    {h:185, s:85, l:50, yC:.55, spd:.00082, amp:.22, ph:1.4,  a:.30},
+    {h:150, s:80, l:60, yC:.22, spd:.00068, amp:.32, ph:2.7,  a:.24},
+    {h:260, s:65, l:58, yC:.70, spd:.00041, amp:.18, ph:0.9,  a:.18},
+    {h:170, s:95, l:48, yC:.45, spd:.00095, amp:.25, ph:3.5,  a:.20},
+  ];
+
+  let _raf;
+  let _W = 0, _H = 0;
+
+  function resize(){
+    const dpr = window.devicePixelRatio || 1;
+    _W = canvas.offsetWidth;
+    _H = canvas.offsetHeight;
+    canvas.width  = _W * dpr;
+    canvas.height = _H * dpr;
+  }
+
+  function draw(ts){
+    const dpr = window.devicePixelRatio || 1;
+    const ctx = canvas.getContext('2d');
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    const W = _W, H = _H;
+
+    // Clear to transparent so topbar background shows through
+    ctx.clearRect(0, 0, W, H);
+
+    ctx.globalCompositeOperation = 'screen';
+
+    BANDS.forEach((b, bi) => {
+      // Vertical center oscillates slowly up and down
+      const yCenter = (b.yC + b.amp * .5 * Math.sin(ts * b.spd + b.ph)) * H;
+      // Band height is proportional to canvas height
+      const bH = H * 0.9;
+
+      // Gradient: transparent → colour peak → transparent
+      const grad = ctx.createLinearGradient(0, yCenter - bH, 0, yCenter + bH);
+      grad.addColorStop(0,   `hsla(${b.h},${b.s}%,${b.l}%,0)`);
+      grad.addColorStop(.35, `hsla(${b.h},${b.s}%,${b.l}%,${b.a * .55})`);
+      grad.addColorStop(.5,  `hsla(${b.h},${b.s}%,${b.l}%,${b.a})`);
+      grad.addColorStop(.65, `hsla(${b.h},${b.s}%,${b.l}%,${b.a * .55})`);
+      grad.addColorStop(1,   `hsla(${b.h},${b.s}%,${b.l}%,0)`);
+
+      // Undulating curtain path — wide horizontal sine waves
+      const SEG = 60;
+      const sw  = W / SEG;
+      ctx.beginPath();
+      ctx.moveTo(0, 0);
+      // Top edge (flat)
+      ctx.lineTo(W, 0);
+      ctx.lineTo(W, yCenter - bH);
+      // Bottom edge of band — sinusoidal curtain
+      for(let i = SEG; i >= 0; i--){
+        const x = i * sw;
+        const wave =
+          Math.sin(i * 0.18 + ts * b.spd * 2.8 + b.ph) * H * .12 +
+          Math.sin(i * 0.09 + ts * b.spd * 1.5 + bi * 0.6) * H * .07;
+        ctx.lineTo(x, yCenter + wave);
+      }
+      ctx.lineTo(0, yCenter - bH);
+      ctx.closePath();
+      ctx.fillStyle = grad;
+      ctx.fill();
+    });
+
+    ctx.globalCompositeOperation = 'source-over';
+
+    _raf = requestAnimationFrame(draw);
+  }
+
+  function start(){
+    resize();
+    window.addEventListener('resize', resize, {passive:true});
+    _raf = requestAnimationFrame(draw);
+  }
+
+  // Start as soon as DOM is ready
+  if(document.readyState === 'loading'){
+    document.addEventListener('DOMContentLoaded', start);
+  } else {
+    start();
+  }
+})();
+
 function closeToast(){document.getElementById('toast')?.classList.remove('show');}
 
 // ═══════════════════════════════════════════════════════════
@@ -2453,27 +3467,50 @@ function renderAurora(rows){
   const ico=lvl==='epic'?'🌌':lvl==='high'?'✨':lvl==='med'?'🌠':'🌑';
   const barPct=Math.min(100,Math.round(forecastKp/9*100));
 
+  // Compute richer display values
+  const visLabel = forecastKp>=7?'EXCEPTIONAL':forecastKp>=5?'VISIBLE':forecastKp>=4?'POSSIBLE':forecastKp>=3?'MARGINAL':'NOT VISIBLE';
+  const visColor = forecastKp>=7?'#b464ff':forecastKp>=5?'#3be8b0':forecastKp>=4?'#f0c040':forecastKp>=3?'#5bafd4':'#4a6070';
+  const visBg    = forecastKp>=7?'rgba(180,100,255,.1)':forecastKp>=5?'rgba(59,232,176,.09)':forecastKp>=4?'rgba(240,192,64,.09)':forecastKp>=3?'rgba(91,175,212,.09)':'rgba(74,96,112,.07)';
+  const visIcon  = forecastKp>=7?'🌌':forecastKp>=5?'✨':forecastKp>=4?'🌠':forecastKp>=3?'👁️':'🌑';
+  const visAdvice= forecastKp>=7?'Go outside NOW — even city skies may show colour':forecastKp>=5?'Head to a dark site — naked eye display likely':forecastKp>=4?'Faint glow on horizon — camera recommended':forecastKp>=3?'Very faint — best with long-exposure camera in darkness':'No aurora activity expected tonight';
+
   card.innerHTML=`
-    <div class="au-hd">
-      <span class="au-ico">${ico}</span>
-      <div>
-        <div class="au-title">Aurora Borealis Forecast</div>
-        <div class="au-sub">Iceland · Kp visibility threshold ≥ 3 · Source: NOAA SWPC</div>
+    <!-- STATUS HERO -->
+    <div style="display:flex;align-items:center;gap:14px;padding:14px 16px 10px;border-bottom:1px solid rgba(140,200,230,.08);">
+      <div style="font-size:2.6rem;line-height:1;flex-shrink:0;">${visIcon}</div>
+      <div style="flex:1;min-width:0;">
+        <div style="font-family:var(--fm);font-size:.48rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:3px;">Aurora Borealis · Iceland Tonight</div>
+        <div style="font-family:var(--fs);font-size:1.55rem;font-weight:600;color:${visColor};line-height:1.1;">${visLabel}</div>
+        <div style="font-family:var(--fm);font-size:.58rem;color:rgba(214,238,248,.6);margin-top:3px;">${visAdvice}</div>
       </div>
     </div>
-    <div class="au-kp-row">
-      <div>
-        <div class="au-kp-val">${forecastKp.toFixed(1)}</div>
-        <div class="au-kp-lbl">Kp index (0–9)</div>
+    <!-- KP + BAR INLINE -->
+    <div style="display:flex;align-items:center;gap:12px;padding:12px 16px 10px;">
+      <div style="flex-shrink:0;text-align:center;">
+        <div style="font-family:var(--fs);font-size:2.4rem;font-weight:600;line-height:1;color:${visColor};">${forecastKp.toFixed(1)}</div>
+        <div style="font-family:var(--fm);font-size:.46rem;color:var(--muted);letter-spacing:.06em;text-transform:uppercase;">Kp Index</div>
       </div>
-      <span class="au-kp-storm">${stormLbl}</span>
+      <div style="flex:1;">
+        <!-- Scale bar with threshold marker -->
+        <div style="position:relative;height:10px;background:rgba(255,255,255,.06);border-radius:6px;margin-bottom:6px;overflow:visible;">
+          <div style="position:absolute;left:0;top:0;bottom:0;width:${barPct}%;background:linear-gradient(90deg,#2e6e6a,${visColor});border-radius:6px;transition:width .8s var(--ease-out-expo);"></div>
+          <!-- Kp=3 threshold tick -->
+          <div style="position:absolute;left:33.3%;top:-3px;bottom:-3px;width:2px;background:rgba(91,175,212,.5);border-radius:1px;" title="Kp 3 — visibility threshold"></div>
+          <!-- Kp=5 threshold tick -->
+          <div style="position:absolute;left:55.5%;top:-3px;bottom:-3px;width:2px;background:rgba(59,232,176,.5);border-radius:1px;" title="Kp 5 — good visibility"></div>
+        </div>
+        <div style="display:flex;justify-content:space-between;font-family:var(--fm);font-size:.46rem;color:var(--muted);">
+          <span>Kp 0</span><span style="color:rgba(91,175,212,.6);">▲3 visible</span><span style="color:rgba(59,232,176,.6);">▲5 good</span><span>Kp 9</span>
+        </div>
+        <div style="font-family:var(--fm);font-size:.54rem;margin-top:5px;color:rgba(214,238,248,.5);">
+          ${stormLbl} · 24h peak Kp ${forecastKp.toFixed(1)}
+        </div>
+      </div>
     </div>
-    <div class="au-bar-wrap">
-      <div class="au-bar-lbl">Geomagnetic activity level</div>
-      <div class="au-bar-track"><div class="au-bar-fill" style="width:${barPct}%"></div></div>
-    </div>
-    <div class="au-verdict">${kpVerdict(forecastKp)}</div>
-    <button class="au-view-btn" onclick="openAuroraOverlay()">🌌 View Aurora Details &amp; Legend ↗</button>`;
+    <!-- ACTION BUTTON -->
+    <div style="padding:0 14px 13px;">
+      <button class="au-view-btn" onclick="openAuroraOverlay()" style="width:100%;justify-content:center;">🌌 Full Forecast &amp; Aurora Legend ↗</button>
+    </div>`;
 
   // Store for overlay
   _overlayKp = forecastKp;
