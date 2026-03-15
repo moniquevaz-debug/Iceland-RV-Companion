@@ -6,7 +6,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes"/>
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
 <meta name="theme-color" content="#0d111e"/>
-<title>🚐 Iceland RV Companion v3.5</title>
+<title>🚐 Iceland RV Companion v3.3</title>
   <link href="https://fonts.googleapis.com/css2?family=Bentham&family=IBM+Plex+Mono:wght@400;500;600&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet"/>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"/>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
@@ -879,322 +879,6 @@ select option{background:#0d0f1a;color:var(--ice);}
 
 
 /* ── TB BUTTON ROW (currency + translator side by side) ──────── */
-.tb-btn-row{
-  display:flex;align-items:center;gap:6px;flex-wrap:wrap;justify-content:flex-end;
-}
-
-/* ── TRANSLATOR BUTTON ───────────────────────────────────────── */
-.trnsl-btn{
-  display:flex;align-items:center;gap:5px;
-  padding:7px 12px;border-radius:8px;-webkit-appearance:none;
-  background:rgba(160,128,255,.09);border:1px solid rgba(160,128,255,.28);
-  color:#c8a8ff;cursor:pointer;
-  font-family:var(--fs);font-size:.72rem;font-style:italic;
-  transition:all .45s var(--ease-dramatic);white-space:nowrap;
-}
-.trnsl-btn:hover{background:rgba(160,128,255,.18);border-color:rgba(160,128,255,.5);}
-.trnsl-btn.active{background:rgba(160,128,255,.16);border-color:rgba(160,128,255,.55);
-  box-shadow:0 0 14px rgba(160,128,255,.2);}
-.trnsl-ico{font-size:.9rem;}
-.trnsl-lbl{font-size:.65rem;}
-
-/* ── TRANSLATOR PANEL ────────────────────────────────────────── */
-#trnsl-panel{
-  display:none;flex-direction:column;gap:0;
-  background:rgba(7,8,15,.98);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);
-  border-bottom:1px solid rgba(160,128,255,.14);
-  padding:16px 18px 18px;flex-shrink:0;z-index:89;
-  animation:slideDown .4s var(--ease-out-expo) both;
-}
-#trnsl-panel.show{display:flex;}
-
-/* header */
-.trnsl-panel-header{
-  display:flex;align-items:baseline;justify-content:space-between;
-  margin-bottom:12px;
-}
-.trnsl-panel-title{
-  font-family:var(--fs);font-size:.95rem;font-style:italic;color:var(--ice);
-}
-.trnsl-api-note{
-  font-family:var(--fm);font-size:.48rem;color:var(--muted);letter-spacing:.04em;
-}
-
-/* Language pair chips */
-.trnsl-lang-select-wrap{
-  display:flex;flex-direction:column;gap:5px;margin-bottom:12px;
-}
-.trnsl-lang-label{
-  font-family:var(--fm);font-size:.5rem;letter-spacing:.08em;
-  text-transform:uppercase;color:var(--muted);
-}
-.trnsl-lang-select{
-  width:100%;
-  background:rgba(160,128,255,.08);
-  border:1px solid rgba(160,128,255,.28);
-  border-radius:8px;
-  padding:10px 32px 10px 12px;
-  color:#d4b8ff;
-  font-family:var(--fs);font-size:.9rem;font-style:italic;
-  cursor:pointer;
-  appearance:none;-webkit-appearance:none;
-  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23a080ff'/%3E%3C/svg%3E");
-  background-repeat:no-repeat;background-position:right 12px center;
-  background-size:10px 6px;
-  outline:none;
-  transition:border-color .4s var(--ease-dramatic),background .4s;
-}
-.trnsl-lang-select:focus{
-  border-color:rgba(160,128,255,.6);
-  background-color:rgba(160,128,255,.13);
-}
-.trnsl-lang-select option{
-  background:#0d0f1a;color:#d4b8ff;font-style:normal;
-}
-.trnsl-dir-lbl{
-  font-family:var(--fm);font-size:.52rem;letter-spacing:.07em;
-  text-transform:uppercase;color:rgba(160,128,255,.6);
-  margin-bottom:10px;
-}
-
-/* Input wrap */
-.trnsl-input-wrap{
-  background:rgba(255,255,255,.04);border:1px solid rgba(160,128,255,.18);
-  border-radius:8px;overflow:hidden;margin-bottom:10px;
-  transition:border-color .4s var(--ease-dramatic);
-}
-.trnsl-input-wrap:focus-within{border-color:rgba(160,128,255,.45);}
-.trnsl-input-top{
-  display:flex;align-items:center;justify-content:space-between;
-  padding:7px 12px 5px;border-bottom:1px solid rgba(160,128,255,.1);
-}
-.trnsl-input-lang{
-  font-family:var(--fm);font-size:.52rem;color:rgba(200,168,255,.6);letter-spacing:.05em;
-}
-.trnsl-clear-btn{
-  background:none;border:none;color:var(--muted);cursor:pointer;
-  font-size:.7rem;padding:0 2px;-webkit-appearance:none;
-  transition:color .3s;
-}
-.trnsl-clear-btn:hover{color:var(--ice);}
-.trnsl-textarea{
-  width:100%;background:transparent;border:none;outline:none;
-  padding:10px 12px 4px;color:var(--ice);resize:none;
-  font-family:var(--fs);font-size:.9rem;font-style:italic;
-  line-height:1.6;-webkit-appearance:none;box-sizing:border-box;
-  -webkit-text-fill-color:var(--ice);
-}
-.trnsl-textarea::placeholder{color:rgba(160,128,255,.3);font-style:italic;}
-.trnsl-char-count{
-  font-family:var(--fm);font-size:.46rem;color:var(--muted);
-  text-align:right;padding:2px 12px 6px;
-}
-
-/* Translate button */
-.trnsl-go-btn{
-  width:100%;padding:11px;border:none;border-radius:8px;-webkit-appearance:none;
-  background:linear-gradient(135deg,rgba(160,128,255,.25),rgba(120,80,220,.3));
-  border:1px solid rgba(160,128,255,.35);
-  color:#d8bcff;cursor:pointer;
-  font-family:var(--fs);font-size:.88rem;font-style:italic;
-  transition:all .45s var(--ease-dramatic);margin-bottom:12px;
-  box-shadow:0 4px 16px rgba(160,128,255,.12);
-}
-.trnsl-go-btn:hover:not(:disabled){
-  background:linear-gradient(135deg,rgba(160,128,255,.38),rgba(120,80,220,.45));
-  box-shadow:0 6px 24px rgba(160,128,255,.25);transform:translateY(-1px);
-}
-.trnsl-go-btn:disabled{opacity:.35;cursor:not-allowed;}
-
-/* Result */
-.trnsl-result-wrap{
-  background:rgba(160,128,255,.05);border:1px solid rgba(160,128,255,.15);
-  border-radius:8px;overflow:hidden;margin-bottom:10px;
-  transition:border-color .4s var(--ease-dramatic);
-}
-.trnsl-result-wrap.has-result{border-color:rgba(160,128,255,.35);}
-.trnsl-result-top{
-  display:flex;align-items:center;justify-content:space-between;
-  padding:7px 12px 5px;border-bottom:1px solid rgba(160,128,255,.1);
-}
-.trnsl-result-lang{
-  font-family:var(--fm);font-size:.52rem;color:rgba(200,168,255,.6);letter-spacing:.05em;
-}
-.trnsl-copy-btn{
-  background:none;border:none;color:var(--muted);cursor:pointer;
-  font-family:var(--fm);font-size:.52rem;padding:0 2px;-webkit-appearance:none;
-  transition:color .3s;
-}
-.trnsl-copy-btn:hover{color:#c8a8ff;}
-.trnsl-result-text{
-  padding:10px 12px 8px;
-  font-family:var(--fs);font-size:1rem;font-style:italic;
-  color:#d8bcff;line-height:1.65;min-height:38px;
-}
-.trnsl-result-note{
-  font-family:var(--fm);font-size:.48rem;color:var(--muted);
-  padding:0 12px 7px;line-height:1.8;
-}
-
-/* Footer */
-.trnsl-footer{
-  font-family:var(--fm);font-size:.48rem;color:var(--muted);
-  margin-top:4px;line-height:1.8;
-}
-.trnsl-footer a{color:rgba(160,128,255,.7);}
-
-
-/* ── TB-BTN-ROW: currency + translator side by side ─────────── */
-.tb-btn-row{
-  display:flex;align-items:center;gap:6px;
-}
-
-/* ── TRANSLATOR BUTTON ───────────────────────────────────────── */
-.trnsl-btn{
-  display:flex;align-items:center;gap:5px;
-  padding:7px 12px;border-radius:8px;-webkit-appearance:none;
-  background:rgba(160,100,255,.09);border:1px solid rgba(160,100,255,.28);
-  color:#c090ff;cursor:pointer;
-  font-family:var(--fs);font-size:.72rem;font-style:italic;
-  transition:all .45s var(--ease-dramatic);white-space:nowrap;
-}
-.trnsl-btn:hover{background:rgba(160,100,255,.18);border-color:rgba(160,100,255,.5);}
-.trnsl-ico{font-size:.9rem;}
-.trnsl-lbl{font-size:.65rem;}
-
-/* ── TRANSLATOR PANEL ────────────────────────────────────────── */
-#trnsl-panel{
-  display:none;flex-direction:column;gap:0;
-  background:rgba(7,8,15,.98);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);
-  border-bottom:1px solid rgba(160,100,255,.14);
-  padding:16px 18px 18px;flex-shrink:0;z-index:89;
-  animation:slideDown .4s var(--ease-out-expo) both;
-}
-#trnsl-panel.show{display:flex;}
-
-.trnsl-panel-header{
-  display:flex;align-items:baseline;justify-content:space-between;
-  margin-bottom:12px;
-}
-.trnsl-panel-title{
-  font-family:var(--fs);font-size:.95rem;font-style:italic;color:var(--ice);
-}
-.trnsl-api-note{
-  font-family:var(--fm);font-size:.48rem;color:var(--muted);
-}
-
-/* ── LANGUAGE CHIPS ─────────────────────────────────────────── */
-.trnsl-lang-row{
-  display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px;
-}
-.trnsl-lang-chip{
-  padding:6px 12px;border-radius:20px;
-  font-family:var(--fm);font-size:.58rem;letter-spacing:.03em;
-  border:1px solid rgba(160,100,255,.22);
-  background:rgba(160,100,255,.06);color:rgba(200,160,255,.7);
-  cursor:pointer;-webkit-appearance:none;
-  transition:all .35s var(--ease-dramatic);white-space:nowrap;
-}
-.trnsl-lang-chip:hover{background:rgba(160,100,255,.14);color:#c090ff;}
-.trnsl-lang-chip.active{
-  background:rgba(160,100,255,.18);border-color:rgba(160,100,255,.5);
-  color:#d0b0ff;box-shadow:0 0 10px rgba(160,100,255,.2);
-}
-
-/* ── DIRECTION LABEL ─────────────────────────────────────────── */
-.trnsl-dir-lbl{
-  font-family:var(--fm);font-size:.52rem;color:var(--muted);
-  letter-spacing:.06em;margin-bottom:10px;
-  text-transform:uppercase;
-}
-
-/* ── INPUT AREA ─────────────────────────────────────────────── */
-.trnsl-input-wrap{
-  position:relative;margin-bottom:10px;
-  border:1px solid rgba(160,100,255,.18);border-radius:8px;
-  background:rgba(255,255,255,.04);overflow:hidden;
-}
-.trnsl-input-top{
-  display:flex;align-items:center;justify-content:space-between;
-  padding:7px 12px 0;
-}
-.trnsl-input-lang{
-  font-family:var(--fm);font-size:.5rem;letter-spacing:.07em;
-  text-transform:uppercase;color:rgba(200,160,255,.6);
-}
-.trnsl-clear-btn{
-  font-size:.65rem;color:var(--muted);background:none;border:none;
-  cursor:pointer;-webkit-appearance:none;padding:2px 4px;
-  transition:color .25s;line-height:1;
-}
-.trnsl-clear-btn:hover{color:var(--ice);}
-.trnsl-textarea{
-  width:100%;background:transparent;border:none;outline:none;
-  padding:6px 12px 4px;color:var(--ice);resize:none;
-  font-family:var(--fs);font-size:.92rem;font-style:italic;
-  line-height:1.55;box-sizing:border-box;
-  -webkit-appearance:none;
-}
-.trnsl-textarea::placeholder{color:rgba(140,200,230,.28);font-style:italic;}
-.trnsl-char-count{
-  padding:2px 12px 6px;font-family:var(--fm);font-size:.46rem;
-  color:var(--muted);text-align:right;
-}
-
-/* ── TRANSLATE BUTTON ───────────────────────────────────────── */
-.trnsl-go-btn{
-  width:100%;padding:11px;border:none;border-radius:8px;
-  -webkit-appearance:none;cursor:pointer;
-  font-family:var(--fs);font-size:.9rem;font-style:italic;
-  background:linear-gradient(135deg,#9040e0 0%,#6020b0 100%);
-  color:#f0e8ff;letter-spacing:.01em;
-  box-shadow:0 4px 20px rgba(140,60,220,.3);
-  transition:all .4s var(--ease-dramatic);margin-bottom:10px;
-}
-.trnsl-go-btn:hover:not(:disabled){
-  box-shadow:0 6px 28px rgba(140,60,220,.5);transform:translateY(-1px);
-}
-.trnsl-go-btn:disabled{opacity:.35;cursor:not-allowed;}
-
-/* ── RESULT AREA ─────────────────────────────────────────────── */
-.trnsl-result-wrap{
-  border:1px solid rgba(160,100,255,.18);border-radius:8px;
-  background:rgba(160,100,255,.05);padding:10px 13px 12px;
-  margin-bottom:10px;display:none;
-  animation:sli .4s var(--ease-out-expo) both;
-}
-.trnsl-result-wrap.show{display:block;}
-.trnsl-result-top{
-  display:flex;align-items:center;justify-content:space-between;
-  margin-bottom:6px;
-}
-.trnsl-result-lang{
-  font-family:var(--fm);font-size:.5rem;letter-spacing:.07em;
-  text-transform:uppercase;color:rgba(200,160,255,.6);
-}
-.trnsl-copy-btn{
-  font-family:var(--fm);font-size:.52rem;color:rgba(200,160,255,.7);
-  background:rgba(160,100,255,.1);border:1px solid rgba(160,100,255,.2);
-  border-radius:4px;padding:3px 8px;cursor:pointer;-webkit-appearance:none;
-  transition:all .3s;
-}
-.trnsl-copy-btn:hover{background:rgba(160,100,255,.22);color:#d0b0ff;}
-.trnsl-result-text{
-  font-family:var(--fs);font-size:1.02rem;font-style:italic;
-  color:var(--ice);line-height:1.6;word-break:break-word;
-}
-.trnsl-result-note{
-  font-family:var(--fm);font-size:.48rem;color:var(--muted);
-  margin-top:5px;line-height:1.6;
-}
-
-/* ── FOOTER ─────────────────────────────────────────────────── */
-.trnsl-footer{
-  font-family:var(--fm);font-size:.48rem;color:var(--muted);
-  line-height:1.8;border-top:1px solid rgba(160,100,255,.08);
-  padding-top:10px;margin-top:2px;
-}
-.trnsl-footer a{color:rgba(200,160,255,.7);}
 
 </style>
 </head>
@@ -1220,20 +904,15 @@ select option{background:#0d0f1a;color:var(--ice);}
         </div>
       </div>
     </div>
-    <span class="tb-ver">v3.5</span>
+    <span class="tb-ver">v3.3</span>
     <div class="tb-spacer"></div>
     <div class="tb-right-btns">
       <button class="gps-btn off" id="gps-btn" onclick="toggleGPS()" title="Tap to enable GPS tracking">
         <div class="gps-dot"></div><span id="gps-lbl">GPS OFF</span>
       </button>
-      <div class="tb-btn-row">
-        <button class="curr-btn" id="curr-btn" onclick="toggleCurrencyPanel()" title="Currency converter">
-          <span class="curr-ico">💱</span><span class="curr-lbl">ISK ⇄ USD</span>
-        </button>
-        <button class="trnsl-btn" id="trnsl-btn" onclick="toggleTranslatorPanel()" title="Translator: Icelandic ⇄ English / Spanish">
-          <span class="trnsl-ico">🗣️</span><span class="trnsl-lbl">Translate</span>
-        </button>
-      </div>
+      <button class="curr-btn" id="curr-btn" onclick="toggleCurrencyPanel()" title="Currency converter">
+        <span class="curr-ico">💱</span><span class="curr-lbl">ISK ⇄ USD</span>
+      </button>
     </div>
   </div>
   <!-- ═══ CURRENCY PANEL ═══ -->
@@ -1259,57 +938,8 @@ select option{background:#0d0f1a;color:var(--ice);}
     </div>
   </div>
 
-  <!-- ═══ TRANSLATOR PANEL ═══ -->
-  <div id="trnsl-panel">
-    <div class="trnsl-panel-header">
-      <div class="trnsl-panel-title">🗣️ Translator</div>
-      <div class="trnsl-api-note">Powered by MyMemory · Free · No login required</div>
-    </div>
-
-    <!-- Language pair dropdown -->
-    <div class="trnsl-lang-select-wrap">
-      <label class="trnsl-lang-label">Translate</label>
-      <select class="trnsl-lang-select" id="trnsl-lang-select" onchange="onLangSelectChange(this.value)">
-        <option value="is|en" selected>🇮🇸 Icelandic → 🇺🇸 English</option>
-        <option value="is|es">🇮🇸 Icelandic → 🇪🇸 Spanish</option>
-        <option value="en|is">🇺🇸 English → 🇮🇸 Icelandic</option>
-        <option value="es|is">🇪🇸 Spanish → 🇮🇸 Icelandic</option>
-      </select>
-    </div>
-
-    <!-- Input -->
-    <div class="trnsl-input-wrap">
-      <div class="trnsl-input-top">
-        <span class="trnsl-input-lang" id="trnsl-from-lang">🇮🇸 Icelandic</span>
-        <button class="trnsl-clear-btn" onclick="clearTranslator()" title="Clear">✕</button>
-      </div>
-      <textarea class="trnsl-textarea" id="trnsl-input"
-        placeholder="Type or paste text here…"
-        rows="3"
-        oninput="onTranslatorInput()"
-        maxlength="500"></textarea>
-      <div class="trnsl-char-count"><span id="trnsl-chars">0</span>/500</div>
-    </div>
-
-    <!-- Translate button -->
-    <button class="trnsl-go-btn" id="trnsl-go-btn" onclick="doTranslate()">
-      <span id="trnsl-go-lbl">Translate ↗</span>
-    </button>
-
-    <!-- Result -->
-    <div class="trnsl-result-wrap" id="trnsl-result-wrap">
-      <div class="trnsl-result-top">
-        <span class="trnsl-result-lang" id="trnsl-to-lang">🇺🇸 English</span>
-        <button class="trnsl-copy-btn" id="trnsl-copy-btn" onclick="copyTranslation()" title="Copy result">⧉ Copy</button>
-      </div>
-      <div class="trnsl-result-text" id="trnsl-result">—</div>
-      <div class="trnsl-result-note" id="trnsl-result-note"></div>
-    </div>
-
-    <div class="trnsl-footer">
-      Translation via <a href="https://mymemory.translated.net" target="_blank">MyMemory</a> · Free · Works from file:// &amp; GitHub Pages · 5 000 chars/day anonymous
-    </div>
-  </div>
+  <!-- ═══ LEFT COL ═══ -->
+<div class="left-col">
 
   <div class="search-sheet">
     <div class="sel-row">
@@ -1329,13 +959,12 @@ select option{background:#0d0f1a;color:var(--ice);}
         <button class="rc" onclick="setR(50000,this)">50 km</button>
         <button class="rc" onclick="setR(100000,this)">100 km</button>
       </div>
-      <button class="btn-go" id="btn-go" onclick="doSearch()" onmousedown="playSearchChime()" ontouchstart="playSearchChime()" disabled>⛽ Search</button>
+      <button class="btn-go" id="btn-go" onclick="doSearch()" disabled
+        onmousedown="playSearchChime()" ontouchstart="playSearchChime()">
+        Search
+      </button>
     </div>
   </div>
-</div>
-
-<!-- ═══ LEFT COL ═══ -->
-<div class="left-col">
 
   <div class="route-summary" id="route-summary">
     <div class="rs-route">
@@ -2788,14 +2417,6 @@ async function fetchExchangeRate(){
 function toggleCurrencyPanel(){
   _currPanelOpen = !_currPanelOpen;
   const panel = document.getElementById('curr-panel');
-  // Mutual exclusion — close translator if open
-  if(_currPanelOpen && _trnslPanelOpen){
-    _trnslPanelOpen = false;
-    const tp = document.getElementById('trnsl-panel');
-    const tb = document.getElementById('trnsl-btn');
-    if(tp) tp.classList.remove('show');
-    if(tb) tb.classList.remove('active');
-  }
   if(_currPanelOpen){
     playCashSound();
     panel.classList.add('show');
@@ -3041,216 +2662,6 @@ document.addEventListener('DOMContentLoaded', ()=>{
 });
 
 
-
-// ═══════════════════════════════════════════════════════════
-// TRANSLATOR — MyMemory free API
-// Icelandic ⇄ English / Spanish
-// API: https://api.Puter.js AI (GPT-4o mini) · No key required · Free unlimited use.
-// ═══════════════════════════════════════════════════════════
-
-let _trnslPanelOpen = false;
-let _trnslFromCode  = 'is';
-let _trnslToCode    = 'en';
-let _trnslFromName  = 'Icelandic';
-let _trnslToName    = 'English';
-let _trnslFromFlag  = '🇮🇸';
-let _trnslToFlag    = '🇺🇸';
-let _trnslDebounce  = null;
-let _trnslLastResult = '';
-
-const LANG_META = {
-  is: {name:'Icelandic', flag:'🇮🇸'},
-  en: {name:'English',   flag:'🇺🇸'},
-  es: {name:'Spanish',   flag:'🇪🇸'},
-};
-
-function toggleTranslatorPanel(){
-  _trnslPanelOpen = !_trnslPanelOpen;
-  const panel = document.getElementById('trnsl-panel');
-  const btn   = document.getElementById('trnsl-btn');
-  // Close currency panel if open
-  if(_trnslPanelOpen && _currPanelOpen){
-    _currPanelOpen = false;
-    document.getElementById('curr-panel').classList.remove('show');
-  }
-  if(_trnslPanelOpen){
-    panel.classList.add('show');
-    btn && btn.classList.add('active');
-    playTranslatorOpenSound();
-    setTimeout(()=>{
-      const ta = document.getElementById('trnsl-input');
-      if(ta) ta.focus();
-    },180);
-  } else {
-    panel.classList.remove('show');
-    btn && btn.classList.remove('active');
-  }
-}
-
-// setLangPair kept for compatibility — delegates to onLangSelectChange
-function setLangPair(from, to){
-  const sel = document.getElementById('trnsl-lang-select');
-  const val = from + '|' + to;
-  if(sel) sel.value = val;
-  onLangSelectChange(val);
-}
-
-function onTranslatorInput(){
-  const ta = document.getElementById('trnsl-input');
-  if(!ta) return;
-  const len = ta.value.length;
-  const cc = document.getElementById('trnsl-chars');
-  if(cc) cc.textContent = len;
-  // Debounce: auto-translate 900ms after last keystroke
-  clearTimeout(_trnslDebounce);
-  if(len > 1){
-    _trnslDebounce = setTimeout(doTranslate, 900);
-  }
-}
-
-// onLangSelectChange — handles dropdown value like "is|en"
-function onLangSelectChange(val){
-  const [from, to] = val.split('|');
-  const META = {
-    is:{name:'Icelandic', flag:'🇮🇸'},
-    en:{name:'English',   flag:'🇺🇸'},
-    es:{name:'Spanish',   flag:'🇪🇸'},
-  };
-  _trnslFromCode = from;
-  _trnslToCode   = to;
-  _trnslFromName = META[from].name;
-  _trnslToName   = META[to].name;
-  _trnslFromFlag = META[from].flag;
-  _trnslToFlag   = META[to].flag;
-  const fl = document.getElementById('trnsl-from-lang');
-  const tl = document.getElementById('trnsl-to-lang');
-  if(fl) fl.textContent = `${_trnslFromFlag} ${_trnslFromName}`;
-  if(tl) tl.textContent = `${_trnslToFlag} ${_trnslToName}`;
-  clearTranslator();
-}
-
-// ── MYMEMORY TRANSLATION ───────────────────────────────────────
-// api.mymemory.translated.net sends Access-Control-Allow-Origin:*
-// so it works from file://, GitHub Pages, and any origin.
-// Free anonymous: 5 000 chars/day. Icelandic code: "is" (no locale suffix).
-async function doTranslate(){
-  clearTimeout(_trnslDebounce);
-  const ta    = document.getElementById('trnsl-input');
-  const res   = document.getElementById('trnsl-result');
-  const note  = document.getElementById('trnsl-result-note');
-  const wrap  = document.getElementById('trnsl-result-wrap');
-  const goLbl = document.getElementById('trnsl-go-lbl');
-  const goBtn = document.getElementById('trnsl-go-btn');
-  if(!ta || !res) return;
-
-  const text = ta.value.trim();
-  if(!text){ res.textContent = '—'; return; }
-
-  if(goLbl) goLbl.textContent = 'Translating…';
-  if(goBtn) goBtn.disabled = true;
-  if(wrap)  wrap.classList.remove('has-result');
-  res.textContent = '…';
-  if(note)  note.textContent = '';
-
-  try {
-    const url = 'https://api.mymemory.translated.net/get'
-      + '?q='        + encodeURIComponent(text)
-      + '&langpair=' + _trnslFromCode + '|' + _trnslToCode;
-
-    const resp = await fetch(url);
-    if(!resp.ok) throw new Error('HTTP ' + resp.status);
-    const data = await resp.json();
-
-    // responseStatus 200 = success; 206 = partial; others = error
-    if((data.responseStatus === 200 || data.responseStatus === 206)
-        && data.responseData && data.responseData.translatedText){
-
-      const translated = data.responseData.translatedText.trim();
-
-      // MyMemory returns the original text when it can't translate
-      if(!translated || translated.toLowerCase() === text.toLowerCase()){
-        throw new Error('No translation found for this language pair');
-      }
-
-      res.textContent = translated;
-      _trnslLastResult = translated;
-      if(wrap) wrap.classList.add('has-result');
-      if(note) note.textContent = _trnslFromName + ' → ' + _trnslToName + ' · MyMemory';
-      playTranslatorResultSound();
-
-    } else {
-      const detail = data.responseDetails || data.responseStatus || 'Unknown error';
-      throw new Error(String(detail));
-    }
-
-  } catch(e){
-    res.textContent = '— Translation failed';
-    if(note) note.textContent = e.message || 'Check your connection and try again.';
-  }
-
-  if(goLbl) goLbl.textContent = 'Translate ↗';
-  if(goBtn) goBtn.disabled = false;
-}
-
-function clearTranslator(){
-  const ta  = document.getElementById('trnsl-input');
-  const res = document.getElementById('trnsl-result');
-  const note= document.getElementById('trnsl-result-note');
-  const wrap= document.getElementById('trnsl-result-wrap');
-  const cc  = document.getElementById('trnsl-chars');
-  if(ta)   ta.value = '';
-  if(res)  res.textContent = '—';
-  if(note) note.textContent = '';
-  if(cc)   cc.textContent = '0';
-  if(wrap) wrap.classList.remove('has-result');
-  _trnslLastResult = '';
-  if(ta) ta.focus();
-}
-
-function copyTranslation(){
-  if(!_trnslLastResult) return;
-  if(navigator.clipboard){
-    navigator.clipboard.writeText(_trnslLastResult).then(()=>{
-      const btn = document.getElementById('trnsl-copy-btn');
-      if(btn){ btn.textContent = '✓ Copied'; setTimeout(()=>{ btn.textContent = '⧉ Copy'; },1800); }
-    });
-  }
-}
-
-// ── TRANSLATOR SOUNDS ─────────────────────────────────────────
-// Open: soft shimmer (two ascending notes, triangle wave)
-function playTranslatorOpenSound(){
-  const ac = getAC(); if(!ac) return;
-  const now = ac.currentTime;
-  [[0, 622, 0.28],[0.13, 880, 0.35]].forEach(([delay, freq, dur])=>{
-    const o = ac.createOscillator();
-    const g = ac.createGain();
-    o.type = 'triangle';
-    o.frequency.setValueAtTime(freq, now+delay);
-    g.gain.setValueAtTime(0, now+delay);
-    g.gain.linearRampToValueAtTime(0.14, now+delay+0.015);
-    g.gain.exponentialRampToValueAtTime(0.001, now+delay+dur);
-    o.connect(g); g.connect(ac.destination);
-    o.start(now+delay); o.stop(now+delay+dur+0.01);
-  });
-}
-
-// Result: soft positive chime (sine, E5→A5)
-function playTranslatorResultSound(){
-  const ac = getAC(); if(!ac) return;
-  const now = ac.currentTime;
-  [[0, 659, 0.3],[0.12, 880, 0.4]].forEach(([delay, freq, dur])=>{
-    const o = ac.createOscillator();
-    const g = ac.createGain();
-    o.type = 'sine';
-    o.frequency.setValueAtTime(freq, now+delay);
-    g.gain.setValueAtTime(0, now+delay);
-    g.gain.linearRampToValueAtTime(0.12, now+delay+0.012);
-    g.gain.exponentialRampToValueAtTime(0.001, now+delay+dur);
-    o.connect(g); g.connect(ac.destination);
-    o.start(now+delay); o.stop(now+delay+dur+0.01);
-  });
-}
 
 // ═══════════════════════════════════════════════════════════
 // TOPBAR AURORA — live animated aurora behind the header
