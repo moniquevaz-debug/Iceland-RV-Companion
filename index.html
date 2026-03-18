@@ -1359,32 +1359,32 @@ html {
 
 
 /* ═══════════════════════════════════════════════════════════
-   WILDLIFE SPOTTER — integrated CSS (wl- prefixed)
+   WILDLIFE SPOTTER v4.2 — Modal approach, no 3D CSS
 ═══════════════════════════════════════════════════════════ */
 
-/* Header */
-#wl-header {
+/* ── PANEL HEADER ─────────────────────────────────────────── */
+#wl-header{
   position:sticky;top:0;z-index:10;
-  background:rgba(7,8,15,.95);
+  background:rgba(7,8,15,.97);
   backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
   border-bottom:1px solid rgba(140,200,230,.11);
   padding:12px 14px 10px;flex-shrink:0;
 }
-#wl-header-top {
+#wl-header-top{
   display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;
 }
-#wl-title {
+#wl-title{
   font-family:var(--fs);font-size:1rem;font-weight:600;font-style:italic;
   color:var(--ice);letter-spacing:.02em;
 }
 #wl-title span{color:var(--aur);}
-#wl-progress-label {
+#wl-progress-label{
   font-family:var(--fm);font-size:.55rem;color:var(--aur);letter-spacing:.08em;
 }
-#wl-progress-track {
+#wl-progress-track{
   height:3px;background:rgba(255,255,255,.07);border-radius:99px;overflow:hidden;
 }
-#wl-progress-fill {
+#wl-progress-fill{
   height:100%;
   background:linear-gradient(90deg,var(--aur),rgba(59,232,176,.55));
   border-radius:99px;
@@ -1392,187 +1392,275 @@ html {
   box-shadow:0 0 8px rgba(59,232,176,.45);
 }
 
-/* Load status */
-#wl-load-status {
-  font-family:var(--fm);font-size:.58rem;color:var(--muted);
-  letter-spacing:.06em;padding:16px 14px 0;
-  text-align:center;
+/* ── LOAD STATUS ──────────────────────────────────────────── */
+#wl-load-status{
+  font-family:var(--fm);font-size:.56rem;color:var(--muted);
+  letter-spacing:.06em;padding:14px 14px 0;text-align:center;
 }
 
-/* Grid */
-#wl-grid {
+/* ── CARD GRID ────────────────────────────────────────────── */
+#wl-grid{
   display:grid;
   grid-template-columns:repeat(2,1fr);
-  gap:10px;padding:12px 10px;
+  gap:10px;padding:12px 10px 16px;
 }
-@media(max-width:380px){ #wl-grid{grid-template-columns:1fr;} }
-@media(min-width:640px){ #wl-grid{grid-template-columns:repeat(3,1fr);gap:14px;padding:16px;} }
+@media(max-width:380px){#wl-grid{grid-template-columns:1fr;}}
+@media(min-width:640px){#wl-grid{grid-template-columns:repeat(3,1fr);gap:14px;padding:16px;}}
 
-/* Card wrapper */
-.wl-card-wrap {
-  perspective:1000px;
-  height:160px;cursor:pointer;
-  position:relative;isolation:isolate;
-}
-.wl-card-wrap.is-flipped { z-index:50; }
-.wl-card-wrap.is-spotted .wl-spotted-badge {
-  opacity:1;transform:rotate(-8deg) scale(1);
-}
-.wl-card-wrap.is-spotted .wl-card-front {
-  border-color:rgba(240,192,64,.5);
-  box-shadow:0 0 16px rgba(240,192,64,.25);
-}
-
-/* Card inner */
-.wl-card-inner {
-  position:relative;width:100%;height:100%;
-  transform-style:preserve-3d;
+/* ── GRID CARD ────────────────────────────────────────────── */
+.wl-card{
+  position:relative;
+  height:160px;
   border-radius:12px;
-  transition:transform .55s var(--ease-out-expo);
-}
-
-/* Card faces */
-.wl-card-front,.wl-card-back {
-  position:absolute;inset:0;
-  border-radius:12px;
-  backface-visibility:hidden;-webkit-backface-visibility:hidden;
+  overflow:hidden;
+  cursor:pointer;
   background:var(--card);
   border:1px solid rgba(140,200,230,.11);
-  overflow:hidden;
-  transition:border-color .5s var(--ease-dramatic),box-shadow .5s var(--ease-dramatic);
+  transition:border-color .4s var(--ease-dramatic),
+             box-shadow .4s var(--ease-dramatic),
+             transform .3s var(--ease-out-expo);
+  -webkit-tap-highlight-color:transparent;
 }
-.wl-card-back {
-  transform:rotateY(180deg);
-  overflow-y:auto;-webkit-overflow-scrolling:touch;
-  cursor:default;
-  background:rgba(15,18,28,.98);
+.wl-card:active{transform:scale(.97);}
+.wl-card.is-spotted{
+  border-color:rgba(240,192,64,.5);
+  box-shadow:0 0 16px rgba(240,192,64,.22);
 }
 
-/* Image */
-.wl-card-img {
+/* ── CARD IMAGE ───────────────────────────────────────────── */
+.wl-card-img{
   width:100%;height:100%;
-  object-fit:cover;object-position:center;
-  display:block;pointer-events:none;
-  opacity:0;transition:opacity .4s ease,transform .5s var(--ease-out-expo);
+  object-fit:cover;object-position:center top;
+  display:block;
+  opacity:0;
+  transition:opacity .5s ease, transform .4s var(--ease-out-expo);
+  pointer-events:none;
 }
 .wl-card-img.loaded{opacity:1;}
-.wl-card-front:hover .wl-card-img.loaded{transform:scale(1.04);}
-.wl-img-placeholder {
-  position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
-  font-size:2.2rem;background:rgba(255,255,255,.025);
+.wl-card:hover .wl-card-img.loaded{transform:scale(1.04);}
+.wl-img-placeholder{
+  position:absolute;inset:0;
+  display:flex;align-items:center;justify-content:center;
+  font-size:2.4rem;
+  background:rgba(255,255,255,.025);
   transition:opacity .3s ease;
 }
 .wl-img-placeholder.hidden{opacity:0;pointer-events:none;}
 
-/* Overlay gradient */
-.wl-card-overlay {
+/* ── CARD GRADIENT OVERLAY ────────────────────────────────── */
+.wl-card-overlay{
   position:absolute;inset:0;pointer-events:none;
-  background:linear-gradient(to top,rgba(7,8,15,.88) 0%,rgba(7,8,15,.25) 45%,transparent 70%);
+  background:linear-gradient(to top,
+    rgba(7,8,15,.9) 0%,
+    rgba(7,8,15,.3) 45%,
+    transparent 70%);
 }
 
-/* Card name */
-.wl-card-name {
-  position:absolute;bottom:34px;left:10px;right:10px;
-  font-family:var(--fs);font-size:.78rem;font-weight:600;font-style:italic;
+/* ── CARD LABELS ──────────────────────────────────────────── */
+.wl-card-name{
+  position:absolute;bottom:32px;left:10px;right:10px;
+  font-family:var(--fs);font-size:.8rem;font-weight:600;font-style:italic;
   color:var(--ice);line-height:1.2;pointer-events:none;
 }
-.wl-card-name-is {
-  display:block;font-family:var(--fm);font-size:.52rem;
-  color:var(--aur);letter-spacing:.07em;margin-top:2px;opacity:.8;
+.wl-card-name-is{
+  display:block;font-family:var(--fm);font-size:.5rem;
+  color:var(--aur);letter-spacing:.07em;margin-top:2px;opacity:.85;
 }
 
-/* Spot button */
-.wl-spot-btn {
-  position:absolute;bottom:8px;left:10px;
-  font-family:var(--fm);font-size:.5rem;letter-spacing:.06em;
-  color:var(--muted);background:rgba(7,8,15,.6);
-  border:1px solid rgba(255,255,255,.12);border-radius:6px;
-  padding:4px 9px;cursor:pointer;z-index:10;
-  transition:all .3s var(--ease-dramatic);
-  backdrop-filter:blur(4px);-webkit-tap-highlight-color:transparent;
-  touch-action:manipulation;min-height:28px;
-  display:inline-flex;align-items:center;
-}
-.wl-spot-btn:active,.wl-spot-btn:hover {
-  border-color:var(--aur);color:var(--aur);background:rgba(59,232,176,.1);
-}
-.wl-card-wrap.is-spotted .wl-spot-btn {
-  border-color:rgba(240,192,64,.5);color:var(--gold);background:rgba(240,192,64,.1);
-}
-
-/* Spotted badge */
-.wl-spotted-badge {
+/* ── SPOTTED BADGE ────────────────────────────────────────── */
+.wl-spotted-badge{
   position:absolute;top:8px;right:8px;
-  width:44px;height:44px;border-radius:50%;
+  width:42px;height:42px;border-radius:50%;
   border:2px solid var(--gold);
-  background:rgba(7,8,15,.75);
-  display:flex;align-items:center;justify-content:center;
-  font-family:var(--fm);font-size:.45rem;font-weight:600;
-  color:var(--gold);letter-spacing:.05em;text-align:center;line-height:1.2;
-  text-transform:uppercase;
-  opacity:0;transform:rotate(-8deg) scale(0.4);
+  background:rgba(7,8,15,.78);
+  display:flex;align-items:center;justify-content:center;flex-direction:column;
+  font-family:var(--fm);font-size:.42rem;font-weight:600;
+  color:var(--gold);letter-spacing:.05em;
+  text-transform:uppercase;line-height:1.2;
+  opacity:0;transform:scale(0.4) rotate(-12deg);
   transition:opacity .4s var(--ease-out-expo),transform .4s var(--ease-out-expo);
-  pointer-events:none;z-index:5;
+  pointer-events:none;z-index:3;
   box-shadow:0 0 12px rgba(240,192,64,.3);
 }
+.wl-card.is-spotted .wl-spotted-badge{
+  opacity:1;transform:scale(1) rotate(-8deg);
+}
 
-/* Card back */
-.wl-card-back-inner{padding:13px;min-height:100%;}
-.wl-back-hint{
-  font-family:var(--fm);font-size:.48rem;color:var(--muted);
-  letter-spacing:.06em;text-align:right;margin-bottom:6px;
+/* ── SPOT BUTTON ──────────────────────────────────────────── */
+.wl-spot-btn{
+  position:absolute;bottom:7px;left:9px;
+  font-family:var(--fm);font-size:.5rem;letter-spacing:.05em;
+  color:var(--muted);
+  background:rgba(7,8,15,.65);
+  border:1px solid rgba(255,255,255,.14);
+  border-radius:6px;padding:4px 9px;
+  cursor:pointer;z-index:4;
+  min-height:28px;
+  display:inline-flex;align-items:center;
+  transition:all .3s var(--ease-dramatic);
+  -webkit-tap-highlight-color:transparent;
+  touch-action:manipulation;
+  backdrop-filter:blur(6px);
 }
-.wl-back-title{
-  font-family:var(--fs);font-size:.88rem;font-weight:600;font-style:italic;
-  color:var(--ice);margin-bottom:1px;padding-right:10px;
+.wl-spot-btn:active,.wl-spot-btn:hover{
+  border-color:var(--aur);color:var(--aur);background:rgba(59,232,176,.1);
 }
-.wl-back-title-is{
-  font-family:var(--fm);font-size:.52rem;color:var(--aur);
-  letter-spacing:.07em;margin-bottom:8px;opacity:.8;
+.wl-card.is-spotted .wl-spot-btn{
+  border-color:rgba(240,192,64,.45);color:var(--gold);background:rgba(240,192,64,.1);
 }
+
+/* ── MODAL OVERLAY ────────────────────────────────────────── */
+#wl-modal{
+  display:none;
+  position:fixed;inset:0;
+  z-index:5200;
+  align-items:flex-end;justify-content:center;
+  padding:0;
+}
+#wl-modal.show{display:flex;}
+
+#wl-modal-backdrop{
+  position:absolute;inset:0;
+  background:rgba(4,5,10,.88);
+  backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);
+  animation:wlBackdropIn .3s ease forwards;
+}
+@keyframes wlBackdropIn{from{opacity:0}to{opacity:1}}
+
+#wl-modal-sheet{
+  position:relative;z-index:1;
+  width:100%;
+  max-width:520px;
+  max-height:90vh;
+  background:#0f1018;
+  border-radius:20px 20px 0 0;
+  overflow:hidden;
+  display:flex;flex-direction:column;
+  animation:wlSheetUp .38s cubic-bezier(0.16,1,0.3,1) forwards;
+  box-shadow:0 -8px 40px rgba(0,0,0,.6),0 0 0 1px rgba(255,255,255,.06);
+}
+@keyframes wlSheetUp{
+  from{transform:translateY(100%);opacity:.6}
+  to{transform:translateY(0);opacity:1}
+}
+/* On wider screens, center as a dialog instead of bottom sheet */
+@media(min-width:540px){
+  #wl-modal{align-items:center;padding:20px;}
+  #wl-modal-sheet{
+    border-radius:20px;
+    max-height:88vh;
+    animation:wlDialogIn .38s cubic-bezier(0.16,1,0.3,1) forwards;
+  }
+}
+@keyframes wlDialogIn{
+  from{transform:scale(.92) translateY(16px);opacity:0}
+  to{transform:scale(1) translateY(0);opacity:1}
+}
+
+/* ── MODAL HEADER ─────────────────────────────────────────── */
+#wl-modal-img-wrap{
+  position:relative;
+  width:100%;height:200px;
+  flex-shrink:0;overflow:hidden;
+  background:rgba(255,255,255,.03);
+}
+#wl-modal-img{
+  width:100%;height:100%;
+  object-fit:cover;object-position:center top;
+  display:block;
+}
+#wl-modal-img-placeholder{
+  position:absolute;inset:0;
+  display:flex;align-items:center;justify-content:center;
+  font-size:4rem;
+}
+#wl-modal-img-gradient{
+  position:absolute;inset:0;pointer-events:none;
+  background:linear-gradient(to top,rgba(15,16,24,1) 0%,transparent 60%);
+}
+#wl-modal-close{
+  position:absolute;top:12px;right:12px;
+  width:34px;height:34px;border-radius:50%;
+  background:rgba(7,8,15,.7);border:1px solid rgba(255,255,255,.15);
+  color:rgba(255,255,255,.7);font-size:.85rem;
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;-webkit-appearance:none;
+  transition:all .3s;backdrop-filter:blur(4px);z-index:2;
+}
+#wl-modal-close:hover{background:rgba(255,255,255,.15);color:#fff;}
+#wl-modal-spotted-wrap{
+  position:absolute;bottom:10px;left:14px;z-index:2;
+}
+
+/* ── MODAL BODY ───────────────────────────────────────────── */
+#wl-modal-body{
+  flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;
+  padding:14px 18px 24px;
+  overscroll-behavior:contain;
+}
+#wl-modal-body::-webkit-scrollbar{width:3px;}
+#wl-modal-body::-webkit-scrollbar-thumb{background:rgba(59,232,176,.2);border-radius:99px;}
+
+#wl-modal-name{
+  font-family:var(--fs);font-size:1.5rem;font-weight:600;font-style:italic;
+  color:var(--ice);line-height:1.1;margin-bottom:2px;
+}
+#wl-modal-name-is{
+  font-family:var(--fm);font-size:.58rem;color:var(--aur);
+  letter-spacing:.08em;margin-bottom:14px;display:block;
+}
+
+/* Info grid */
 .wl-info-grid{
-  display:grid;grid-template-columns:1fr 1fr;gap:5px 8px;margin-bottom:8px;
+  display:grid;grid-template-columns:1fr 1fr;
+  gap:8px 12px;margin-bottom:14px;
 }
-.wl-info-row{display:flex;flex-direction:column;gap:1px;}
+.wl-info-row{display:flex;flex-direction:column;gap:2px;}
 .wl-info-row.full{grid-column:1/-1;}
 .wl-info-label{
   font-family:var(--fm);font-size:.46rem;color:var(--aur);
-  letter-spacing:.1em;text-transform:uppercase;opacity:.7;
+  letter-spacing:.1em;text-transform:uppercase;opacity:.75;
 }
 .wl-info-value{
-  font-family:var(--fm);font-size:.58rem;color:rgba(214,238,248,.7);line-height:1.4;
+  font-family:var(--fm);font-size:.6rem;
+  color:rgba(214,238,248,.75);line-height:1.5;
 }
-.wl-divider{height:1px;background:rgba(140,200,230,.08);margin:6px 0;}
+.wl-divider{
+  height:1px;background:rgba(140,200,230,.08);margin:10px 0;
+}
+.wl-section-label{
+  font-family:var(--fm);font-size:.48rem;color:var(--aur);
+  letter-spacing:.1em;text-transform:uppercase;opacity:.8;
+  margin-bottom:5px;display:block;
+}
+.wl-iceland-fact{
+  font-family:var(--fm);font-size:.6rem;color:rgba(214,238,248,.78);
+  line-height:1.65;margin-bottom:8px;display:block;
+  border-left:2px solid rgba(59,232,176,.3);padding-left:10px;
+}
 .wl-behavior-text{
-  font-family:var(--fm);font-size:.55rem;color:var(--muted);
-  line-height:1.55;margin-bottom:4px;display:block;
+  font-family:var(--fm);font-size:.58rem;color:var(--muted);
+  line-height:1.6;margin-bottom:5px;display:block;
+}
+.wl-fun-fact{
+  font-family:var(--fm);font-size:.6rem;color:var(--gold);
+  line-height:1.65;margin-bottom:8px;display:block;font-style:italic;
 }
 .wl-back-source{
-  font-family:var(--fm);font-size:.46rem;color:rgba(59,232,176,.3);
-  letter-spacing:.05em;margin-top:8px;
+  font-family:var(--fm);font-size:.46rem;
+  color:rgba(59,232,176,.3);letter-spacing:.04em;
+  margin-top:10px;padding-top:8px;
+  border-top:1px solid rgba(140,200,230,.07);display:block;
 }
 
-/* Scrollbar */
-.wl-card-back::-webkit-scrollbar{width:3px;}
-.wl-card-back::-webkit-scrollbar-thumb{background:rgba(59,232,176,.2);border-radius:99px;}
-
-/* Scrim */
-#wl-card-scrim {
-  display:none;position:fixed;inset:0;z-index:5100;
-  background:rgba(7,8,15,.88);
-  backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);
-  cursor:pointer;
-}
-#wl-card-scrim.visible{display:block;animation:scrimIn .3s ease forwards;}
-
-/* Celebration overlay */
-#wl-celebration {
-  position:fixed;inset:0;z-index:5100;
+/* ── CELEBRATION ──────────────────────────────────────────── */
+#wl-celebration{
+  position:fixed;inset:0;z-index:5300;
   display:flex;align-items:center;justify-content:center;
   background:rgba(7,8,15,.82);backdrop-filter:blur(8px);
   animation:tourFadeIn .4s var(--ease-out-expo) forwards;
 }
-.wl-cel-inner {
+.wl-cel-inner{
   background:rgba(10,14,24,.97);
   border:1px solid rgba(59,232,176,.3);border-radius:20px;
   padding:36px 28px;text-align:center;
@@ -1592,43 +1680,17 @@ html {
   font-family:var(--fs);font-size:.85rem;font-style:italic;
   color:var(--ink);background:var(--aur);
   border:none;border-radius:8px;padding:10px 28px;
-  cursor:pointer;transition:opacity .2s;
+  cursor:pointer;
 }
-.wl-cel-btn:hover{opacity:.85;}
 
-/* Mobile tweaks */
+/* Mobile */
 @media(max-width:767px){
   #wl-header{padding:10px 12px 8px;}
   #wl-title{font-size:.88rem;}
-  .wl-card-wrap{height:150px;}
-  .wl-card-name{font-size:.72rem;bottom:30px;}
+  .wl-card{height:148px;}
+  #wl-modal-img-wrap{height:180px;}
+  #wl-modal-name{font-size:1.3rem;}
 }
-
-
-/* Card back enriched sections */
-.wl-section-label{
-  font-family:var(--fm);font-size:.48rem;color:var(--aur);
-  letter-spacing:.1em;text-transform:uppercase;opacity:.8;
-  margin-bottom:3px;display:block;
-}
-.wl-iceland-fact{
-  font-family:var(--fm);font-size:.58rem;color:rgba(214,238,248,.75);
-  line-height:1.6;margin-bottom:6px;display:block;
-  border-left:2px solid rgba(59,232,176,.25);padding-left:8px;
-}
-.wl-fun-fact{
-  font-family:var(--fm);font-size:.58rem;color:var(--gold);
-  line-height:1.6;margin-bottom:8px;display:block;
-  font-style:italic;
-}
-.wl-back-source{
-  font-family:var(--fm);font-size:.46rem;
-  color:rgba(59,232,176,.3);letter-spacing:.04em;
-  margin-top:8px;padding-top:6px;
-  border-top:1px solid rgba(140,200,230,.07);
-  display:block;
-}
-
 </style>
 </head>
 <body>
@@ -1653,7 +1715,7 @@ html {
         </div>
       </div>
     </div>
-    <span class="tb-ver">v4.1</span>
+    <span class="tb-ver">v4.2</span>
     <div class="tb-spacer"></div>
     <div class="tb-right-btns">
       <button class="gps-btn off" id="gps-btn" onclick="toggleGPS()" title="Tap to enable GPS tracking">
@@ -1808,9 +1870,27 @@ html {
           <div id="wl-progress-fill" style="width:0%"></div>
         </div>
       </div>
-      <div id="wl-card-scrim"></div>
       <div id="wl-load-status">Loading wildlife photos…</div>
       <div id="wl-grid"></div>
+    </div>
+
+    <!-- WILDLIFE MODAL -->
+    <div id="wl-modal" role="dialog" aria-modal="true">
+      <div id="wl-modal-backdrop"></div>
+      <div id="wl-modal-sheet">
+        <div id="wl-modal-img-wrap">
+          <img id="wl-modal-img" src="" alt="" style="display:none"/>
+          <div id="wl-modal-img-placeholder"></div>
+          <div id="wl-modal-img-gradient"></div>
+          <button id="wl-modal-close" onclick="wlCloseModal()" aria-label="Close">✕</button>
+          <div id="wl-modal-spotted-wrap"></div>
+        </div>
+        <div id="wl-modal-body">
+          <div id="wl-modal-name"></div>
+          <span id="wl-modal-name-is"></span>
+          <div id="wl-modal-info"></div>
+        </div>
+      </div>
     </div>
 
   </div><!-- /panels -->
@@ -3995,14 +4075,18 @@ document.addEventListener('keydown', e => {
 
 
 // ═══════════════════════════════════════════════════════════
-// WILDLIFE SPOTTER — JS (wl- prefixed, integrated)
+// WILDLIFE SPOTTER v4.2 — Modal approach
+// Grid shows photo cards. Tap card → bottom sheet modal with
+// full info. Spot button on card, independent of modal.
 // ═══════════════════════════════════════════════════════════
 
-const WL_STORAGE_KEY  = 'iceland-wildlife-spotted-v1';
-const WL_IMG_CACHE    = 'iceland-wildlife-imgs-v1';
+const WL_STORAGE_KEY = 'iceland-wildlife-spotted-v1';
+const WL_IMG_CACHE   = 'iceland-wildlife-imgs-v2';
 let wlSpotted  = new Set();
 let wlImageMap = {};
+let wlActiveId = null; // currently open modal animal id
 
+// ── PERSISTENCE ──────────────────────────────────────────────
 function wlLoadSpotted(){
   try{ const r=localStorage.getItem(WL_STORAGE_KEY); if(r) wlSpotted=new Set(JSON.parse(r)); }catch(e){}
 }
@@ -4017,18 +4101,18 @@ function wlSaveImgCache(){
   try{ localStorage.setItem(WL_IMG_CACHE,JSON.stringify(wlImageMap)); }catch(e){}
 }
 
-// Fetch image from Wikipedia REST API
+// ── WIKIPEDIA IMAGE FETCH ─────────────────────────────────────
 async function wlFetchImage(animal){
-  const url=`https://en.wikipedia.org/api/rest_v1/page/summary/${animal.wikipediaTitle}`;
+  const url='https://en.wikipedia.org/api/rest_v1/page/summary/'+animal.wikipediaTitle;
   try{
     const res=await fetch(url,{headers:{'Api-User-Agent':'IcelandWildlifeSpotter/1.0'}});
     if(!res.ok) return null;
-    const data=await res.json();
-    return data.originalimage?.source || data.thumbnail?.source || null;
+    const d=await res.json();
+    return d.originalimage?.source || d.thumbnail?.source || null;
   }catch(e){ return null; }
 }
 
-// Progress bar
+// ── PROGRESS ─────────────────────────────────────────────────
 function wlUpdateProgress(){
   const n=wlSpotted.size, total=WL_ANIMALS.length;
   const lbl=document.getElementById('wl-progress-label');
@@ -4037,85 +4121,39 @@ function wlUpdateProgress(){
   if(fill) fill.style.width=((n/total)*100)+'%';
 }
 
-// Build a single card (all classes wl- prefixed)
+// ── BUILD GRID CARD ───────────────────────────────────────────
 function wlBuildCard(a){
-  const wrap=document.createElement('div');
-  wrap.className='wl-card-wrap'+(wlSpotted.has(a.id)?' is-spotted':'');
-  wrap.dataset.id=a.id;
-  const imgSrc=wlImageMap[a.id]||'';
-  const spottedText=wlSpotted.has(a.id)?'✓ Spotted':'+ Spot it';
-  wrap.innerHTML=`
-    <div class="wl-card-inner">
-      <div class="wl-card-front">
-        <img class="wl-card-img${imgSrc?' ':''}${imgSrc?'':''}"
-             ${imgSrc?`src="${imgSrc}"`:`data-wlsrc="${a.id}"`}
-             alt="${a.name}" loading="lazy" decoding="async">
-        <div class="wl-img-placeholder">${a.emoji}</div>
-        <div class="wl-card-overlay"></div>
-        <div class="wl-card-name">${a.name}<span class="wl-card-name-is">${a.nameIs}</span></div>
-        <button class="wl-spot-btn" data-id="${a.id}" aria-label="Mark ${a.name} as spotted">${spottedText}</button>
-        <div class="wl-spotted-badge">✓<br>SEEN</div>
-      </div>
-      <div class="wl-card-back">
-        <div class="wl-card-back-inner">
-          <div class="wl-back-hint">tap to close ↩</div>
-          <div class="wl-back-title">${a.name}</div>
-          <div class="wl-back-title-is">${a.nameIs}</div>
-          <div class="wl-info-grid">
-            <div class="wl-info-row full">
-              <span class="wl-info-label">🏔 Habitat</span>
-              <span class="wl-info-value">${a.habitat}</span>
-            </div>
-            <div class="wl-info-row">
-              <span class="wl-info-label">⏳ Lifespan</span>
-              <span class="wl-info-value">${a.lifespan}</span>
-            </div>
-            <div class="wl-info-row">
-              <span class="wl-info-label">⚖️ Weight</span>
-              <span class="wl-info-value">${a.weight}</span>
-            </div>
-            <div class="wl-info-row">
-              <span class="wl-info-label">📏 Size</span>
-              <span class="wl-info-value">${a.size}</span>
-            </div>
-            <div class="wl-info-row full">
-              <span class="wl-info-label">🍽 Diet</span>
-              <span class="wl-info-value">${a.diet}</span>
-            </div>
-            <div class="wl-info-row full">
-              <span class="wl-info-label">🌿 Conservation</span>
-              <span class="wl-info-value">${a.conservation||''}</span>
-            </div>
-          </div>
-          <div class="wl-divider"></div>
-          <div class="wl-section-label">🇮🇸 Iceland Fact</div>
-          <span class="wl-iceland-fact">${a.icelandicFact||''}</span>
-          <div class="wl-divider"></div>
-          <div class="wl-section-label">🔍 Behaviours</div>
-          ${a.behaviors.map(b=>`<span class="wl-behavior-text">• ${b}</span>`).join('')}
-          <div class="wl-divider"></div>
-          <div class="wl-section-label">💡 Fun Fact</div>
-          <span class="wl-fun-fact">${a.funFact||''}</span>
-          <div class="wl-back-source">📚 ${a.source}</div>
-        </div>
-      </div>
-    </div>`;
+  const div=document.createElement('div');
+  div.className='wl-card'+(wlSpotted.has(a.id)?' is-spotted':'');
+  div.dataset.id=a.id;
 
-  // Image fade-in
-  const img=wrap.querySelector('.wl-card-img');
-  const ph =wrap.querySelector('.wl-img-placeholder');
-  if(img && imgSrc){
+  const imgSrc=wlImageMap[a.id]||'';
+  div.innerHTML=
+    '<img class="wl-card-img" alt="'+a.name+'" loading="lazy" decoding="async">'+
+    '<div class="wl-img-placeholder">'+a.emoji+'</div>'+
+    '<div class="wl-card-overlay"></div>'+
+    '<div class="wl-card-name">'+a.name+'<span class="wl-card-name-is">'+a.nameIs+'</span></div>'+
+    '<div class="wl-spotted-badge">✓<br>SEEN</div>'+
+    '<button class="wl-spot-btn" data-id="'+a.id+'">'+
+      (wlSpotted.has(a.id)?'✓ Spotted':'+ Spot it')+
+    '</button>';
+
+  // Set image after building
+  const img=div.querySelector('.wl-card-img');
+  const ph =div.querySelector('.wl-img-placeholder');
+  if(imgSrc){
+    img.src=imgSrc;
     if(img.complete && img.naturalWidth>0){
       img.classList.add('loaded'); ph.classList.add('hidden');
     } else {
-      img.addEventListener('load',()=>{ img.classList.add('loaded'); ph.classList.add('hidden'); });
-      img.addEventListener('error',()=>{ img.style.display='none'; });
+      img.onload =()=>{ img.classList.add('loaded');  ph.classList.add('hidden'); };
+      img.onerror=()=>{ img.style.display='none'; };
     }
   }
-  return wrap;
+  return div;
 }
 
-// Render all cards
+// ── RENDER GRID ───────────────────────────────────────────────
 function wlRender(){
   const grid=document.getElementById('wl-grid');
   if(!grid) return;
@@ -4124,20 +4162,19 @@ function wlRender(){
   wlUpdateProgress();
 }
 
-// Inject image into existing card after async fetch
+// ── INJECT IMAGE INTO EXISTING CARD ──────────────────────────
 function wlInjectImage(id,src){
-  const wrap=document.querySelector(`.wl-card-wrap[data-id="${id}"]`);
-  if(!wrap) return;
-  const img=wrap.querySelector('.wl-card-img');
-  const ph =wrap.querySelector('.wl-img-placeholder');
-  if(img && src){
-    img.src=src;
-    img.addEventListener('load',()=>{ img.classList.add('loaded'); if(ph) ph.classList.add('hidden'); });
-    img.addEventListener('error',()=>{ img.style.display='none'; });
-  }
+  const card=document.querySelector('.wl-card[data-id="'+id+'"]');
+  if(!card) return;
+  const img=card.querySelector('.wl-card-img');
+  const ph =card.querySelector('.wl-img-placeholder');
+  if(!img||!src) return;
+  img.src=src;
+  img.onload =()=>{ img.classList.add('loaded');  if(ph) ph.classList.add('hidden'); };
+  img.onerror=()=>{ img.style.display='none'; };
 }
 
-// Load all images (cache-first)
+// ── LOAD IMAGES ───────────────────────────────────────────────
 async function wlLoadImages(){
   const status=document.getElementById('wl-load-status');
   if(wlLoadImgCache()){
@@ -4146,17 +4183,228 @@ async function wlLoadImages(){
     return;
   }
   wlRender();
-  if(status) status.textContent='Loading wildlife photos from Wikipedia…';
-  const fetches=WL_ANIMALS.map(a=>
-    wlFetchImage(a).then(src=>{
+  if(status) status.textContent='Loading wildlife photos…';
+  await Promise.allSettled(
+    WL_ANIMALS.map(a=>wlFetchImage(a).then(src=>{
       if(src){ wlImageMap[a.id]=src; wlInjectImage(a.id,src); }
-    })
+    }))
   );
-  await Promise.allSettled(fetches);
   wlSaveImgCache();
   if(status) status.style.display='none';
 }
 
+// ── MODAL ─────────────────────────────────────────────────────
+function wlOpenModal(id){
+  const a=WL_ANIMALS.find(x=>x.id===id);
+  if(!a) return;
+  wlActiveId=id;
+
+  // Image
+  const imgEl=document.getElementById('wl-modal-img');
+  const phEl =document.getElementById('wl-modal-img-placeholder');
+  const src=wlImageMap[id]||'';
+  phEl.textContent=a.emoji;
+  if(src){
+    imgEl.style.display='block';
+    imgEl.src=src; imgEl.alt=a.name;
+    phEl.style.display='none';
+  } else {
+    imgEl.style.display='none';
+    phEl.style.display='flex';
+  }
+
+  // Name
+  document.getElementById('wl-modal-name').textContent=a.name;
+  document.getElementById('wl-modal-name-is').textContent=a.nameIs;
+
+  // Spot button in modal header
+  const sw=document.getElementById('wl-modal-spotted-wrap');
+  const spotted=wlSpotted.has(id);
+  sw.innerHTML='<button class="wl-spot-btn" data-id="'+id+'" style="position:static;">'+
+    (spotted?'✓ Spotted':'+ Spot it')+'</button>';
+
+  // Info body
+  const info=document.getElementById('wl-modal-info');
+  info.innerHTML=
+    '<div class="wl-info-grid">'+
+      '<div class="wl-info-row full"><span class="wl-info-label">🏔 Habitat</span><span class="wl-info-value">'+a.habitat+'</span></div>'+
+      '<div class="wl-info-row"><span class="wl-info-label">⏳ Lifespan</span><span class="wl-info-value">'+a.lifespan+'</span></div>'+
+      '<div class="wl-info-row"><span class="wl-info-label">⚖️ Weight</span><span class="wl-info-value">'+a.weight+'</span></div>'+
+      '<div class="wl-info-row"><span class="wl-info-label">📏 Size</span><span class="wl-info-value">'+a.size+'</span></div>'+
+      '<div class="wl-info-row full"><span class="wl-info-label">🍽 Diet</span><span class="wl-info-value">'+a.diet+'</span></div>'+
+      '<div class="wl-info-row full"><span class="wl-info-label">🌿 Conservation</span><span class="wl-info-value">'+(a.conservation||'')+'</span></div>'+
+    '</div>'+
+    '<div class="wl-divider"></div>'+
+    '<span class="wl-section-label">🇮🇸 Iceland Fact</span>'+
+    '<span class="wl-iceland-fact">'+(a.icelandicFact||'')+'</span>'+
+    '<div class="wl-divider"></div>'+
+    '<span class="wl-section-label">🔍 Behaviours</span>'+
+    a.behaviors.map(b=>'<span class="wl-behavior-text">• '+b+'</span>').join('')+
+    '<div class="wl-divider"></div>'+
+    '<span class="wl-section-label">💡 Fun Fact</span>'+
+    '<span class="wl-fun-fact">'+(a.funFact||'')+'</span>'+
+    '<span class="wl-back-source">📚 '+a.source+'</span>';
+
+  // Show modal
+  const modal=document.getElementById('wl-modal');
+  const body =document.getElementById('wl-modal-body');
+  body.scrollTop=0;
+  modal.classList.add('show');
+  document.body.style.overflow='hidden';
+}
+
+function wlCloseModal(){
+  const modal=document.getElementById('wl-modal');
+  const sheet=document.getElementById('wl-modal-sheet');
+  // Slide out
+  sheet.style.transition='transform .32s cubic-bezier(0.4,0,1,1), opacity .28s ease';
+  sheet.style.transform='translateY(100%)';
+  sheet.style.opacity='0';
+  setTimeout(()=>{
+    modal.classList.remove('show');
+    sheet.style.cssText='';
+    document.body.style.overflow='';
+    wlActiveId=null;
+  },320);
+}
+
+// ── SPOT TOGGLE ───────────────────────────────────────────────
+function wlToggleSpot(id){
+  const spotted=wlSpotted.has(id);
+  if(spotted){
+    wlSpotted.delete(id);
+  } else {
+    wlSpotted.add(id);
+    wlPlayAnimalSound(id);
+    if(wlSpotted.size===WL_ANIMALS.length){
+      setTimeout(wlPlayCelebrationSound,400);
+      setTimeout(wlShowCelebration,300);
+    }
+  }
+  wlSaveSpotted();
+  wlUpdateProgress();
+
+  // Update grid card
+  const card=document.querySelector('.wl-card[data-id="'+id+'"]');
+  if(card){
+    const btn=card.querySelector('.wl-spot-btn');
+    if(!wlSpotted.has(id)){
+      card.classList.remove('is-spotted');
+      if(btn) btn.textContent='+ Spot it';
+    } else {
+      card.classList.add('is-spotted');
+      if(btn) btn.textContent='✓ Spotted';
+    }
+  }
+
+  // Update modal spot button if open
+  const msw=document.getElementById('wl-modal-spotted-wrap');
+  if(msw && wlActiveId===id){
+    const mbtn=msw.querySelector('.wl-spot-btn');
+    if(mbtn) mbtn.textContent=wlSpotted.has(id)?'✓ Spotted':'+ Spot it';
+  }
+}
+
+// ── EVENT DELEGATION ──────────────────────────────────────────
+document.addEventListener('click',e=>{
+  // Spot button (on grid card or in modal)
+  const spotBtn=e.target.closest('.wl-spot-btn');
+  if(spotBtn){
+    e.stopPropagation();
+    wlToggleSpot(spotBtn.dataset.id);
+    return;
+  }
+  // Tap grid card body (not spot button) → open modal
+  const card=e.target.closest('.wl-card');
+  if(card && !e.target.closest('.wl-spot-btn')){
+    wlOpenModal(card.dataset.id);
+    return;
+  }
+  // Tap modal backdrop → close
+  if(e.target===document.getElementById('wl-modal-backdrop')){
+    wlCloseModal();
+  }
+});
+
+// ESC closes modal
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape' && wlActiveId) wlCloseModal();
+});
+
+// ── SOUNDS ────────────────────────────────────────────────────
+function wlPlaySpotSound(){
+  try{
+    const ac=getAC(); if(!ac) return; const now=ac.currentTime;
+    [[523.25,0],[659.25,.07],[783.99,.14]].forEach(([freq,delay])=>{
+      const o=ac.createOscillator(), g=ac.createGain();
+      o.connect(g); g.connect(ac.destination); o.type='sine';
+      o.frequency.setValueAtTime(freq,now+delay);
+      g.gain.setValueAtTime(0,now+delay);
+      g.gain.linearRampToValueAtTime(.16,now+delay+.015);
+      g.gain.exponentialRampToValueAtTime(.001,now+delay+.5);
+      o.start(now+delay); o.stop(now+delay+.55);
+    });
+  }catch(e){}
+}
+
+function wlPlayCelebrationSound(){
+  try{
+    const ac=getAC(); if(!ac) return; const now=ac.currentTime;
+    [523.25,587.33,659.25,698.46,783.99,880,987.77,1046.5].forEach((freq,i)=>{
+      const o=ac.createOscillator(), g=ac.createGain();
+      o.connect(g); g.connect(ac.destination);
+      o.type=i%2===0?'sine':'triangle';
+      o.frequency.setValueAtTime(freq,now+i*.07);
+      g.gain.setValueAtTime(0,now+i*.07);
+      g.gain.linearRampToValueAtTime(.18,now+i*.07+.02);
+      g.gain.exponentialRampToValueAtTime(.001,now+i*.07+.45);
+      o.start(now+i*.07); o.stop(now+i*.07+.5);
+    });
+  }catch(e){}
+}
+
+// Wildlife tab navigation sound
+function playWildlifeSound(){
+  try{
+    const ac=getAC(); if(!ac) return; const now=ac.currentTime;
+    [[1200,0,.12],[1800,.09,.1]].forEach(([freq,delay,dur])=>{
+      const o=ac.createOscillator(), g=ac.createGain();
+      o.connect(g); g.connect(ac.destination); o.type='sine';
+      o.frequency.setValueAtTime(freq,now+delay);
+      o.frequency.exponentialRampToValueAtTime(freq*1.15,now+delay+dur);
+      g.gain.setValueAtTime(0,now+delay);
+      g.gain.linearRampToValueAtTime(.14,now+delay+.01);
+      g.gain.exponentialRampToValueAtTime(.001,now+delay+dur);
+      o.start(now+delay); o.stop(now+delay+dur+.01);
+    });
+  }catch(e){}
+}
+
+// ── CELEBRATION ────────────────────────────────────────────────
+function wlShowCelebration(){
+  const el=document.createElement('div');
+  el.id='wl-celebration';
+  el.innerHTML=
+    '<div class="wl-cel-inner">'+
+    '<span class="wl-cel-emoji">🎉</span>'+
+    '<div class="wl-cel-title">All 15 Spotted!</div>'+
+    '<div class="wl-cel-sub">You’ve documented every creature in Iceland’s wilderness!</div>'+
+    '<button class="wl-cel-btn" onclick="document.getElementById(&quot;wl-celebration&quot;).remove()">Close</button>'+
+    '</div>';
+  document.body.appendChild(el);
+  setTimeout(()=>{ if(el.parentNode) el.remove(); },7000);
+}
+
+// ── INIT ──────────────────────────────────────────────────────
+function wlInit(){
+  wlLoadSpotted();
+  wlLoadImages();
+}
+
+document.addEventListener('DOMContentLoaded',()=>{
+  if(typeof TAB_SOUNDS!=='undefined') TAB_SOUNDS.wildlife=playWildlifeSound;
+  wlInit();
+});
 
 // ═══════════════════════════════════════════════════════════
 // ANIMAL SOUND SYNTHESIS — v4.1
@@ -4423,44 +4671,31 @@ function wlOpenScrim(){ if(wlScrim){ wlScrim.classList.add('visible'); }}
 function wlCloseScrim(){ if(wlScrim){ wlScrim.classList.remove('visible'); }}
 
 // ── FLIP OPEN — centered, expanded ────────────────────────────
-function wlFlipOpen(wrap){
-  const inner=wrap.querySelector('.wl-card-inner');
-  const vw=window.innerWidth, vh=window.innerHeight;
-  const tw=Math.min(480,vw*.94), th=Math.min(560,vh*.84);
-  inner.style.cssText=[
-    'position:fixed','left:50%','top:50%',
-    `width:${tw}px`,`height:${th}px`,
-    // Start face-down (rotateY 180) + slightly scaled down for entry animation
-    'transform:translateX(-50%) translateY(-50%) rotateY(180deg) scale(0.88)',
-    'border-radius:14px',
-    'z-index:5200',   // above map(4000), aurora overlay(4000), tour popup(5000)
-    'box-shadow:0 32px 100px rgba(0,0,0,.9),0 0 0 1px rgba(59,232,176,.25),0 0 50px rgba(59,232,176,.08)',
-    'overflow:hidden','opacity:0',
-    'transition:opacity .4s var(--ease-out-expo), transform .45s var(--ease-out-expo)',
-    'will-change:transform,opacity'
-  ].join(';');
-  // Trigger reflow then animate to final state
-  inner.getBoundingClientRect();
-  inner.style.opacity='1';
-  inner.style.transform='translateX(-50%) translateY(-50%) rotateY(180deg) scale(1)';
-  wrap.classList.add('is-flipped');
-  wlOpenScrim();
-}
 
-// ── FLIP CLOSE ─────────────────────────────────────────────────
 function wlFlipClose(wrap){
-  const inner=wrap.querySelector('.wl-card-inner');
-  if(!inner.style.position) return;
-  inner.style.transition='transform .35s var(--ease-out-expo),opacity .28s ease';
-  inner.style.transform='translateX(-50%) translateY(-50%) rotateY(90deg) scale(.9)';
-  inner.style.opacity='0';
+  const back = wrap.querySelector('.wl-card-back');
+  if(!back || !back.style.position) return;
+
+  back.style.transform = 'translateX(-50%) translateY(-50%) scale(0.88)';
+  back.style.opacity = '0';
+
   wrap.classList.remove('is-flipped');
   wlCloseScrim();
-  setTimeout(()=>{ inner.style.cssText=''; },380);
+
+  setTimeout(()=>{
+    // Reset back face to its normal in-grid state
+    back.style.cssText = '';
+  }, 380);
 }
 
 function wlCloseAll(){
   document.querySelectorAll('.wl-card-wrap.is-flipped').forEach(w=>wlFlipClose(w));
+  // Also close any back face that may have lost its wrap reference
+  document.querySelectorAll('.wl-card-back[style*="position:fixed"]').forEach(back=>{
+    const wrap=back.closest('.wl-card-wrap');
+    if(wrap) wlFlipClose(wrap);
+    else { back.style.cssText=''; }
+  });
 }
 
 if(wlScrim) wlScrim.addEventListener('click',wlCloseAll);
@@ -4504,7 +4739,11 @@ document.addEventListener('click',e=>{
 
   // Tap card back → flip close
   const back=e.target.closest('.wl-card-back');
-  if(back) wlFlipClose(back.closest('.wl-card-wrap'));
+  if(back){
+    const wrap=back.closest('.wl-card-wrap');
+    if(wrap) wlFlipClose(wrap);
+    return;
+  }
 });
 
 // ESC key
