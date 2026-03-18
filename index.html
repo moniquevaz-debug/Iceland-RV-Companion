@@ -227,7 +227,8 @@ select option{background:#0d0f1a;color:var(--ice);}
    TABS
 ═══════════════════════════════════════════ */
 .tabs{
-  display:flex;border-bottom:1px solid rgba(59,232,176,.08);flex-shrink:0;
+  display:none; /* hidden on mobile — bnav handles tabs */
+  border-bottom:1px solid rgba(59,232,176,.08);flex-shrink:0;
   background:rgba(7,8,15,.94);backdrop-filter:blur(12px);
 }
 .tab{
@@ -567,6 +568,7 @@ min-height:36px;display:inline-flex;align-items:center;}
   .app  #map-container{position:absolute;inset:0;display:block;}
   #map{height:100%;}
   .map-fab{bottom:24px;right:20px;position:fixed;}
+  .tabs{display:flex;} /* show tab strip on desktop */
   .bnav{display:none;}
   .btn-go{padding:10px 22px;}
   select{font-size:.82rem;}
@@ -1710,7 +1712,42 @@ html {
   .left-col.wildlife-mode .search-sheet  { display:none !important; }
   .left-col.wildlife-mode .route-summary { display:none !important; }
   .left-col.wildlife-mode .ntl           { display:none !important; }
-  .left-col.wildlife-mode .tabs          { order:0; }
+  .left-col.wildlife-mode .tabs          { order:0; display:flex; }
+}
+
+
+/* ── COLLAPSIBLE SEARCH SHEET ────────────────────────────────
+   Mobile only. After search fires, sheet collapses to a
+   slim "From → To" bar to maximise scrolling space.
+──────────────────────────────────────────────────────────── */
+@media(max-width:767px){
+  .search-sheet.collapsed{padding:0;}
+  .search-sheet.collapsed .ss-form{display:none;}
+  .search-sheet.collapsed .ss-collapsed-bar{display:flex !important;}
+
+  .ss-collapsed-bar{
+    display:none;
+    align-items:center;justify-content:space-between;
+    padding:8px 14px;
+    cursor:pointer;
+    min-height:38px;
+    -webkit-tap-highlight-color:transparent;
+    touch-action:manipulation;
+  }
+  .ss-route-summary{
+    font-family:var(--fs);font-size:.72rem;font-style:italic;
+    color:rgba(214,238,248,.7);
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+    flex:1;
+  }
+  .ss-expand-btn{
+    font-size:1rem;color:var(--aur);
+    background:none;border:none;padding:4px 6px;
+    cursor:pointer;-webkit-appearance:none;
+    line-height:1;flex-shrink:0;
+    transition:transform .3s var(--ease-out-expo);
+  }
+  .search-sheet:not(.collapsed) .ss-expand-btn{transform:rotate(180deg);}
 }
 
 </style>
@@ -1737,7 +1774,7 @@ html {
         </div>
       </div>
     </div>
-    <span class="tb-ver">v4.3</span>
+    <span class="tb-ver">v4.4</span>
     <div class="tb-spacer"></div>
     <div class="tb-right-btns">
       <button class="gps-btn off" id="gps-btn" onclick="toggleGPS()" title="Tap to enable GPS tracking">
@@ -1776,28 +1813,36 @@ html {
 <!-- ═══ LEFT COL ═══ -->
 <div class="left-col">
 
-  <div class="search-sheet">
-    <div class="sel-row">
-      <div class="sel-wrap">
-        <span class="sel-label">📍 Departure</span>
-        <select id="sel-from"><option value="">From camp…</option></select>
-      </div>
-      <div class="sel-wrap">
-        <span class="sel-label">🏁 Destination</span>
-        <select id="sel-to"><option value="">To camp…</option></select>
-      </div>
+  <div class="search-sheet" id="search-sheet">
+    <!-- Collapsed summary bar (shown when collapsed) -->
+    <div class="ss-collapsed-bar" id="ss-collapsed-bar" onclick="expandSearchSheet()" style="display:none;">
+      <span class="ss-route-summary" id="ss-route-summary">Search a route…</span>
+      <button class="ss-expand-btn" aria-label="Expand search">⌄</button>
     </div>
-    <div class="action-row">
-      <div class="rchips">
-        <button class="rc" onclick="setR(10000,this)">10 km</button>
-        <button class="rc on" onclick="setR(25000,this)">25 km</button>
-        <button class="rc" onclick="setR(50000,this)">50 km</button>
-        <button class="rc" onclick="setR(100000,this)">100 km</button>
+    <!-- Full form (shown by default) -->
+    <div class="ss-form" id="ss-form">
+      <div class="sel-row">
+        <div class="sel-wrap">
+          <span class="sel-label">📍 Departure</span>
+          <select id="sel-from"><option value="">From camp…</option></select>
+        </div>
+        <div class="sel-wrap">
+          <span class="sel-label">🏁 Destination</span>
+          <select id="sel-to"><option value="">To camp…</option></select>
+        </div>
       </div>
-      <button class="btn-go" id="btn-go" onclick="doSearch()" disabled
-        onmousedown="playSearchChime()" ontouchstart="playSearchChime()">
-        Search
-      </button>
+      <div class="action-row">
+        <div class="rchips">
+          <button class="rc" onclick="setR(10000,this)">10 km</button>
+          <button class="rc on" onclick="setR(25000,this)">25 km</button>
+          <button class="rc" onclick="setR(50000,this)">50 km</button>
+          <button class="rc" onclick="setR(100000,this)">100 km</button>
+        </div>
+        <button class="btn-go" id="btn-go" onclick="doSearch()" disabled
+          onmousedown="playSearchChime()" ontouchstart="playSearchChime()">
+          Search
+        </button>
+      </div>
     </div>
   </div>
 
@@ -2383,6 +2428,9 @@ async function doSearch(){
 
   // Tour day popup — fires after search if departure is a tour day
   checkTourAfterSearch();
+
+  // Collapse search sheet on mobile to give more scroll space
+  collapseSearchSheet();
 }
 
 // ═══════════════════════════════════════════════════════════
@@ -4803,6 +4851,28 @@ document.addEventListener('DOMContentLoaded',()=>{
   if(typeof TAB_SOUNDS!=='undefined') TAB_SOUNDS.wildlife=playWildlifeSound;
   wlInit();
 });
+
+
+// ── COLLAPSIBLE SEARCH SHEET ─────────────────────────────────
+function collapseSearchSheet(){
+  if(window.innerWidth >= 768) return; // desktop: never collapse
+  const sheet = document.getElementById('search-sheet');
+  const bar   = document.getElementById('ss-collapsed-bar');
+  const summary = document.getElementById('ss-route-summary');
+  if(!sheet) return;
+  // Build summary text from current selections
+  const fi = parseInt(document.getElementById('sel-from').value);
+  const ti = parseInt(document.getElementById('sel-to').value);
+  const fromName = (!isNaN(fi) && CAMPS[fi]) ? CAMPS[fi].name.split(' ')[0] : '—';
+  const toName   = (!isNaN(ti) && CAMPS[ti]) ? CAMPS[ti].name.split(' ')[0] : '—';
+  if(summary) summary.textContent = '📍 ' + fromName + '  →  🏁 ' + toName;
+  sheet.classList.add('collapsed');
+}
+
+function expandSearchSheet(){
+  const sheet = document.getElementById('search-sheet');
+  if(sheet) sheet.classList.remove('collapsed');
+}
 
 function closeToast(){document.getElementById('toast')?.classList.remove('show');}
 
