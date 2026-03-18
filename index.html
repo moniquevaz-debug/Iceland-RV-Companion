@@ -222,6 +222,28 @@ select option{background:#0d0f1a;color:var(--ice);}
   border-color:var(--aur);background:rgba(59,232,176,.12);color:var(--aur);
   box-shadow:0 0 12px rgba(59,232,176,.25);
 }
+/* Pill selection states for two-tap departure/destination picking */
+.np.from{
+  border-color:var(--aur);background:rgba(59,232,176,.18);color:var(--aur);
+  box-shadow:0 0 14px rgba(59,232,176,.35);
+  transform:scale(1.1);
+}
+.np.to{
+  border-color:var(--gold);background:rgba(240,192,64,.18);color:var(--gold);
+  box-shadow:0 0 14px rgba(240,192,64,.3);
+  transform:scale(1.1);
+}
+/* Small label under pill showing FROM / TO */
+.np-label{
+  position:absolute;bottom:-14px;left:50%;transform:translateX(-50%);
+  font-family:var(--fm);font-size:.38rem;letter-spacing:.06em;
+  text-transform:uppercase;white-space:nowrap;pointer-events:none;
+  opacity:0;transition:opacity .3s;
+}
+.np.from .np-label{opacity:1;color:var(--aur);}
+.np.to   .np-label{opacity:1;color:var(--gold);}
+/* ntl needs position:relative context for labels */
+.ntl .np{position:relative;}
 
 /* ═══════════════════════════════════════════
    TABS
@@ -1770,6 +1792,9 @@ html {
   .ss-form-header{ display:none; }
 }
 
+
+.np-num{display:block;line-height:1;}
+
 </style>
 </head>
 <body>
@@ -1794,7 +1819,7 @@ html {
         </div>
       </div>
     </div>
-    <span class="tb-ver">v4.5</span>
+    <span class="tb-ver">v4.8</span>
     <div class="tb-spacer"></div>
     <div class="tb-right-btns">
       <button class="gps-btn off" id="gps-btn" onclick="toggleGPS()" title="Tap to enable GPS tracking">
@@ -2232,15 +2257,33 @@ let mapVisible=false;
     sf.innerHTML+=`<option value="${i}">${txt}</option>`;
     st.innerHTML+=`<option value="${i}">${txt}</option>`;
   });
-  sf.addEventListener('change',()=>{checkReady();playScrollSound();});
-  st.addEventListener('change',()=>{checkReady();playScrollSound();});
+  sf.addEventListener('change',()=>{
+    // Sync pill FROM state when dropdown changes manually
+    const v = parseInt(sf.value);
+    _pillFrom = isNaN(v) || sf.value==='' ? -1 : v;
+    _updatePills();
+    checkReady();
+    playScrollSound();
+  });
+  st.addEventListener('change',()=>{
+    // Sync pill TO state when dropdown changes manually
+    const v = parseInt(st.value);
+    _pillTo = isNaN(v) || st.value==='' ? -1 : v;
+    _updatePills();
+    checkReady();
+    playScrollSound();
+  });
 
-  // Night timeline pills
+  // Night timeline pills — two-tap departure/destination picker
   const tl=document.getElementById('ntl');
-  CAMPS.forEach((c,i)=>{
+  CAMPS.forEach((camp,i)=>{
     const d=document.createElement('button');
-    d.className='np';d.id='np'+i;d.textContent=c.n;d.title=c.name;
-    d.onclick=()=>{sf.value=i;checkReady();};
+    d.className='np';
+    d.id='np'+i;
+    d.title=camp.name;
+    // Inner: number + micro-label
+    d.innerHTML='<span class="np-num">'+camp.n+'</span><span class="np-label"></span>';
+    d.addEventListener('click',()=>pilltap(i));
     tl.appendChild(d);
   });
 
@@ -2405,12 +2448,17 @@ async function doSearch(){
   document.getElementById('rb-dist').textContent=(dist/1000*1.35).toFixed(0)+' km';
   document.getElementById('rb-time').textContent=Math.round(dist/1000*1.35/70*60)+' min';
 
-  // Timeline
+  // Timeline — show route progress, clear FROM/TO labels
   document.querySelectorAll('.np').forEach((p,i)=>{
-    p.classList.remove('act','vis');
-    if(i<curFi)p.classList.add('vis');
-    if(i===curFi)p.classList.add('act');
+    p.classList.remove('act','vis','from','to');
+    if(i<curFi) p.classList.add('vis');
+    if(i===curFi) p.classList.add('act');
+    const lbl=p.querySelector('.np-label');
+    if(lbl) lbl.textContent='';
   });
+  // Reset pill state (search has consumed the selection)
+  _pillFrom = curFi;
+  _pillTo   = curTi;
 
   // Camp footer
   document.getElementById('cdp').classList.add('show');
@@ -4895,6 +4943,99 @@ function collapseSearchSheet(){
 function expandSearchSheet(){
   const sheet = document.getElementById('search-sheet');
   if(sheet) sheet.classList.remove('collapsed');
+}
+
+
+// ── TWO-TAP PILL LOGIC ───────────────────────────────────────
+// Tracks which pill index is FROM and which is TO.
+// -1 means not set.
+let _pillFrom = -1;
+let _pillTo   = -1;
+
+function pilltap(i){
+  // ── ORDERED SELECTION RULES ──────────────────────────────────
+  // Only forward routes: FROM must always be < TO (camp index).
+  // Tap 1: sets FROM.
+  // Tap 2 (> FROM): sets TO → auto-search.
+  // Tap 2 (< FROM or = FROM): resets everything, starts fresh.
+  // When both set: any tap resets, then sets tapped pill as FROM.
+
+  if(_pillFrom === -1){
+    // Nothing selected — set as FROM
+    _pillFrom = i;
+    _updatePills();
+    playScrollSound();
+
+  } else if(_pillTo === -1){
+    // FROM set, TO not yet set
+    if(i === _pillFrom){
+      // Tapped FROM again → reset (deselect)
+      _pillFrom = -1;
+      _updatePills();
+      playScrollSound();
+    } else if(i < _pillFrom){
+      // Invalid: trying to go backwards → shake pill, do nothing
+      _shakePill(i);
+    } else {
+      // Valid forward selection → set TO
+      _pillTo = i;
+      _updatePills();
+      playScrollSound();
+      // Auto-search
+      document.getElementById('sel-from').value = String(_pillFrom);
+      document.getElementById('sel-to').value   = String(_pillTo);
+      checkReady();
+      doSearch();
+      return;
+    }
+
+  } else {
+    // Both set — any tap resets everything, then sets new FROM
+    _pillFrom = i;
+    _pillTo   = -1;
+    _updatePills();
+    playScrollSound();
+  }
+
+  // Sync dropdowns (non-search path)
+  document.getElementById('sel-from').value = _pillFrom >= 0 ? String(_pillFrom) : '';
+  document.getElementById('sel-to').value   = _pillTo   >= 0 ? String(_pillTo)   : '';
+  checkReady();
+}
+
+// Visual shake for invalid backward tap
+function _shakePill(i){
+  const btn = document.getElementById('np'+i);
+  if(!btn) return;
+  btn.style.transition = 'transform .1s ease';
+  btn.style.transform  = 'translateX(-5px)';
+  setTimeout(()=>{ btn.style.transform='translateX(5px)';  }, 100);
+  setTimeout(()=>{ btn.style.transform='translateX(-3px)'; }, 200);
+  setTimeout(()=>{ btn.style.transform='translateX(0)';
+                   btn.style.transition=''; }, 300);
+}
+
+function _updatePills(){
+  document.querySelectorAll('.np').forEach((btn, i) => {
+    btn.classList.remove('from','to','act','vis');
+    const lbl = btn.querySelector('.np-label');
+    if(i === _pillFrom){
+      btn.classList.add('from');
+      if(lbl) lbl.textContent = 'FROM';
+    } else if(i === _pillTo){
+      btn.classList.add('to');
+      if(lbl) lbl.textContent = 'TO';
+    } else {
+      if(lbl) lbl.textContent = '';
+    }
+  });
+}
+
+// Reset pills (called when dropdowns change manually or search clears)
+function resetPills(){
+  _pillFrom = -1;
+  _pillTo   = -1;
+  _updatePills();
 }
 
 function closeToast(){document.getElementById('toast')?.classList.remove('show');}
