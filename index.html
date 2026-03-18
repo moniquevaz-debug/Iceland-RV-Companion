@@ -1691,6 +1691,28 @@ html {
   #wl-modal-img-wrap{height:180px;}
   #wl-modal-name{font-size:1.3rem;}
 }
+
+/* ── WILDLIFE MODE — mobile only ─────────────────────────────
+   When wildlife tab active: hide search/route/timeline,
+   pull tabs to top so cards get maximum screen space.
+──────────────────────────────────────────────────────────── */
+@media(max-width:767px){
+  .left-col{display:flex;flex-direction:column;}
+
+  /* Default order for all children */
+  .search-sheet   { order:1; }
+  .route-summary  { order:2; }
+  .ntl            { order:3; }
+  .tabs           { order:4; }
+  .panels         { order:5; flex:1; min-height:0; }
+
+  /* Wildlife mode — tabs move to top, clutter hidden */
+  .left-col.wildlife-mode .search-sheet  { display:none !important; }
+  .left-col.wildlife-mode .route-summary { display:none !important; }
+  .left-col.wildlife-mode .ntl           { display:none !important; }
+  .left-col.wildlife-mode .tabs          { order:0; }
+}
+
 </style>
 </head>
 <body>
@@ -1715,7 +1737,7 @@ html {
         </div>
       </div>
     </div>
-    <span class="tb-ver">v4.2</span>
+    <span class="tb-ver">v4.3</span>
     <div class="tb-spacer"></div>
     <div class="tb-right-btns">
       <button class="gps-btn off" id="gps-btn" onclick="toggleGPS()" title="Tap to enable GPS tracking">
@@ -2229,6 +2251,9 @@ function openTab(id,el){
   el.classList.add('on');
   document.getElementById('panel-'+id).classList.add('on');
   if(TAB_SOUNDS[id]) TAB_SOUNDS[id]();
+  // Wildlife mode for mobile
+  const lc=document.querySelector('.left-col');
+  if(lc) lc.classList.toggle('wildlife-mode', id==='wildlife');
 }
 function mobileTab(id,el){
   document.querySelectorAll('.bn').forEach(b=>b.classList.remove('on'));
@@ -2259,6 +2284,9 @@ function mobileTab(id,el){
   document.querySelectorAll('#desktop-tabs .tab').forEach((t,i)=>{
     t.classList.toggle('on',['gas','wx','roads'][i]===id);
   });
+  // Wildlife mode: pull tabs to top, hide search/route/timeline
+  const lc=document.querySelector('.left-col');
+  if(lc) lc.classList.toggle('wildlife-mode', id==='wildlife');
 }
 
 function haversine(la1,lo1,la2,lo2){
