@@ -6,7 +6,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes"/>
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
 <meta name="theme-color" content="#0d111e"/>
-<title>🚐 Iceland RV Companion v3.3</title>
+<title>🚐 Iceland RV Companion v3.8</title>
   <link href="https://fonts.googleapis.com/css2?family=Bentham&family=IBM+Plex+Mono:wght@400;500;600&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet"/>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"/>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
@@ -160,6 +160,7 @@ select option{background:#0d0f1a;color:var(--ice);}
   font-family:var(--fm);font-size:.58rem;padding:7px 10px;border-radius:20px;
   border:1px solid rgba(140,200,230,.15);color:var(--muted);
   background:transparent;cursor:pointer;transition:all .15s;-webkit-appearance:none;
+  min-height:36px;display:inline-flex;align-items:center;justify-content:center;
 }
 .rc.on{background:rgba(59,232,176,.12);border-color:rgba(59,232,176,.4);color:var(--aur);}
 .btn-go{
@@ -254,8 +255,10 @@ select option{background:#0d0f1a;color:var(--ice);}
 .panel{
   position:absolute;inset:0;overflow-y:auto;display:none;
   -webkit-overflow-scrolling:touch;
-  padding-bottom:8px;
+  padding-bottom:calc(var(--bnav) + var(--sb) + 8px);
   scroll-behavior:smooth;
+  /* Smooth momentum scroll on iOS */
+  overscroll-behavior:contain;
 }
 .panel.on{display:block;}
 /* Cinematic scroll-triggered entry */
@@ -277,9 +280,10 @@ select option{background:#0d0f1a;color:var(--ice);}
 .brand-bar.show{display:flex;}
 .bl{font-family:var(--fm);font-size:.5rem;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-right:2px;}
 .fb{
-  font-family:var(--fm);font-size:.6rem;padding:5px 11px;border-radius:14px;
+  font-family:var(--fm);font-size:.6rem;padding:6px 11px;border-radius:14px;
   border:1px solid rgba(140,200,230,.15);color:var(--muted);
   background:transparent;cursor:pointer;transition:all .15s;white-space:nowrap;-webkit-appearance:none;
+  min-height:32px;display:inline-flex;align-items:center;
 }
 .fb.on{background:rgba(240,192,64,.12);border-color:rgba(240,192,64,.38);color:var(--gold);}
 .gas-hd{
@@ -335,7 +339,7 @@ select option{background:#0d0f1a;color:var(--ice);}
   font-family:var(--fm);font-size:.62rem;color:var(--gl);text-decoration:none;
   padding:5px 10px;border-radius:8px;border:1px solid rgba(140,200,230,.15);
   background:rgba(140,200,230,.05);transition:all .15s;
-}
+min-height:36px;display:inline-flex;align-items:center;}
 .ml:active{background:rgba(140,200,230,.12);}
 /* Camp footer */
 .cdp{padding:12px 16px;border-top:1px solid var(--border);display:none;margin-top:8px;}
@@ -560,8 +564,7 @@ select option{background:#0d0f1a;color:var(--ice);}
   }
   /* On desktop the map lives in right-col, not map-panel */
   #map-panel{display:none!important;}
-  .app.map-active .left-col{display:flex!important;}
-  #map-container{position:absolute;inset:0;display:block;}
+  .app  #map-container{position:absolute;inset:0;display:block;}
   #map{height:100%;}
   .map-fab{bottom:24px;right:20px;position:fixed;}
   .bnav{display:none;}
@@ -670,7 +673,7 @@ select option{background:#0d0f1a;color:var(--ice);}
   font-size:1.1rem;color:var(--muted);cursor:pointer;
   background:none;border:none;-webkit-appearance:none;
   transition:color .3s;line-height:1;padding:4px;
-}
+min-width:44px;min-height:44px;display:flex;align-items:center;justify-content:center;}
 .au-ov-close:hover{color:var(--ice);}
 .au-ov-title{
   font-family:var(--fs);font-size:1.45rem;font-weight:600;
@@ -880,6 +883,752 @@ select option{background:#0d0f1a;color:var(--ice);}
 
 /* ── TB BUTTON ROW (currency + translator side by side) ──────── */
 
+
+
+
+/* ═══════════════════════════════════════════════════════════
+   MOBILE RESPONSIVE — v3.4
+   Primary target: phones 375px–430px wide
+   All touch targets ≥ 44px, readable text ≥ 0.75rem
+═══════════════════════════════════════════════════════════ */
+
+/* ── TOPBAR mobile ────────────────────────────────────────── */
+@media(max-width:767px){
+  .topbar{
+    padding:calc(8px + var(--st)) 12px 8px;
+    gap:8px;
+    align-items:center;
+  }
+  .tb-icon{font-size:1.3rem;}
+  .tb-center{gap:2px;}
+  .tb-title{font-size:.92rem;}
+  .tb-clocks{
+    font-size:.48rem;
+    gap:4px;
+  }
+  .tb-ck-time{font-size:.48rem;}
+  .tb-ver{font-size:.38rem;padding:1px 5px;}
+  .tb-spacer{min-width:0;flex:1;}
+
+  /* Stack GPS above currency on very narrow screens */
+  .tb-right-btns{
+    gap:5px;
+    flex-direction:column;
+    align-items:flex-end;
+  }
+  .gps-btn{
+    font-size:.5rem;
+    padding:6px 9px;
+    min-height:32px;
+  }
+  .curr-btn{
+    font-size:.62rem;
+    padding:6px 10px;
+    min-height:32px;
+  }
+  .curr-ico{font-size:.8rem;}
+  .curr-lbl{font-size:.58rem;}
+}
+
+/* ── CURRENCY PANEL mobile ───────────────────────────────── */
+@media(max-width:767px){
+  #curr-panel{padding:14px 14px 16px;}
+  .curr-panel-title{font-size:.82rem;margin-bottom:10px;}
+  .curr-row{gap:8px;}
+  .curr-input{
+    font-size:.95rem;
+    padding:10px 10px;
+  }
+  .curr-input-label{font-size:.48rem;}
+  .curr-swap-btn{width:36px;height:36px;font-size:.9rem;}
+  .curr-result{font-size:1.25rem;padding:10px 12px;}
+  .curr-footer{font-size:.46rem;}
+}
+
+/* ── SEARCH SHEET mobile ─────────────────────────────────── */
+@media(max-width:767px){
+  .search-sheet{padding:10px 12px;}
+  /* Stack selects vertically on small phones */
+  .sel-row{
+    flex-direction:column;
+    gap:6px;
+    margin-bottom:8px;
+  }
+  .sel-wrap{width:100%;}
+  select{
+    font-size:.82rem;
+    padding:10px 28px 10px 10px;
+    min-height:44px;         /* touch target */
+  }
+  .sel-label{font-size:.48rem;}
+  .action-row{
+    flex-wrap:wrap;
+    gap:6px;
+  }
+  .rchips{
+    display:flex;
+    flex-wrap:wrap;
+    gap:5px;
+    flex:1;
+  }
+  .rc{
+    min-height:36px;
+    padding:6px 10px;
+    font-size:.58rem;
+    flex:1;
+    min-width:52px;
+  }
+  .btn-go{
+    padding:10px 18px;
+    font-size:.82rem;
+    min-height:44px;
+    width:100%;
+    margin-top:4px;
+  }
+}
+
+/* ── TABS mobile ─────────────────────────────────────────── */
+@media(max-width:767px){
+  .tab{
+    padding:11px 2px 10px;
+    font-size:.7rem;
+    min-height:44px;
+  }
+}
+
+/* ── BOTTOM NAV mobile ───────────────────────────────────── */
+@media(max-width:767px){
+  .bnav{
+    /* ensure enough height for comfortable tapping */
+  }
+  .bn{
+    padding:9px 4px;
+    min-height:52px;
+  }
+  .bn-ico{font-size:1.25rem;}
+  .bn-lbl{font-size:.55rem;}
+}
+
+/* ── GAS CARDS mobile ────────────────────────────────────── */
+@media(max-width:767px){
+  .gc{
+    margin:8px 10px 0;
+    padding:12px 12px 12px 14px;
+  }
+  .gcn{font-size:.9rem;}
+  .gca{font-size:.62rem;}
+  .gcm{gap:4px;}
+  .tag{font-size:.46rem;padding:2px 6px;}
+  .ml{font-size:.55rem;padding:4px 8px;min-height:28px;}
+}
+
+/* ── WEATHER CARDS mobile ───────────────────────────────── */
+@media(max-width:767px){
+  .wx-now{
+    margin:0 10px;
+    padding:12px 14px;
+    gap:12px;
+  }
+  .wx-big{font-size:2.2rem;}
+  .wx-icon{font-size:2rem;}
+  .wx-stat{margin:0 10px;}
+  .wx-warn{margin:6px 10px 0;}
+}
+
+/* ── AURORA CARD mobile ─────────────────────────────────── */
+@media(max-width:767px){
+  .au-card{margin:8px 10px 0;}
+  .au-view-btn{font-size:.72rem;padding:7px 14px;}
+}
+
+/* ── AURORA OVERLAY mobile ──────────────────────────────── */
+@media(max-width:767px){
+  .au-overlay-panel{
+    width:94vw;
+    padding:18px 16px 16px;
+    max-height:90vh;
+  }
+  .au-ov-title{font-size:1.25rem;}
+  .au-ov-kp-num{font-size:2.6rem;}
+  .au-legend-row{
+    grid-template-columns:36px 60px 1fr;
+    gap:6px;
+  }
+  .au-legend-kp{font-size:.9rem;}
+  .au-legend-desc{font-size:.52rem;}
+}
+
+/* ── ROAD CARDS mobile ──────────────────────────────────── */
+@media(max-width:767px){
+  .rn{margin:8px 10px 0;padding:12px 14px;}
+  .rn-title{font-size:.88rem;}
+  .rn-meta{font-size:.55rem;}
+  .rn-desc{font-size:.6rem;}
+  .alt-box{margin:8px 10px 0;padding:12px 14px;}
+}
+
+/* ── ROUTE SUMMARY mobile ───────────────────────────────── */
+@media(max-width:767px){
+  .route-summary{padding:8px 12px;}
+  .rs-val{font-size:.7rem;}
+  .rs-key{font-size:.8rem;}
+}
+
+/* ── CAMP DETAIL mobile ─────────────────────────────────── */
+@media(max-width:767px){
+  .cdp{padding:10px 12px 12px;}
+  .cdpn{font-size:1rem;}
+}
+
+/* ── TOAST mobile ───────────────────────────────────────── */
+@media(max-width:767px){
+  .toast{
+    left:10px;right:10px;
+    padding:12px 14px;
+    font-size:.65rem;
+  }
+}
+
+/* ── MAP FAB mobile ─────────────────────────────────────── */
+@media(max-width:767px){
+  .map-fab{
+    width:48px;height:48px;
+    font-size:1.2rem;
+    bottom:14px;right:14px;
+  }
+}
+
+/* ── NIGHT TIMELINE mobile ──────────────────────────────── */
+@media(max-width:767px){
+  .ntl{padding:6px 10px;}
+  .np{width:34px;height:34px;font-size:.72rem;}
+}
+
+/* ── VERY SMALL SCREENS (iPhone SE, 375px) ───────────────── */
+@media(max-width:389px){
+  .tb-title{font-size:.82rem;}
+  .tb-clocks{display:none;}   /* hide clocks on 375px to prevent overflow */
+  .curr-btn .curr-lbl{display:none;} /* icon only on tiny screens */
+  .tab{font-size:.62rem;padding:10px 1px 9px;}
+}
+
+/* ── LANDSCAPE PHONE ────────────────────────────────────── */
+@media(max-height:500px) and (orientation:landscape){
+  .topbar{padding:calc(4px + var(--st)) 12px 4px;}
+  .tb-clocks{display:none;}
+  .search-sheet{padding:6px 12px;}
+  .sel-row{flex-direction:row;}
+  .bnav{display:none;}
+  /* Show desktop-style tabs instead */
+  .tabs{display:flex;}
+}
+
+
+/* ── GLOBAL TOUCH IMPROVEMENTS ──────────────────────────────
+   Prevent 300ms tap delay, remove tap flash on all buttons  */
+button, select, input, textarea, a {
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+/* Ensure consistent box-sizing */
+*, *::before, *::after { box-sizing: border-box; }
+
+/* Prevent text size adjust on orientation change */
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+
+@media(max-width:767px){
+  #curr-panel{
+    max-height:70vh;
+    overflow-y:auto;
+  }
+}
+
+
+/* ═══════════════════════════════════════════════════════════
+   TOUR DAY POPUP — v3.5
+   Full-screen cinematic modal, one per tour day.
+   Dismissed state saved in localStorage per date.
+═══════════════════════════════════════════════════════════ */
+#tour-popup{
+  position:fixed;inset:0;z-index:5000;
+  display:none;align-items:center;justify-content:center;
+  padding:20px 16px;
+  box-sizing:border-box;
+}
+#tour-popup.show{display:flex;}
+
+/* Backdrop — blurred dark */
+.tour-backdrop{
+  position:absolute;inset:0;
+  background:rgba(4,5,10,.88);
+  backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
+  animation:tourFadeIn .5s var(--ease-out-expo) both;
+}
+@keyframes tourFadeIn{from{opacity:0}to{opacity:1}}
+
+/* Card */
+.tour-card{
+  position:relative;z-index:1;
+  width:min(92vw,420px);
+  border-radius:20px;
+  padding:28px 24px 24px;
+  text-align:center;
+  overflow:hidden;
+  animation:tourSlideUp .6s var(--ease-out-expo) both;
+  animation-delay:.08s;
+  /* Background set dynamically via JS data-theme */
+  background:rgba(10,14,24,.97);
+  border:1px solid rgba(255,255,255,.1);
+  box-shadow:0 32px 80px rgba(0,0,0,.7), 0 0 0 1px rgba(255,255,255,.04) inset;
+}
+@keyframes tourSlideUp{
+  from{opacity:0;transform:translateY(32px) scale(.97)}
+  to{opacity:1;transform:translateY(0) scale(1)}
+}
+
+/* Close button */
+.tour-close{
+  position:absolute;top:14px;right:16px;
+  width:36px;height:36px;
+  background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);
+  border-radius:50%;color:rgba(255,255,255,.5);
+  font-size:.8rem;cursor:pointer;-webkit-appearance:none;
+  display:flex;align-items:center;justify-content:center;
+  transition:all .3s;
+}
+.tour-close:hover{background:rgba(255,255,255,.14);color:#fff;}
+
+/* Eyebrow — "Day 1 · Today" */
+.tour-eyebrow{
+  font-family:var(--fm);font-size:.55rem;letter-spacing:.12em;
+  text-transform:uppercase;color:var(--muted);margin-bottom:16px;
+}
+
+/* Big tour icon */
+.tour-icon{
+  font-size:4rem;line-height:1;margin-bottom:12px;
+  filter:drop-shadow(0 4px 16px rgba(0,0,0,.4));
+  animation:tourIconPulse 3s ease-in-out infinite;
+}
+@keyframes tourIconPulse{
+  0%,100%{transform:scale(1);}
+  50%{transform:scale(1.06);}
+}
+
+/* Tour name */
+.tour-name{
+  font-family:var(--fs);font-size:1.9rem;font-weight:600;
+  line-height:1.1;margin-bottom:6px;
+  /* Color set by theme */
+}
+
+/* Tagline */
+.tour-tagline{
+  font-family:var(--fm);font-size:.65rem;color:rgba(214,238,248,.55);
+  margin-bottom:18px;line-height:1.7;
+}
+
+/* Tips list */
+.tour-tips{
+  text-align:left;margin-bottom:16px;
+  display:flex;flex-direction:column;gap:7px;
+}
+.tour-tip{
+  display:flex;align-items:flex-start;gap:10px;
+  background:rgba(255,255,255,.04);border-radius:10px;
+  padding:9px 12px;
+  font-family:var(--fm);font-size:.6rem;color:rgba(214,238,248,.7);
+  line-height:1.6;
+  border:1px solid rgba(255,255,255,.06);
+}
+.tour-tip-ico{font-size:.9rem;flex-shrink:0;margin-top:1px;}
+
+/* Dismiss button */
+.tour-dismiss-btn{
+  width:100%;padding:14px;border:none;border-radius:12px;
+  font-family:var(--fs);font-size:1rem;font-weight:600;font-style:italic;
+  cursor:pointer;-webkit-appearance:none;margin-bottom:10px;
+  transition:all .4s var(--ease-dramatic);
+  /* Color set by theme */
+}
+.tour-dismiss-btn:active{transform:scale(.97);}
+
+
+
+/* ── TOUR THEMES ─────────────────────────────────────────── */
+/* Blue Lagoon */
+.tour-card[data-theme="lagoon"]{
+  background:linear-gradient(160deg,rgba(8,28,48,.97) 0%,rgba(6,18,34,.97) 100%);
+  border-color:rgba(80,180,220,.25);
+  box-shadow:0 32px 80px rgba(0,0,0,.7),0 0 60px rgba(40,140,200,.08);
+}
+.tour-card[data-theme="lagoon"] .tour-name{color:#5bbfe8;}
+.tour-card[data-theme="lagoon"] .tour-dismiss-btn{
+  background:linear-gradient(135deg,#1a8fc0,#0e6a96);color:#fff;
+  box-shadow:0 4px 24px rgba(26,143,192,.4);
+}
+
+/* Katla Ice Cave */
+.tour-card[data-theme="ice"]{
+  background:linear-gradient(160deg,rgba(10,20,40,.97) 0%,rgba(6,16,30,.97) 100%);
+  border-color:rgba(160,200,240,.2);
+  box-shadow:0 32px 80px rgba(0,0,0,.7),0 0 60px rgba(100,160,220,.07);
+}
+.tour-card[data-theme="ice"] .tour-name{color:#a8d4f5;}
+.tour-card[data-theme="ice"] .tour-dismiss-btn{
+  background:linear-gradient(135deg,#4a90c4,#2a6090);color:#fff;
+  box-shadow:0 4px 24px rgba(74,144,196,.35);
+}
+
+/* Whale Watching */
+.tour-card[data-theme="whale"]{
+  background:linear-gradient(160deg,rgba(4,20,36,.97) 0%,rgba(4,14,26,.97) 100%);
+  border-color:rgba(59,232,176,.2);
+  box-shadow:0 32px 80px rgba(0,0,0,.7),0 0 60px rgba(59,232,176,.07);
+}
+.tour-card[data-theme="whale"] .tour-name{color:#3be8b0;}
+.tour-card[data-theme="whale"] .tour-dismiss-btn{
+  background:linear-gradient(135deg,#3be8b0,#1db88a);color:#07080f;
+  box-shadow:0 4px 24px rgba(59,232,176,.35);
+}
+
+/* Snorkel Silfra */
+.tour-card[data-theme="silfra"]{
+  background:linear-gradient(160deg,rgba(6,18,44,.97) 0%,rgba(4,14,34,.97) 100%);
+  border-color:rgba(120,160,255,.22);
+  box-shadow:0 32px 80px rgba(0,0,0,.7),0 0 60px rgba(100,120,255,.08);
+}
+.tour-card[data-theme="silfra"] .tour-name{color:#8baeff;}
+.tour-card[data-theme="silfra"] .tour-dismiss-btn{
+  background:linear-gradient(135deg,#5578e8,#3350c0);color:#fff;
+  box-shadow:0 4px 24px rgba(85,120,232,.35);
+}
+
+/* Mobile */
+@media(max-width:767px){
+  .tour-card{padding:24px 18px 20px;}
+  .tour-icon{font-size:3.2rem;}
+  .tour-name{font-size:1.6rem;}
+  .tour-tagline{font-size:.6rem;}
+  .tour-tip{font-size:.58rem;padding:8px 10px;}
+  .tour-dismiss-btn{padding:13px;font-size:.92rem;}
+}
+
+
+/* ── TOUR POPUP v3.6 additions ────────────────────────────── */
+
+
+
+/* ── ADVENTURE BUTTON in bnav ───────────────────────────────
+   Hidden by default, shown only on tour days via JS.
+   Glowing teal to stand out from regular nav buttons.      */
+.bn-adventure{
+  /* inherits .bn base styles */
+  display:none; /* hidden by default; JS sets display:flex on tour days */
+  color:var(--aur) !important;
+  position:relative;
+}
+.bn-adventure .bn-ico{
+  filter:drop-shadow(0 0 6px rgba(59,232,176,.6));
+  animation:adventurePulse 2.5s ease-in-out infinite;
+}
+@keyframes adventurePulse{
+  0%,100%{filter:drop-shadow(0 0 4px rgba(59,232,176,.5));}
+  50%     {filter:drop-shadow(0 0 10px rgba(59,232,176,.9));}
+}
+.bn-adventure .bn-lbl{
+  color:var(--aur);
+  font-weight:600;
+}
+/* Subtle glow behind the button */
+.bn-adventure::before{
+  content:'';position:absolute;inset:4px;border-radius:10px;
+  background:rgba(59,232,176,.06);
+  border:1px solid rgba(59,232,176,.15);
+  pointer-events:none;
+}
+
+@media(max-width:767px){
+  .tour-no-show{font-size:.54rem;}
+  .tour-no-show input{width:15px;height:15px;}
+}
+
+
+/* ═══════════════════════════════════════════════════════════
+   WILDLIFE SPOTTER — integrated CSS (wl- prefixed)
+═══════════════════════════════════════════════════════════ */
+
+/* Header */
+#wl-header {
+  position:sticky;top:0;z-index:10;
+  background:rgba(7,8,15,.95);
+  backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+  border-bottom:1px solid rgba(140,200,230,.11);
+  padding:12px 14px 10px;flex-shrink:0;
+}
+#wl-header-top {
+  display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;
+}
+#wl-title {
+  font-family:var(--fs);font-size:1rem;font-weight:600;font-style:italic;
+  color:var(--ice);letter-spacing:.02em;
+}
+#wl-title span{color:var(--aur);}
+#wl-progress-label {
+  font-family:var(--fm);font-size:.55rem;color:var(--aur);letter-spacing:.08em;
+}
+#wl-progress-track {
+  height:3px;background:rgba(255,255,255,.07);border-radius:99px;overflow:hidden;
+}
+#wl-progress-fill {
+  height:100%;
+  background:linear-gradient(90deg,var(--aur),rgba(59,232,176,.55));
+  border-radius:99px;
+  transition:width .6s var(--ease-out-expo);
+  box-shadow:0 0 8px rgba(59,232,176,.45);
+}
+
+/* Load status */
+#wl-load-status {
+  font-family:var(--fm);font-size:.58rem;color:var(--muted);
+  letter-spacing:.06em;padding:16px 14px 0;
+  text-align:center;
+}
+
+/* Grid */
+#wl-grid {
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:10px;padding:12px 10px;
+}
+@media(max-width:380px){ #wl-grid{grid-template-columns:1fr;} }
+@media(min-width:640px){ #wl-grid{grid-template-columns:repeat(3,1fr);gap:14px;padding:16px;} }
+
+/* Card wrapper */
+.wl-card-wrap {
+  perspective:1000px;
+  height:160px;cursor:pointer;
+  position:relative;isolation:isolate;
+}
+.wl-card-wrap.is-flipped { z-index:50; }
+.wl-card-wrap.is-spotted .wl-spotted-badge {
+  opacity:1;transform:rotate(-8deg) scale(1);
+}
+.wl-card-wrap.is-spotted .wl-card-front {
+  border-color:rgba(240,192,64,.5);
+  box-shadow:0 0 16px rgba(240,192,64,.25);
+}
+
+/* Card inner */
+.wl-card-inner {
+  position:relative;width:100%;height:100%;
+  transform-style:preserve-3d;
+  border-radius:12px;
+  transition:transform .55s var(--ease-out-expo);
+}
+
+/* Card faces */
+.wl-card-front,.wl-card-back {
+  position:absolute;inset:0;
+  border-radius:12px;
+  backface-visibility:hidden;-webkit-backface-visibility:hidden;
+  background:var(--card);
+  border:1px solid rgba(140,200,230,.11);
+  overflow:hidden;
+  transition:border-color .5s var(--ease-dramatic),box-shadow .5s var(--ease-dramatic);
+}
+.wl-card-back {
+  transform:rotateY(180deg);
+  overflow-y:auto;-webkit-overflow-scrolling:touch;
+  cursor:default;
+  background:rgba(15,18,28,.98);
+}
+
+/* Image */
+.wl-card-img {
+  width:100%;height:100%;
+  object-fit:cover;object-position:center;
+  display:block;pointer-events:none;
+  opacity:0;transition:opacity .4s ease,transform .5s var(--ease-out-expo);
+}
+.wl-card-img.loaded{opacity:1;}
+.wl-card-front:hover .wl-card-img.loaded{transform:scale(1.04);}
+.wl-img-placeholder {
+  position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+  font-size:2.2rem;background:rgba(255,255,255,.025);
+  transition:opacity .3s ease;
+}
+.wl-img-placeholder.hidden{opacity:0;pointer-events:none;}
+
+/* Overlay gradient */
+.wl-card-overlay {
+  position:absolute;inset:0;pointer-events:none;
+  background:linear-gradient(to top,rgba(7,8,15,.88) 0%,rgba(7,8,15,.25) 45%,transparent 70%);
+}
+
+/* Card name */
+.wl-card-name {
+  position:absolute;bottom:34px;left:10px;right:10px;
+  font-family:var(--fs);font-size:.78rem;font-weight:600;font-style:italic;
+  color:var(--ice);line-height:1.2;pointer-events:none;
+}
+.wl-card-name-is {
+  display:block;font-family:var(--fm);font-size:.52rem;
+  color:var(--aur);letter-spacing:.07em;margin-top:2px;opacity:.8;
+}
+
+/* Spot button */
+.wl-spot-btn {
+  position:absolute;bottom:8px;left:10px;
+  font-family:var(--fm);font-size:.5rem;letter-spacing:.06em;
+  color:var(--muted);background:rgba(7,8,15,.6);
+  border:1px solid rgba(255,255,255,.12);border-radius:6px;
+  padding:4px 9px;cursor:pointer;z-index:10;
+  transition:all .3s var(--ease-dramatic);
+  backdrop-filter:blur(4px);-webkit-tap-highlight-color:transparent;
+  touch-action:manipulation;min-height:28px;
+  display:inline-flex;align-items:center;
+}
+.wl-spot-btn:active,.wl-spot-btn:hover {
+  border-color:var(--aur);color:var(--aur);background:rgba(59,232,176,.1);
+}
+.wl-card-wrap.is-spotted .wl-spot-btn {
+  border-color:rgba(240,192,64,.5);color:var(--gold);background:rgba(240,192,64,.1);
+}
+
+/* Spotted badge */
+.wl-spotted-badge {
+  position:absolute;top:8px;right:8px;
+  width:44px;height:44px;border-radius:50%;
+  border:2px solid var(--gold);
+  background:rgba(7,8,15,.75);
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--fm);font-size:.45rem;font-weight:600;
+  color:var(--gold);letter-spacing:.05em;text-align:center;line-height:1.2;
+  text-transform:uppercase;
+  opacity:0;transform:rotate(-8deg) scale(0.4);
+  transition:opacity .4s var(--ease-out-expo),transform .4s var(--ease-out-expo);
+  pointer-events:none;z-index:5;
+  box-shadow:0 0 12px rgba(240,192,64,.3);
+}
+
+/* Card back */
+.wl-card-back-inner{padding:13px;min-height:100%;}
+.wl-back-hint{
+  font-family:var(--fm);font-size:.48rem;color:var(--muted);
+  letter-spacing:.06em;text-align:right;margin-bottom:6px;
+}
+.wl-back-title{
+  font-family:var(--fs);font-size:.88rem;font-weight:600;font-style:italic;
+  color:var(--ice);margin-bottom:1px;padding-right:10px;
+}
+.wl-back-title-is{
+  font-family:var(--fm);font-size:.52rem;color:var(--aur);
+  letter-spacing:.07em;margin-bottom:8px;opacity:.8;
+}
+.wl-info-grid{
+  display:grid;grid-template-columns:1fr 1fr;gap:5px 8px;margin-bottom:8px;
+}
+.wl-info-row{display:flex;flex-direction:column;gap:1px;}
+.wl-info-row.full{grid-column:1/-1;}
+.wl-info-label{
+  font-family:var(--fm);font-size:.46rem;color:var(--aur);
+  letter-spacing:.1em;text-transform:uppercase;opacity:.7;
+}
+.wl-info-value{
+  font-family:var(--fm);font-size:.58rem;color:rgba(214,238,248,.7);line-height:1.4;
+}
+.wl-divider{height:1px;background:rgba(140,200,230,.08);margin:6px 0;}
+.wl-behavior-text{
+  font-family:var(--fm);font-size:.55rem;color:var(--muted);
+  line-height:1.55;margin-bottom:4px;display:block;
+}
+.wl-back-source{
+  font-family:var(--fm);font-size:.46rem;color:rgba(59,232,176,.3);
+  letter-spacing:.05em;margin-top:8px;
+}
+
+/* Scrollbar */
+.wl-card-back::-webkit-scrollbar{width:3px;}
+.wl-card-back::-webkit-scrollbar-thumb{background:rgba(59,232,176,.2);border-radius:99px;}
+
+/* Scrim */
+#wl-card-scrim {
+  display:none;position:fixed;inset:0;z-index:5100;
+  background:rgba(7,8,15,.88);
+  backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);
+  cursor:pointer;
+}
+#wl-card-scrim.visible{display:block;animation:scrimIn .3s ease forwards;}
+
+/* Celebration overlay */
+#wl-celebration {
+  position:fixed;inset:0;z-index:5100;
+  display:flex;align-items:center;justify-content:center;
+  background:rgba(7,8,15,.82);backdrop-filter:blur(8px);
+  animation:tourFadeIn .4s var(--ease-out-expo) forwards;
+}
+.wl-cel-inner {
+  background:rgba(10,14,24,.97);
+  border:1px solid rgba(59,232,176,.3);border-radius:20px;
+  padding:36px 28px;text-align:center;
+  box-shadow:0 0 60px rgba(59,232,176,.18),0 32px 80px rgba(0,0,0,.6);
+  max-width:300px;width:88vw;
+}
+.wl-cel-emoji{font-size:3.2rem;margin-bottom:14px;display:block;}
+.wl-cel-title{
+  font-family:var(--fs);font-size:1.4rem;font-style:italic;
+  color:var(--aur);margin-bottom:8px;
+}
+.wl-cel-sub{
+  font-family:var(--fm);font-size:.58rem;color:var(--muted);
+  line-height:1.6;margin-bottom:20px;
+}
+.wl-cel-btn{
+  font-family:var(--fs);font-size:.85rem;font-style:italic;
+  color:var(--ink);background:var(--aur);
+  border:none;border-radius:8px;padding:10px 28px;
+  cursor:pointer;transition:opacity .2s;
+}
+.wl-cel-btn:hover{opacity:.85;}
+
+/* Mobile tweaks */
+@media(max-width:767px){
+  #wl-header{padding:10px 12px 8px;}
+  #wl-title{font-size:.88rem;}
+  .wl-card-wrap{height:150px;}
+  .wl-card-name{font-size:.72rem;bottom:30px;}
+}
+
+
+/* Card back enriched sections */
+.wl-section-label{
+  font-family:var(--fm);font-size:.48rem;color:var(--aur);
+  letter-spacing:.1em;text-transform:uppercase;opacity:.8;
+  margin-bottom:3px;display:block;
+}
+.wl-iceland-fact{
+  font-family:var(--fm);font-size:.58rem;color:rgba(214,238,248,.75);
+  line-height:1.6;margin-bottom:6px;display:block;
+  border-left:2px solid rgba(59,232,176,.25);padding-left:8px;
+}
+.wl-fun-fact{
+  font-family:var(--fm);font-size:.58rem;color:var(--gold);
+  line-height:1.6;margin-bottom:8px;display:block;
+  font-style:italic;
+}
+.wl-back-source{
+  font-family:var(--fm);font-size:.46rem;
+  color:rgba(59,232,176,.3);letter-spacing:.04em;
+  margin-top:8px;padding-top:6px;
+  border-top:1px solid rgba(140,200,230,.07);
+  display:block;
+}
+
 </style>
 </head>
 <body>
@@ -904,7 +1653,7 @@ select option{background:#0d0f1a;color:var(--ice);}
         </div>
       </div>
     </div>
-    <span class="tb-ver">v3.3</span>
+    <span class="tb-ver">v4.1</span>
     <div class="tb-spacer"></div>
     <div class="tb-right-btns">
       <button class="gps-btn off" id="gps-btn" onclick="toggleGPS()" title="Tap to enable GPS tracking">
@@ -936,9 +1685,11 @@ select option{background:#0d0f1a;color:var(--ice);}
     <div class="curr-footer">
       Rate fetched live from <a href="https://www.exchangerate-api.com" target="_blank">ExchangeRate-API</a> (free tier) · Updates on open · 1 USD ≈ 137–140 ISK historically
     </div>
-  </div>
+  </div><!-- /curr-panel -->
 
-  <!-- ═══ LEFT COL ═══ -->
+</div><!-- /top-area -->
+
+<!-- ═══ LEFT COL ═══ -->
 <div class="left-col">
 
   <div class="search-sheet">
@@ -990,6 +1741,7 @@ select option{background:#0d0f1a;color:var(--ice);}
     <button class="tab"    onclick="openTab('roads',this)">🚧 Roads
       <span class="tbadge tbadge-red" id="road-tbadge"></span>
     </button>
+    <button class="tab"    onclick="openTab('wildlife',this)">🦊 Wildlife</button>
   </div>
 
   <div class="panels">
@@ -1044,6 +1796,23 @@ select option{background:#0d0f1a;color:var(--ice);}
       </div>
     </div>
 
+
+    <!-- WILDLIFE -->
+    <div class="panel" id="panel-wildlife">
+      <div id="wl-header">
+        <div id="wl-header-top">
+          <h2 id="wl-title">🦊 Iceland <span>Wildlife</span> Spotter</h2>
+          <div id="wl-progress-label">0 / 15</div>
+        </div>
+        <div id="wl-progress-track">
+          <div id="wl-progress-fill" style="width:0%"></div>
+        </div>
+      </div>
+      <div id="wl-card-scrim"></div>
+      <div id="wl-load-status">Loading wildlife photos…</div>
+      <div id="wl-grid"></div>
+    </div>
+
   </div><!-- /panels -->
 </div><!-- /left-col -->
 
@@ -1053,7 +1822,7 @@ select option{background:#0d0f1a;color:var(--ice);}
     <div id="map"><div id="map-canvas" style="width:100%;height:100%;"></div></div>
     <button class="map-fab" id="loc-fab" onclick="toggleGPS()">📍</button>
   </div>
-</div>
+</div><!-- /right-col -->
 
 <!-- ═══ MAP PANEL — full screen on mobile ═══ -->
 <div id="map-panel">
@@ -1077,6 +1846,13 @@ select option{background:#0d0f1a;color:var(--ice);}
   </button>
   <button class="bn" id="bn-map" onclick="mobileTab('map',this)">
     <span class="bn-ico">🗺️</span><span class="bn-lbl">Map</span>
+  </button>
+
+  <button class="bn" id="bn-wildlife" onclick="mobileTab('wildlife',this)">
+    <span class="bn-ico">🦊</span><span class="bn-lbl">Wildlife</span>
+  </button>
+  <button class="bn bn-adventure" id="bn-adventure" onclick="openTourPopup()" style="display:none;">
+    <span class="bn-ico">🏔️</span><span class="bn-lbl">Adventure</span>
   </button>
 </nav>
 
@@ -1205,7 +1981,7 @@ const ROAD_NOTICES=[
    updated:"March 2026 — ongoing"},
   {id:"sandur-wind",sev:"wa",icon:"⚠️",
    title:"Skeiðarársandur (Rte 1, Klaustur→Höfn) — Sand & wind hazard",
-   body:"Iceland's most notorious wind zone. Gusts above 20 m/s cause severe sandblasting that permanently damages paint and glass. Pull off and wait if warnings are active.",
+   body:"Iceland’s most notorious wind zone. Gusts above 20 m/s cause severe sandblasting that permanently damages paint and glass. Pull off and wait if warnings are active.",
    tags:["Strong gusts","Sandblasting","Rte 1"],
    legs:[[2,3],[3,2],[3,4],[4,3]],
    updated:"Year-round — check vedur.is before crossing"},
@@ -1496,6 +2272,9 @@ async function doSearch(){
   if(window.innerWidth<768){
     mobileTab('gas',document.getElementById('bn-gas'));
   }
+
+  // Tour day popup — fires after search if departure is a tour day
+  checkTourAfterSearch();
 }
 
 // ═══════════════════════════════════════════════════════════
@@ -1583,7 +2362,7 @@ async function fetchWeather(from,to){
     {label:from.name.split(' ')[0]+' (Departure)',lat:from.lat,lng:from.lng},
     {label:to.name.split(' ')[0]+' (Destination)',lat:to.lat,lng:to.lng},
   ];
-  // Use allSettled so one failed location never hides the other's data
+  // Use allSettled so one failed location never hides the other’s data
   const settled=await Promise.allSettled(locs.map(async loc=>{
     const abort=typeof AbortSignal.timeout==='function'
       ? AbortSignal.timeout(10000)
@@ -2357,7 +3136,7 @@ function playSearchChime(){
   });
 }
 
-const TAB_SOUNDS={gas:playGasSound, wx:playWeatherSound, roads:playRoadsSound, map:playMapSound};
+const TAB_SOUNDS={gas:playGasSound, wx:playWeatherSound, roads:playRoadsSound, map:playMapSound, wildlife:()=>playWildlifeSound&&playWildlifeSound()};
 
 
 
@@ -2760,6 +3539,1004 @@ document.addEventListener('DOMContentLoaded', ()=>{
   }
 })();
 
+
+// ═══════════════════════════════════════════════════════════
+// TOUR DAY POPUP — v3.5
+//
+// Trip start date: set TRIP_START to your actual Day 1 date
+// in Iceland local time (Atlantic/Reykjavik, UTC+0 always).
+//
+// Tours defined by trip day number (1-based).
+// Popup shows once per calendar date — dismissed state saved
+// in localStorage so refreshing doesn’t re-show it.
+// ═══════════════════════════════════════════════════════════
+
+// ── SET YOUR TRIP START DATE HERE ─────────────────────────
+// Format: 'YYYY-MM-DD' — this is the date of Day 1 in Iceland
+const TRIP_START = '2026-04-07'; // ← UPDATE THIS before your trip
+
+// ── TOUR DEFINITIONS ──────────────────────────────────────
+const TOURS = {
+  // Key = FROM camp n value (night number you depart from)
+  // day = trip day number shown in the popup eyebrow
+  1: {
+    day: 1,
+    name:    'Blue Lagoon',
+    icon:    '🌊',
+    theme:   'lagoon',
+    tagline: 'Geothermal bliss in a lava field — the iconic start to your Iceland journey.',
+    tips: [
+      { ico: '🎒', text: 'Bring your booking confirmation — entry is timed, no walk-ins.' },
+      { ico: '👙', text: 'Swimsuit and towel included in most packages, but bring your own flip-flops.' },
+      { ico: '💆', text: 'The silica mud masks are free at the lagoon — don’t miss them.' },
+      { ico: '📸', text: 'Best photos: steam rising at golden hour, arrive at opening or dusk.' },
+      { ico: '🚐', text: 'Blue Lagoon is 20 min from Keflavik Airport — easy first stop after landing.' },
+    ],
+  },
+  2: {
+    day: 2,
+    name:    'Katla Ice Cave',
+    icon:    '🧊',
+    theme:   'ice',
+    tagline: 'Venture inside the glacier of Iceland’s most powerful volcano.',
+    tips: [
+      { ico: '🥾', text: 'Crampons and helmets are provided — wear warm, waterproof layers underneath.' },
+      { ico: '🌡️', text: 'Inside the cave it’s 0–4°C year-round. Thermal base layer strongly recommended.' },
+      { ico: '📷', text: 'Bring a wide-angle lens — the ice formations are sweeping and blue.' },
+      { ico: '⏱',  text: 'Tours typically 2–3 hours. Leave Selfoss camp by 8 AM to make it on time.' },
+      { ico: '⚠️', text: 'Ice caves change shape seasonally. Follow your guide’s instructions at all times.' },
+    ],
+  },
+  6: {
+    day: 7,
+    name:    'Whale Watching',
+    icon:    '🐋',
+    theme:   'whale',
+    tagline: 'Husavik or Akureyri — the whale watching capital of Europe awaits.',
+    tips: [
+      { ico: '🤢', text: 'Take seasickness medication 1–2 hours before if you’re sensitive to waves.' },
+      { ico: '🧥', text: 'Wear every warm layer you own — the North Atlantic wind is brutal on deck.' },
+      { ico: '🦭', text: 'You may also spot harbor porpoises, white-beaked dolphins, and seabirds.' },
+      { ico: '📷', text: 'Use burst mode — humpbacks breach fast. Keep your camera ready on deck.' },
+      { ico: '🕐', text: 'Tours last 2–3 hours. Minke and humpback whales are most common in summer.' },
+    ],
+  },
+  8: {
+    day: 9,
+    name:    'Snorkel Silfra',
+    icon:    '🤿',
+    theme:   'silfra',
+    tagline: 'Drift between two continents in the clearest water on Earth. Visibility: 100m+.',
+    tips: [
+      { ico: '🌡️', text: 'Water is 2–4°C year-round. Dry suits are required and provided by your guide.' },
+      { ico: '📋', text: 'You must be able to swim. No scuba certification needed for snorkeling.' },
+      { ico: '🥤', text: 'Don’t eat a heavy meal beforehand — the dry suit is tight and snug.' },
+      { ico: '📷', text: 'Rent an underwater camera or GoPro mount — the visibility is unlike anywhere else.' },
+      { ico: '🌍', text: 'Silfra fissure sits in Þingvellir National Park — arrive early for parking.' },
+    ],
+  },
+};
+
+// ═══════════════════════════════════════════════════════════
+// WILDLIFE ANIMAL DATA
+// ═══════════════════════════════════════════════════════════
+const WL_ANIMALS = [
+  {id:"arctic-fox",emoji:"🦊",name:"Arctic Fox",nameIs:"Melrakki",
+   wikipediaTitle:"Arctic_fox",
+   habitat:"Coastal cliffs, lava fields, tundra highlands",
+   lifespan:"3–6 yrs wild / up to 14 in captivity",weight:"1.4–9.4 kg",size:"46–68 cm body; 30 cm tail",
+   diet:"Birds, eggs, lemmings, berries, seal pups, carrion",
+   conservation:"Least Concern (IUCN) — protected in Iceland since 1994",
+   icelandicFact:"Iceland's only native land mammal. Around 10,000 individuals remain, concentrated in the Westfjords.",
+   behaviors:[
+     "Molts twice yearly — brown/grey summer coat to thick white or blue-grey winter coat for camouflage.",
+     "Caches hundreds of food items under rocks and soil, relocating them through memory in winter."
+   ],
+   funFact:"Can hear lemmings moving under 77 cm of snow and pounce through it headfirst.",
+   source:"IUCN Red List; Wikipedia – Vulpes lagopus"},
+
+  {id:"puffin",emoji:"🐦",name:"Atlantic Puffin",nameIs:"Lundi",
+   wikipediaTitle:"Atlantic_puffin",
+   habitat:"Sea cliffs, grassy burrows, open ocean in winter",
+   lifespan:"20–25 yrs",weight:"320–500 g",size:"26–29 cm; wingspan 47–63 cm",
+   diet:"Sand eel, herring, sprat, capelin",
+   conservation:"Vulnerable (IUCN) — declining due to climate-driven fish stock shifts",
+   icelandicFact:"Iceland hosts ~60% of the world’s Atlantic Puffins. The Vestmannaeyjar colony is the largest on Earth.",
+   behaviors:[
+     "Holds up to 62 small fish crosswise in its bill simultaneously using a unique spine-lined tongue.",
+     "Digs or re-uses earthen burrows up to 1 m deep; mates for life and returns to the same burrow annually."
+   ],
+   funFact:"Can flap its wings 400 times per minute and dive to 60 m to catch fish.",
+   source:"IUCN Red List; BirdLife International"},
+
+  {id:"reindeer",emoji:"🦌",name:"Reindeer",nameIs:"Hreindýr",
+   wikipediaTitle:"Reindeer",
+   habitat:"East Iceland highlands, river valleys, coastal plains",
+   lifespan:"15–20 yrs",weight:"80–180 kg (males larger)",size:"1.6–2.1 m body; shoulder 0.9–1.4 m",
+   diet:"Lichen, sedges, grasses, willows, mushrooms",
+   conservation:"Vulnerable (IUCN globally); Iceland population is healthy and managed",
+   icelandicFact:"Introduced from Norway in 1771. The East Iceland herd of ~6,000 is the only wild reindeer population in Western Europe outside Scandinavia.",
+   behaviors:[
+     "Both sexes grow and shed antlers annually — unique among deer species.",
+     "Hooves change seasonally: firm in summer for traction on tundra, softer and broader in winter to paddle through snow."
+   ],
+   funFact:"Their eyes shift from gold in summer to blue in winter to improve vision in low Arctic light.",
+   source:"Wikipedia – Rangifer tarandus; IUCN"},
+
+  {id:"icelandic-horse",emoji:"🐴",name:"Icelandic Horse",nameIs:"Íslenska Hesturinn",
+   wikipediaTitle:"Icelandic_horse",
+   habitat:"Farms, open heathland, volcanic river valleys",
+   lifespan:"25–30 yrs",weight:"330–380 kg",size:"132–142 cm at withers (13–14 hh)",
+   diet:"Grass and hay; forages under snow in winter",
+   conservation:"Not threatened — ~80,000 horses in Iceland; ~100,000 more exported worldwide",
+   icelandicFact:"Icelandic law forbids importing horses into the country. Any horse that leaves may never return — the breed has been genetically isolated since Viking settlement c. 874 AD.",
+   behaviors:[
+     "The only horse breed with five natural gaits: walk, trot, canter, tölt (smooth 4-beat), and flying pace.",
+     "Tölt is so smooth a rider can carry a full glass of beer without spilling — a traditional test."
+   ],
+   funFact:"Despite their small size (pony dimensions), Icelanders insist they are called horses, never ponies.",
+   source:"World Fengur / FEIF; Wikipedia"},
+
+  {id:"humpback-whale",emoji:"🐋",name:"Humpback Whale",nameIs:"Hnúfubakur",
+   wikipediaTitle:"Humpback_whale",
+   habitat:"Open ocean; Faxaflói Bay and north coast in summer",
+   lifespan:"45–100 yrs",weight:"25,000–30,000 kg",size:"12–16 m; flippers up to 5 m",
+   diet:"Krill, sand lance, herring, mackerel",
+   conservation:"Least Concern (IUCN) — recovered significantly since commercial hunting ban (1986)",
+   icelandicFact:"Summer feeding grounds around Iceland, especially Skúnafjorður and Eyjafjorður, support hundreds of individuals annually.",
+   behaviors:[
+     "Males produce the most complex evolving songs in the animal kingdom — new patterns spread ocean-wide within seasons.",
+     "Bubble-net feeding: a group spirals upward blowing air curtains below prey to herd fish, then lunges through together."
+   ],
+   funFact:"Humpbacks have been observed singing for up to 22 hours continuously.",
+   source:"IUCN Red List; NOAA Fisheries"},
+
+  {id:"minke-whale",emoji:"🐳",name:"Common Minke Whale",nameIs:"Hrefna",
+   wikipediaTitle:"Common_minke_whale",
+   habitat:"Coastal bays, fjords, open water",
+   lifespan:"40–50 yrs",weight:"5,000–10,000 kg",size:"7–10 m",
+   diet:"Sand eel, herring, capelin, krill",
+   conservation:"Least Concern (IUCN) globally; Iceland conducts controversial commercial hunts",
+   icelandicFact:"The most common whale seen on Icelandic whale watching tours. Iceland harvests ~200 minke whales commercially per year.",
+   behaviors:[
+     "The most inquisitive baleen whale — known to approach and circle stationary boats for extended periods.",
+     "Surfaces every 3–8 minutes; rarely shows its tail flukes when diving, unlike humpbacks."
+   ],
+   funFact:"Has a distinctive white band on each pectoral fin — the easiest way to identify it at sea.",
+   source:"IUCN Red List; Wikipedia – Balaenoptera acutorostrata"},
+
+  {id:"arctic-tern",emoji:"🐦",name:"Arctic Tern",nameIs:"Kría",
+   wikipediaTitle:"Arctic_tern",
+   habitat:"Coastal areas, sandy beaches, tundra, lagoon edges",
+   lifespan:"20–30 yrs",weight:"86–127 g",size:"33–36 cm; wingspan 76–85 cm",
+   diet:"Small fish (sand eel, herring), marine invertebrates",
+   conservation:"Least Concern (IUCN) but declining in some regions",
+   icelandicFact:"Iceland hosts one of the largest breeding populations globally. Nests in huge colonies across coastal lowlands.",
+   behaviors:[
+     "Makes the world’s longest annual migration — Arctic to Antarctic and back, ~90,000 km/year.",
+     "Fiercely defends nest sites by dive-bombing intruders, drawing blood from the tops of human heads."
+   ],
+   funFact:"Over its ~30-year lifespan, an Arctic Tern travels the equivalent of three trips to the Moon and back.",
+   source:"BirdLife International; IUCN"},
+
+  {id:"golden-plover",emoji:"🐦",name:"European Golden Plover",nameIs:"Heiðlóa",
+   wikipediaTitle:"European_golden_plover",
+   habitat:"Moorland, heathland, lava plains, highland plateaus",
+   lifespan:"~5 yrs wild (up to 12 recorded)",weight:"140–220 g",size:"26–29 cm; wingspan 67–76 cm",
+   diet:"Insects, earthworms, berries, seeds",
+   conservation:"Least Concern (IUCN)",
+   icelandicFact:"Considered the official harbinger of spring. Its late-April arrival is announced on national radio and in newspapers — a cultural event since medieval times.",
+   behaviors:[
+     "Males perform an elaborate slow butterfly-like display flight, rising and falling over nesting territory.",
+     "Forms enormous mixed flocks with lapwings in winter, sometimes exceeding 100,000 birds."
+   ],
+   funFact:"The golden speckled breeding plumage inspired its name; the belly turns jet-black in summer.",
+   source:"BirdLife International; Wikipedia – Pluvialis apricaria"},
+
+  {id:"gyrfalcon",emoji:"🦅",name:"Gyrfalcon",nameIs:"Fálki",
+   wikipediaTitle:"Gyrfalcon",
+   habitat:"Coastal cliffs, highland plateaus, open tundra",
+   lifespan:"13–20 yrs",weight:"805–2,100 g (females much larger)",size:"48–65 cm; wingspan 105–130 cm",
+   diet:"Rock ptarmigan (primary), ducks, shorebirds, lemmings",
+   conservation:"Least Concern (IUCN) — Iceland holds one of the world’s most important breeding populations",
+   icelandicFact:"Iceland’s national bird and coat-of-arms symbol. Historically the most valuable falconry bird in the world — traded for ransoms and given as royal gifts.",
+   behaviors:[
+     "Hunts in high-speed horizontal pursuit at 160+ km/h rather than the steep stoop dive of a peregrine.",
+     "Nests on sheer cliff ledges, often reusing the same eyrie for decades."
+   ],
+   funFact:"White gyrfalcons from Iceland were worth their weight in gold in medieval Europe — more valuable than the lands they flew over.",
+   source:"IUCN Red List; Wikipedia – Falco rusticolus"},
+
+  {id:"harbour-seal",emoji:"🦭",name:"Harbour Seal",nameIs:"Landselur",
+   wikipediaTitle:"Harbour_seal",
+   habitat:"Fjords, tidal flats, river estuaries, sandbanks",
+   lifespan:"25–35 yrs",weight:"45–130 kg",size:"1.2–1.9 m",
+   diet:"Herring, sand eel, cod, squid, crustaceans",
+   conservation:"Least Concern (IUCN) — Iceland population is stable, around 12,000",
+   icelandicFact:"Found on almost every stretch of Icelandic coastline. Hvammsfjörður in the Westfjords is a prime haul-out location.",
+   behaviors:[
+     "Hunts using vibrissae (whiskers) sensitive enough to detect fish hydrodynamic trails up to 35 seconds old.",
+     "Pups are born with adult fur and can swim within hours of birth, unlike many seal species."
+   ],
+   funFact:"Can slow its heart rate from 100 bpm to under 10 bpm during deep dives — a reflex called the diving response.",
+   source:"IUCN Red List; Wikipedia – Phoca vitulina"},
+
+  {id:"grey-seal",emoji:"🦭",name:"Grey Seal",nameIs:"Útselur",
+   wikipediaTitle:"Grey_seal",
+   habitat:"Rocky offshore skerries, open sea, exposed coastlines",
+   lifespan:"25–35 yrs",weight:"105–310 kg (males up to 3× females)",size:"1.6–2.3 m",
+   diet:"Sand eel, cod, flatfish, squid, octopus",
+   conservation:"Least Concern (IUCN) — Iceland population ~10,000",
+   icelandicFact:"Often seen hauled out on remote skerries and sea stacks around the Rúnavik peninsula and Westfjords.",
+   behaviors:[
+     "Bulls arrive at breeding beaches weeks before females and battle fiercely, accumulating deep scars over a lifetime.",
+     "Can dive to 300 m and remain submerged up to 20 minutes, slowing heart rate to ~4 beats per minute."
+   ],
+   funFact:"Grey seal mothers fast completely during the 18-day nursing period, losing up to 65 kg while pups gain 2 kg/day.",
+   source:"IUCN Red List; Wikipedia – Halichoerus grypus"},
+
+  {id:"mink",emoji:"🦦",name:"American Mink",nameIs:"Minkur",
+   wikipediaTitle:"American_mink",
+   habitat:"Riverbanks, lake shores, wetlands, sea coasts",
+   lifespan:"3–6 yrs wild",weight:"0.5–2.3 kg",size:"30–45 cm body + 15–25 cm tail",
+   diet:"Fish, seabirds and eggs, small mammals, frogs, invertebrates",
+   conservation:"Least Concern (IUCN) globally; invasive and damaging in Iceland",
+   icelandicFact:"Escaped from fur farms in the 1930s. Now widespread across Iceland and responsible for catastrophic declines in ground-nesting seabirds, including Arctic terns and eiders.",
+   behaviors:[
+     "An exceptional swimmer with partially webbed feet and water-resistant underfur; dives repeatedly.",
+     "Marks territory extensively with musk; a single individual may range 5 km of riverbank."
+   ],
+   funFact:"Despite weighing under 1 kg, a mink can kill prey 5× its own size, including large rabbits.",
+   source:"IUCN Red List; Wikipedia – Neovison vison"},
+
+  {id:"rock-ptarmigan",emoji:"🐦",name:"Rock Ptarmigan",nameIs:"Rjúpa",
+   wikipediaTitle:"Rock_ptarmigan",
+   habitat:"Highland tundra, lava fields, rocky hillsides",
+   lifespan:"~3 yrs wild (up to 9 recorded)",weight:"440–580 g",size:"34–36 cm; wingspan 54–60 cm",
+   diet:"Willow buds, leaves, berries, seeds, insects in summer",
+   conservation:"Least Concern (IUCN) — one of Iceland’s most abundant birds",
+   icelandicFact:"An important game bird in Iceland with a regulated hunting season. Population fluctuates cyclically and is monitored closely by the Icelandic Institute of Natural History.",
+   behaviors:[
+     "Molts three times per year cycling through mottled brown, grey-brown, and pure white plumages.",
+     "Males retain a small black eye-stripe in winter as the only visible marking against snow."
+   ],
+   funFact:"Feet are fully feathered to the toes in winter, acting as snowshoes and reducing heat loss on frozen ground.",
+   source:"BirdLife International; IUCN – Lagopus muta"},
+
+  {id:"raven",emoji:"🐦‍⬛",name:"Common Raven",nameIs:"Hrafn",
+   wikipediaTitle:"Common_raven",
+   habitat:"Cliffs, farmland, highland interior, coastal areas — all habitats",
+   lifespan:"10–15 yrs wild (up to 40 in captivity)",weight:"690–1,625 g",size:"54–67 cm; wingspan ~120 cm",
+   diet:"Carrion, small mammals, eggs, berries, refuse, invertebrates — highly omnivorous",
+   conservation:"Least Concern (IUCN) — one of the most widespread birds in the world",
+   icelandicFact:"Odin’s ravens Huginn (Thought) and Muninn (Memory) originated in Norse mythology. The raven appears on the Icelandic coat of arms and is woven throughout saga literature.",
+   behaviors:[
+     "One of the most intelligent vertebrates: performs mirror self-recognition, uses tools, plans for the future, and deceives rivals.",
+     "Caches food and then performs false caching dances when rivals are watching to mislead them."
+   ],
+   funFact:"Ravens have been observed sliding down snowbanks repeatedly, apparently for fun — one of few non-human animals documented playing.",
+   source:"Wikipedia – Corvus corax; BirdLife International"},
+
+  {id:"snowy-owl",emoji:"🦉",name:"Snowy Owl",nameIs:"Snæugla",
+   wikipediaTitle:"Snowy_owl",
+   habitat:"Open tundra, coastal flats, moorland",
+   lifespan:"9–10 yrs wild (up to 28 in captivity)",weight:"1,600–3,000 g (females heavier)",size:"52–71 cm; wingspan 125–150 cm",
+   diet:"Lemmings (primary), voles, ptarmigan, hares, ducks",
+   conservation:"Vulnerable (IUCN) — declining due to lemming cycle disruption from climate change",
+   icelandicFact:"An irregular winter visitor and occasional breeder in Iceland. Sightings spike during lemming irruption years in Arctic Canada. Seeing one is considered extremely lucky.",
+   behaviors:[
+     "Hunts by day and night — one of the very few truly diurnal owls, essential under 24-hour Arctic summer daylight.",
+     "A single snowy owl may consume over 1,600 lemmings in a year."
+   ],
+   funFact:"Their white plumage is not white pigment — the feathers are actually hollow and transparent, scattering light to appear white.",
+   source:"IUCN Red List; Wikipedia – Bubo scandiacus"},
+];
+
+
+
+// ── HELPERS ───────────────────────────────────────────────
+
+// Get today’s date string in Iceland timezone (YYYY-MM-DD)
+function getTodayIceland(){
+  return new Date().toLocaleDateString('en-CA', {timeZone:'Atlantic/Reykjavik'});
+}
+
+// Calculate which trip day today is (1-based; null if outside trip)
+function getTripDay(){
+  const today = getTodayIceland();
+  const start = TRIP_START;
+  const msPerDay = 86400000;
+  const diff = new Date(today + 'T12:00') - new Date(start + 'T12:00');
+  const day = Math.round(diff / msPerDay) + 1;
+  return (day >= 1 && day <= 14) ? day : null; // trip assumed max 14 days
+}
+
+// ── POPUP LOGIC ────────────────────────────────────────────
+
+// ── TOUR_PREVIEW_DAY: set to 1,2,7, or 9 to force a specific tour card.
+// Set to null for production (uses real trip dates).
+const TOUR_PREVIEW_DAY = null; // null = use real trip dates & camp selection
+
+// ═══════════════════════════════════════════════════════════
+// TOUR POPUP — v3.6
+//
+// • Fires after doSearch() when the selected departure day
+//   matches a tour day (Days 1, 2, 7, 9).
+// • If "Don't show again today" was checked, respects that
+//   and stays hidden until Adventure button is tapped.
+// • Adventure button appears in bottom nav ONLY on tour days.
+// • openTourPopup() always shows the popup (ignores suppress).
+// ═══════════════════════════════════════════════════════════
+
+function getTodayIceland(){
+  return new Date().toLocaleDateString('en-CA',{timeZone:'Atlantic/Reykjavik'});
+}
+
+function getTripDay(){
+  const today = getTodayIceland();
+  const msDay = 86400000;
+  const diff  = new Date(today+'T12:00') - new Date(TRIP_START+'T12:00');
+  const day   = Math.round(diff / msDay) + 1;
+  return (day >= 1 && day <= 14) ? day : null;
+}
+
+// Return which tour day the currently-selected FROM camp corresponds to.
+// Camp n:1 = Day 1, n:2 = Day 2, etc.
+function getSelectedTourDay(){
+  if(TOUR_PREVIEW_DAY !== null) return TOUR_PREVIEW_DAY;
+  // Use the departure camp number as the trip day
+  const fi = parseInt(document.getElementById('sel-from').value);
+  if(isNaN(fi)) return null;
+  const campDay = CAMPS[fi] ? CAMPS[fi].n : null;
+  return (campDay && TOURS[campDay]) ? campDay : null;
+}
+
+// Is today a tour day? (for Adventure button visibility)
+// Map trip calendar days to TOURS keys (camp night numbers)
+const TRIP_DAY_TO_CAMP = {1:1, 2:2, 7:6, 9:8};
+
+function isTourDay(){
+  if(TOUR_PREVIEW_DAY !== null) return true;
+  const tripDay = getTripDay();
+  const campKey = tripDay ? TRIP_DAY_TO_CAMP[tripDay] : null;
+  return !!(campKey && TOURS[campKey]);
+}
+
+// Populate the tour card with data for a given day
+function populateTourCard(day){
+  const tour = TOURS[day];
+  if(!tour) return;
+  document.getElementById('tour-eyebrow').textContent = 'Day ' + (tour.day || day) + ' · Tour Day';
+  document.getElementById('tour-icon').textContent    = tour.icon;
+  document.getElementById('tour-name').textContent    = tour.name;
+  document.getElementById('tour-tagline').textContent = tour.tagline;
+  const tipsEl = document.getElementById('tour-tips');
+  tipsEl.innerHTML = '';
+  tour.tips.forEach(tip => {
+    const div = document.createElement('div');
+    div.className = 'tour-tip';
+    div.innerHTML = '<span class="tour-tip-ico">' + tip.ico + '</span><span>' + tip.text + '</span>';
+    tipsEl.appendChild(div);
+  });
+  document.querySelector('.tour-card').setAttribute('data-theme', tour.theme);
+  // Reset checkbox
+  const chk = document.getElementById('tour-no-show-chk');
+  if(chk){
+    chk.checked = !!localStorage.getItem('tour_seen_day_' + day);
+  }
+}
+
+// Show tour popup after search — respects "don't show again" flag
+function checkTourAfterSearch(){
+  const day = getSelectedTourDay();
+  if(!day) return;
+
+  // Show Adventure button
+  updateAdventureBtn(day);
+
+  // Populate and show popup — every search on a tour day triggers it
+  populateTourCard(day);
+  setTimeout(() => {
+    document.getElementById('tour-popup').classList.add('show');
+    document.body.style.overflow = 'hidden';
+  }, 600);
+}
+
+// Open tour popup on demand (Adventure button) — always shows, ignores suppress
+function openTourPopup(){
+  const day = getSelectedTourDay();
+  if(!day) return;
+  populateTourCard(day);
+  document.getElementById('tour-popup').classList.add('show');
+  document.body.style.overflow = 'hidden';
+}
+
+// Close popup — save suppress flag if checkbox is checked
+function closeTourPopup(){
+  document.getElementById('tour-popup').classList.remove('show');
+  document.body.style.overflow = '';
+  // Keep Adventure button visible so user can reopen anytime
+  const day = getSelectedTourDay();
+  if(day) updateAdventureBtn(day);
+}
+
+
+
+// Show/hide the Adventure button based on whether a tour day is selected
+function updateAdventureBtn(day){
+  const btn = document.getElementById('bn-adventure');
+  if(!btn) return;
+  if(day && TOURS[day]){
+    btn.style.display = 'flex'; // explicit flex — never relies on cascade
+    btn.style.flex    = '1';
+  } else {
+    btn.style.display = 'none';
+  }
+}
+
+// On page load: show Adventure button if today is a tour day
+function initTourDay(){
+  if(isTourDay()){
+    const tripDay = TOUR_PREVIEW_DAY !== null ? TOUR_PREVIEW_DAY : getTripDay();
+    const campKey = tripDay ? (TRIP_DAY_TO_CAMP[tripDay] || tripDay) : null;
+    if(campKey) updateAdventureBtn(campKey);
+  }
+}
+document.addEventListener('DOMContentLoaded', initTourDay);
+
+// ESC key dismisses tour popup
+document.addEventListener('keydown', e => {
+  if(e.key === 'Escape' && document.getElementById('tour-popup').classList.contains('show')){
+    closeTourPopup();
+  }
+});
+
+// Tour day init handled by initTourDay() above
+
+
+// ═══════════════════════════════════════════════════════════
+// WILDLIFE SPOTTER — JS (wl- prefixed, integrated)
+// ═══════════════════════════════════════════════════════════
+
+const WL_STORAGE_KEY  = 'iceland-wildlife-spotted-v1';
+const WL_IMG_CACHE    = 'iceland-wildlife-imgs-v1';
+let wlSpotted  = new Set();
+let wlImageMap = {};
+
+function wlLoadSpotted(){
+  try{ const r=localStorage.getItem(WL_STORAGE_KEY); if(r) wlSpotted=new Set(JSON.parse(r)); }catch(e){}
+}
+function wlSaveSpotted(){
+  try{ localStorage.setItem(WL_STORAGE_KEY,JSON.stringify([...wlSpotted])); }catch(e){}
+}
+function wlLoadImgCache(){
+  try{ const r=localStorage.getItem(WL_IMG_CACHE); if(r){ wlImageMap=JSON.parse(r); return Object.keys(wlImageMap).length>0; }}catch(e){}
+  return false;
+}
+function wlSaveImgCache(){
+  try{ localStorage.setItem(WL_IMG_CACHE,JSON.stringify(wlImageMap)); }catch(e){}
+}
+
+// Fetch image from Wikipedia REST API
+async function wlFetchImage(animal){
+  const url=`https://en.wikipedia.org/api/rest_v1/page/summary/${animal.wikipediaTitle}`;
+  try{
+    const res=await fetch(url,{headers:{'Api-User-Agent':'IcelandWildlifeSpotter/1.0'}});
+    if(!res.ok) return null;
+    const data=await res.json();
+    return data.originalimage?.source || data.thumbnail?.source || null;
+  }catch(e){ return null; }
+}
+
+// Progress bar
+function wlUpdateProgress(){
+  const n=wlSpotted.size, total=WL_ANIMALS.length;
+  const lbl=document.getElementById('wl-progress-label');
+  const fill=document.getElementById('wl-progress-fill');
+  if(lbl) lbl.textContent=n+' / '+total+' spotted';
+  if(fill) fill.style.width=((n/total)*100)+'%';
+}
+
+// Build a single card (all classes wl- prefixed)
+function wlBuildCard(a){
+  const wrap=document.createElement('div');
+  wrap.className='wl-card-wrap'+(wlSpotted.has(a.id)?' is-spotted':'');
+  wrap.dataset.id=a.id;
+  const imgSrc=wlImageMap[a.id]||'';
+  const spottedText=wlSpotted.has(a.id)?'✓ Spotted':'+ Spot it';
+  wrap.innerHTML=`
+    <div class="wl-card-inner">
+      <div class="wl-card-front">
+        <img class="wl-card-img${imgSrc?' ':''}${imgSrc?'':''}"
+             ${imgSrc?`src="${imgSrc}"`:`data-wlsrc="${a.id}"`}
+             alt="${a.name}" loading="lazy" decoding="async">
+        <div class="wl-img-placeholder">${a.emoji}</div>
+        <div class="wl-card-overlay"></div>
+        <div class="wl-card-name">${a.name}<span class="wl-card-name-is">${a.nameIs}</span></div>
+        <button class="wl-spot-btn" data-id="${a.id}" aria-label="Mark ${a.name} as spotted">${spottedText}</button>
+        <div class="wl-spotted-badge">✓<br>SEEN</div>
+      </div>
+      <div class="wl-card-back">
+        <div class="wl-card-back-inner">
+          <div class="wl-back-hint">tap to close ↩</div>
+          <div class="wl-back-title">${a.name}</div>
+          <div class="wl-back-title-is">${a.nameIs}</div>
+          <div class="wl-info-grid">
+            <div class="wl-info-row full">
+              <span class="wl-info-label">🏔 Habitat</span>
+              <span class="wl-info-value">${a.habitat}</span>
+            </div>
+            <div class="wl-info-row">
+              <span class="wl-info-label">⏳ Lifespan</span>
+              <span class="wl-info-value">${a.lifespan}</span>
+            </div>
+            <div class="wl-info-row">
+              <span class="wl-info-label">⚖️ Weight</span>
+              <span class="wl-info-value">${a.weight}</span>
+            </div>
+            <div class="wl-info-row">
+              <span class="wl-info-label">📏 Size</span>
+              <span class="wl-info-value">${a.size}</span>
+            </div>
+            <div class="wl-info-row full">
+              <span class="wl-info-label">🍽 Diet</span>
+              <span class="wl-info-value">${a.diet}</span>
+            </div>
+            <div class="wl-info-row full">
+              <span class="wl-info-label">🌿 Conservation</span>
+              <span class="wl-info-value">${a.conservation||''}</span>
+            </div>
+          </div>
+          <div class="wl-divider"></div>
+          <div class="wl-section-label">🇮🇸 Iceland Fact</div>
+          <span class="wl-iceland-fact">${a.icelandicFact||''}</span>
+          <div class="wl-divider"></div>
+          <div class="wl-section-label">🔍 Behaviours</div>
+          ${a.behaviors.map(b=>`<span class="wl-behavior-text">• ${b}</span>`).join('')}
+          <div class="wl-divider"></div>
+          <div class="wl-section-label">💡 Fun Fact</div>
+          <span class="wl-fun-fact">${a.funFact||''}</span>
+          <div class="wl-back-source">📚 ${a.source}</div>
+        </div>
+      </div>
+    </div>`;
+
+  // Image fade-in
+  const img=wrap.querySelector('.wl-card-img');
+  const ph =wrap.querySelector('.wl-img-placeholder');
+  if(img && imgSrc){
+    if(img.complete && img.naturalWidth>0){
+      img.classList.add('loaded'); ph.classList.add('hidden');
+    } else {
+      img.addEventListener('load',()=>{ img.classList.add('loaded'); ph.classList.add('hidden'); });
+      img.addEventListener('error',()=>{ img.style.display='none'; });
+    }
+  }
+  return wrap;
+}
+
+// Render all cards
+function wlRender(){
+  const grid=document.getElementById('wl-grid');
+  if(!grid) return;
+  grid.innerHTML='';
+  WL_ANIMALS.forEach(a=>grid.appendChild(wlBuildCard(a)));
+  wlUpdateProgress();
+}
+
+// Inject image into existing card after async fetch
+function wlInjectImage(id,src){
+  const wrap=document.querySelector(`.wl-card-wrap[data-id="${id}"]`);
+  if(!wrap) return;
+  const img=wrap.querySelector('.wl-card-img');
+  const ph =wrap.querySelector('.wl-img-placeholder');
+  if(img && src){
+    img.src=src;
+    img.addEventListener('load',()=>{ img.classList.add('loaded'); if(ph) ph.classList.add('hidden'); });
+    img.addEventListener('error',()=>{ img.style.display='none'; });
+  }
+}
+
+// Load all images (cache-first)
+async function wlLoadImages(){
+  const status=document.getElementById('wl-load-status');
+  if(wlLoadImgCache()){
+    wlRender();
+    if(status) status.style.display='none';
+    return;
+  }
+  wlRender();
+  if(status) status.textContent='Loading wildlife photos from Wikipedia…';
+  const fetches=WL_ANIMALS.map(a=>
+    wlFetchImage(a).then(src=>{
+      if(src){ wlImageMap[a.id]=src; wlInjectImage(a.id,src); }
+    })
+  );
+  await Promise.allSettled(fetches);
+  wlSaveImgCache();
+  if(status) status.style.display='none';
+}
+
+
+// ═══════════════════════════════════════════════════════════
+// ANIMAL SOUND SYNTHESIS — v4.1
+// Each function produces a unique sound character for its animal
+// All use the main app's getAC() AudioContext
+// ═══════════════════════════════════════════════════════════
+
+const WL_SOUNDS = {
+
+  // 🦊 Arctic Fox — sharp high bark + echo
+  "arctic-fox": ()=>{
+    const ac=getAC(); if(!ac) return; const t=ac.currentTime;
+    // Noise burst for bark texture
+    const buf=ac.createBuffer(1,ac.sampleRate*.08,ac.sampleRate);
+    const d=buf.getChannelData(0);
+    for(let i=0;i<d.length;i++) d[i]=(Math.random()*2-1)*Math.pow(1-i/d.length,1.5);
+    const ns=ac.createBufferSource(); ns.buffer=buf;
+    const nf=ac.createBiquadFilter(); nf.type='bandpass'; nf.frequency.value=900; nf.Q.value=2;
+    const ng=ac.createGain(); ng.gain.setValueAtTime(.5,t); ng.gain.exponentialRampToValueAtTime(.001,t+.15);
+    ns.connect(nf); nf.connect(ng); ng.connect(ac.destination); ns.start(t);
+    // Tonal bark
+    const o=ac.createOscillator(), g=ac.createGain(); o.type='sawtooth';
+    o.frequency.setValueAtTime(700,t); o.frequency.exponentialRampToValueAtTime(400,t+.12);
+    g.gain.setValueAtTime(0,t); g.gain.linearRampToValueAtTime(.25,t+.01); g.gain.exponentialRampToValueAtTime(.001,t+.18);
+    o.connect(g); g.connect(ac.destination); o.start(t); o.stop(t+.2);
+    // Echo bark
+    const o2=ac.createOscillator(), g2=ac.createGain(); o2.type='sawtooth';
+    o2.frequency.setValueAtTime(600,t+.22); o2.frequency.exponentialRampToValueAtTime(320,t+.34);
+    g2.gain.setValueAtTime(0,t+.22); g2.gain.linearRampToValueAtTime(.15,t+.23); g2.gain.exponentialRampToValueAtTime(.001,t+.38);
+    o2.connect(g2); g2.connect(ac.destination); o2.start(t+.22); o2.stop(t+.4);
+  },
+
+  // 🐦 Puffin — low raspy growl (AM modulation)
+  "puffin": ()=>{
+    const ac=getAC(); if(!ac) return; const t=ac.currentTime;
+    const carrier=ac.createOscillator(); carrier.type='sawtooth'; carrier.frequency.value=130;
+    const modulator=ac.createOscillator(); modulator.type='sine'; modulator.frequency.value=18;
+    const modGain=ac.createGain(); modGain.gain.value=80;
+    const masterGain=ac.createGain();
+    masterGain.gain.setValueAtTime(0,t); masterGain.gain.linearRampToValueAtTime(.3,t+.05);
+    masterGain.gain.setValueAtTime(.3,t+.3); masterGain.gain.exponentialRampToValueAtTime(.001,t+.55);
+    modulator.connect(modGain); modGain.connect(carrier.frequency);
+    carrier.connect(masterGain); masterGain.connect(ac.destination);
+    carrier.start(t); modulator.start(t); carrier.stop(t+.6); modulator.stop(t+.6);
+  },
+
+  // 🦌 Reindeer — low guttural grunt
+  "reindeer": ()=>{
+    const ac=getAC(); if(!ac) return; const t=ac.currentTime;
+    const o=ac.createOscillator(), g=ac.createGain();
+    o.type='sawtooth'; o.frequency.setValueAtTime(180,t); o.frequency.exponentialRampToValueAtTime(80,t+.25);
+    g.gain.setValueAtTime(0,t); g.gain.linearRampToValueAtTime(.35,t+.03); g.gain.exponentialRampToValueAtTime(.001,t+.35);
+    const filter=ac.createBiquadFilter(); filter.type='lowpass'; filter.frequency.value=500;
+    o.connect(filter); filter.connect(g); g.connect(ac.destination); o.start(t); o.stop(t+.4);
+  },
+
+  // 🐴 Icelandic Horse — whinny (rising then falling glide)
+  "icelandic-horse": ()=>{
+    const ac=getAC(); if(!ac) return; const t=ac.currentTime;
+    const o=ac.createOscillator(), g=ac.createGain();
+    o.type='sawtooth';
+    o.frequency.setValueAtTime(350,t); o.frequency.exponentialRampToValueAtTime(900,t+.25); o.frequency.exponentialRampToValueAtTime(280,t+.65);
+    g.gain.setValueAtTime(0,t); g.gain.linearRampToValueAtTime(.28,t+.04); g.gain.setValueAtTime(.28,t+.5); g.gain.exponentialRampToValueAtTime(.001,t+.8);
+    const f=ac.createBiquadFilter(); f.type='bandpass'; f.frequency.value=700; f.Q.value=1.5;
+    o.connect(f); f.connect(g); g.connect(ac.destination); o.start(t); o.stop(t+.85);
+  },
+
+  // 🐋 Humpback Whale — deep rising moan
+  "humpback-whale": ()=>{
+    const ac=getAC(); if(!ac) return; const t=ac.currentTime;
+    const o=ac.createOscillator(), g=ac.createGain();
+    o.type='sine'; o.frequency.setValueAtTime(60,t); o.frequency.linearRampToValueAtTime(140,t+.8); o.frequency.linearRampToValueAtTime(90,t+1.4);
+    g.gain.setValueAtTime(0,t); g.gain.linearRampToValueAtTime(.4,t+.1); g.gain.setValueAtTime(.4,t+1.0); g.gain.exponentialRampToValueAtTime(.001,t+1.6);
+    o.connect(g); g.connect(ac.destination); o.start(t); o.stop(t+1.7);
+    // Overtone
+    const o2=ac.createOscillator(), g2=ac.createGain();
+    o2.type='sine'; o2.frequency.setValueAtTime(120,t); o2.frequency.linearRampToValueAtTime(280,t+.8);
+    g2.gain.setValueAtTime(0,t); g2.gain.linearRampToValueAtTime(.12,t+.1); g2.gain.exponentialRampToValueAtTime(.001,t+1.6);
+    o2.connect(g2); g2.connect(ac.destination); o2.start(t); o2.stop(t+1.7);
+  },
+
+  // 🐳 Minke Whale — rapid series of clicks
+  "minke-whale": ()=>{
+    const ac=getAC(); if(!ac) return; const t=ac.currentTime;
+    [0,.08,.16,.24,.34].forEach((delay,i)=>{
+      const o=ac.createOscillator(), g=ac.createGain();
+      o.type='sine'; o.frequency.setValueAtTime(1200+i*80,t+delay);
+      g.gain.setValueAtTime(0,t+delay); g.gain.linearRampToValueAtTime(.2,t+delay+.008); g.gain.exponentialRampToValueAtTime(.001,t+delay+.05);
+      o.connect(g); g.connect(ac.destination); o.start(t+delay); o.stop(t+delay+.06);
+    });
+  },
+
+  // 🐦 Arctic Tern — sharp piercing screech
+  "arctic-tern": ()=>{
+    const ac=getAC(); if(!ac) return; const t=ac.currentTime;
+    const o=ac.createOscillator(), g=ac.createGain();
+    o.type='sawtooth'; o.frequency.setValueAtTime(2800,t); o.frequency.exponentialRampToValueAtTime(1800,t+.18);
+    g.gain.setValueAtTime(0,t); g.gain.linearRampToValueAtTime(.22,t+.01); g.gain.exponentialRampToValueAtTime(.001,t+.22);
+    o.connect(g); g.connect(ac.destination); o.start(t); o.stop(t+.25);
+    // Second cry
+    const o2=ac.createOscillator(), g2=ac.createGain();
+    o2.type='sawtooth'; o2.frequency.setValueAtTime(3000,t+.28); o2.frequency.exponentialRampToValueAtTime(1600,t+.46);
+    g2.gain.setValueAtTime(0,t+.28); g2.gain.linearRampToValueAtTime(.18,t+.29); g2.gain.exponentialRampToValueAtTime(.001,t+.5);
+    o2.connect(g2); g2.connect(ac.destination); o2.start(t+.28); o2.stop(t+.52);
+  },
+
+  // 🐦 Golden Plover — melodic ascending whistle
+  "golden-plover": ()=>{
+    const ac=getAC(); if(!ac) return; const t=ac.currentTime;
+    [[1200,0,.28],[1550,.3,.22],[1800,.55,.3]].forEach(([freq,delay,dur])=>{
+      const o=ac.createOscillator(), g=ac.createGain();
+      o.type='sine'; o.frequency.setValueAtTime(freq,t+delay); o.frequency.linearRampToValueAtTime(freq*1.05,t+delay+dur);
+      g.gain.setValueAtTime(0,t+delay); g.gain.linearRampToValueAtTime(.18,t+delay+.02); g.gain.exponentialRampToValueAtTime(.001,t+delay+dur);
+      o.connect(g); g.connect(ac.destination); o.start(t+delay); o.stop(t+delay+dur+.02);
+    });
+  },
+
+  // 🦅 Gyrfalcon — rapid high-pitched chattering screech
+  "gyrfalcon": ()=>{
+    const ac=getAC(); if(!ac) return; const t=ac.currentTime;
+    [0,.07,.14,.21,.28].forEach((delay,i)=>{
+      const o=ac.createOscillator(), g=ac.createGain();
+      o.type='sawtooth'; o.frequency.setValueAtTime(2200+i*80,t+delay); o.frequency.exponentialRampToValueAtTime(1600,t+delay+.06);
+      g.gain.setValueAtTime(0,t+delay); g.gain.linearRampToValueAtTime(.2,t+delay+.008); g.gain.exponentialRampToValueAtTime(.001,t+delay+.07);
+      o.connect(g); g.connect(ac.destination); o.start(t+delay); o.stop(t+delay+.08);
+    });
+  },
+
+  // 🦭 Harbour Seal — short percussive bark
+  "harbour-seal": ()=>{
+    const ac=getAC(); if(!ac) return; const t=ac.currentTime;
+    [0,.35].forEach(delay=>{
+      const buf=ac.createBuffer(1,ac.sampleRate*.06,ac.sampleRate);
+      const d=buf.getChannelData(0);
+      for(let i=0;i<d.length;i++) d[i]=(Math.random()*2-1)*Math.pow(1-i/d.length,2);
+      const ns=ac.createBufferSource(); ns.buffer=buf;
+      const f=ac.createBiquadFilter(); f.type='bandpass'; f.frequency.value=400; f.Q.value=3;
+      const g=ac.createGain(); g.gain.setValueAtTime(.45,t+delay); g.gain.exponentialRampToValueAtTime(.001,t+delay+.1);
+      ns.connect(f); f.connect(g); g.connect(ac.destination); ns.start(t+delay);
+      const o=ac.createOscillator(), og=ac.createGain(); o.type='sine'; o.frequency.value=280;
+      og.gain.setValueAtTime(0,t+delay); og.gain.linearRampToValueAtTime(.2,t+delay+.01); og.gain.exponentialRampToValueAtTime(.001,t+delay+.12);
+      o.connect(og); og.connect(ac.destination); o.start(t+delay); o.stop(t+delay+.13);
+    });
+  },
+
+  // 🦭 Grey Seal — long low moan
+  "grey-seal": ()=>{
+    const ac=getAC(); if(!ac) return; const t=ac.currentTime;
+    const o=ac.createOscillator(), g=ac.createGain();
+    o.type='sawtooth'; o.frequency.setValueAtTime(200,t); o.frequency.exponentialRampToValueAtTime(120,t+.7);
+    g.gain.setValueAtTime(0,t); g.gain.linearRampToValueAtTime(.3,t+.1); g.gain.setValueAtTime(.3,t+.5); g.gain.exponentialRampToValueAtTime(.001,t+.9);
+    const f=ac.createBiquadFilter(); f.type='lowpass'; f.frequency.value=600;
+    o.connect(f); f.connect(g); g.connect(ac.destination); o.start(t); o.stop(t+.95);
+  },
+
+  // 🦦 Mink — sharp hiss
+  "mink": ()=>{
+    const ac=getAC(); if(!ac) return; const t=ac.currentTime;
+    const buf=ac.createBuffer(1,ac.sampleRate*.25,ac.sampleRate);
+    const d=buf.getChannelData(0); for(let i=0;i<d.length;i++) d[i]=Math.random()*2-1;
+    const ns=ac.createBufferSource(); ns.buffer=buf;
+    const f=ac.createBiquadFilter(); f.type='highpass'; f.frequency.value=4000;
+    const g=ac.createGain(); g.gain.setValueAtTime(.3,t); g.gain.linearRampToValueAtTime(.35,t+.03); g.gain.exponentialRampToValueAtTime(.001,t+.25);
+    ns.connect(f); f.connect(g); g.connect(ac.destination); ns.start(t);
+  },
+
+  // 🐦 Rock Ptarmigan — rapid clucking
+  "rock-ptarmigan": ()=>{
+    const ac=getAC(); if(!ac) return; const t=ac.currentTime;
+    [0,.09,.18,.27,.38,.49].forEach((delay,i)=>{
+      const o=ac.createOscillator(), g=ac.createGain();
+      o.type='square'; o.frequency.value=380+i*15;
+      g.gain.setValueAtTime(0,t+delay); g.gain.linearRampToValueAtTime(.18,t+delay+.01); g.gain.exponentialRampToValueAtTime(.001,t+delay+.07);
+      const f=ac.createBiquadFilter(); f.type='bandpass'; f.frequency.value=500; f.Q.value=2;
+      o.connect(f); f.connect(g); g.connect(ac.destination); o.start(t+delay); o.stop(t+delay+.08);
+    });
+  },
+
+  // 🐦‍⬛ Raven — deep resonant caw
+  "raven": ()=>{
+    const ac=getAC(); if(!ac) return; const t=ac.currentTime;
+    [0,.38].forEach((delay,i)=>{
+      const o=ac.createOscillator(), g=ac.createGain();
+      o.type='sawtooth'; o.frequency.setValueAtTime(220,t+delay); o.frequency.exponentialRampToValueAtTime(160,t+delay+.28);
+      g.gain.setValueAtTime(0,t+delay); g.gain.linearRampToValueAtTime(.3,t+delay+.02); g.gain.exponentialRampToValueAtTime(.001,t+delay+.32);
+      const f=ac.createBiquadFilter(); f.type='lowpass'; f.frequency.value=800;
+      o.connect(f); f.connect(g); g.connect(ac.destination); o.start(t+delay); o.stop(t+delay+.35);
+    });
+  },
+
+  // 🦉 Snowy Owl — deep hoot with vibrato
+  "snowy-owl": ()=>{
+    const ac=getAC(); if(!ac) return; const t=ac.currentTime;
+    const carrier=ac.createOscillator(); carrier.type='sine'; carrier.frequency.setValueAtTime(280,t); carrier.frequency.linearRampToValueAtTime(260,t+.9);
+    const vibrato=ac.createOscillator(); vibrato.type='sine'; vibrato.frequency.value=5;
+    const vibGain=ac.createGain(); vibGain.gain.value=8;
+    vibrato.connect(vibGain); vibGain.connect(carrier.frequency);
+    const g=ac.createGain(); g.gain.setValueAtTime(0,t); g.gain.linearRampToValueAtTime(.35,t+.08); g.gain.setValueAtTime(.35,t+.7); g.gain.exponentialRampToValueAtTime(.001,t+1.0);
+    carrier.connect(g); g.connect(ac.destination);
+    carrier.start(t); vibrato.start(t); carrier.stop(t+1.05); vibrato.stop(t+1.05);
+  },
+};
+
+// Play the sound for a given animal id
+function wlPlayAnimalSound(id){
+  try{ if(WL_SOUNDS[id]) WL_SOUNDS[id](); }catch(e){}
+}
+
+// ── SOUNDS (reuse main app's getAC()) ─────────────────────────
+function wlPlaySpotSound(){
+  try{
+    const ac=getAC(); if(!ac) return;
+    const now=ac.currentTime;
+    [[523.25,0],[659.25,.07],[783.99,.14]].forEach(([freq,delay])=>{
+      const o=ac.createOscillator(), g=ac.createGain();
+      o.connect(g); g.connect(ac.destination);
+      o.type='sine'; o.frequency.setValueAtTime(freq,now+delay);
+      g.gain.setValueAtTime(0,now+delay);
+      g.gain.linearRampToValueAtTime(.16,now+delay+.015);
+      g.gain.exponentialRampToValueAtTime(.001,now+delay+.5);
+      o.start(now+delay); o.stop(now+delay+.55);
+    });
+  }catch(e){}
+}
+
+function wlPlayCelebrationSound(){
+  try{
+    const ac=getAC(); if(!ac) return;
+    const now=ac.currentTime;
+    [523.25,587.33,659.25,698.46,783.99,880,987.77,1046.5].forEach((freq,i)=>{
+      const o=ac.createOscillator(), g=ac.createGain();
+      o.connect(g); g.connect(ac.destination);
+      o.type=i%2===0?'sine':'triangle';
+      o.frequency.setValueAtTime(freq,now+i*.07);
+      g.gain.setValueAtTime(0,now+i*.07);
+      g.gain.linearRampToValueAtTime(.18,now+i*.07+.02);
+      g.gain.exponentialRampToValueAtTime(.001,now+i*.07+.45);
+      o.start(now+i*.07); o.stop(now+i*.07+.5);
+    });
+  }catch(e){}
+}
+
+// Wildlife tab sound — short bird-chirp (two quick ascending tones)
+function playWildlifeSound(){
+  try{
+    const ac=getAC(); if(!ac) return;
+    const now=ac.currentTime;
+    [[1200,.0,.12],[1800,.09,.1]].forEach(([freq,delay,dur])=>{
+      const o=ac.createOscillator(), g=ac.createGain();
+      o.connect(g); g.connect(ac.destination);
+      o.type='sine'; o.frequency.setValueAtTime(freq,now+delay);
+      o.frequency.exponentialRampToValueAtTime(freq*1.15,now+delay+dur);
+      g.gain.setValueAtTime(0,now+delay);
+      g.gain.linearRampToValueAtTime(.14,now+delay+.01);
+      g.gain.exponentialRampToValueAtTime(.001,now+delay+dur);
+      o.start(now+delay); o.stop(now+delay+dur+.01);
+    });
+  }catch(e){}
+}
+
+// ── SCRIM ──────────────────────────────────────────────────────
+const wlScrim=document.getElementById('wl-card-scrim');
+function wlOpenScrim(){ if(wlScrim){ wlScrim.classList.add('visible'); }}
+function wlCloseScrim(){ if(wlScrim){ wlScrim.classList.remove('visible'); }}
+
+// ── FLIP OPEN — centered, expanded ────────────────────────────
+function wlFlipOpen(wrap){
+  const inner=wrap.querySelector('.wl-card-inner');
+  const vw=window.innerWidth, vh=window.innerHeight;
+  const tw=Math.min(480,vw*.94), th=Math.min(560,vh*.84);
+  inner.style.cssText=[
+    'position:fixed','left:50%','top:50%',
+    `width:${tw}px`,`height:${th}px`,
+    // Start face-down (rotateY 180) + slightly scaled down for entry animation
+    'transform:translateX(-50%) translateY(-50%) rotateY(180deg) scale(0.88)',
+    'border-radius:14px',
+    'z-index:5200',   // above map(4000), aurora overlay(4000), tour popup(5000)
+    'box-shadow:0 32px 100px rgba(0,0,0,.9),0 0 0 1px rgba(59,232,176,.25),0 0 50px rgba(59,232,176,.08)',
+    'overflow:hidden','opacity:0',
+    'transition:opacity .4s var(--ease-out-expo), transform .45s var(--ease-out-expo)',
+    'will-change:transform,opacity'
+  ].join(';');
+  // Trigger reflow then animate to final state
+  inner.getBoundingClientRect();
+  inner.style.opacity='1';
+  inner.style.transform='translateX(-50%) translateY(-50%) rotateY(180deg) scale(1)';
+  wrap.classList.add('is-flipped');
+  wlOpenScrim();
+}
+
+// ── FLIP CLOSE ─────────────────────────────────────────────────
+function wlFlipClose(wrap){
+  const inner=wrap.querySelector('.wl-card-inner');
+  if(!inner.style.position) return;
+  inner.style.transition='transform .35s var(--ease-out-expo),opacity .28s ease';
+  inner.style.transform='translateX(-50%) translateY(-50%) rotateY(90deg) scale(.9)';
+  inner.style.opacity='0';
+  wrap.classList.remove('is-flipped');
+  wlCloseScrim();
+  setTimeout(()=>{ inner.style.cssText=''; },380);
+}
+
+function wlCloseAll(){
+  document.querySelectorAll('.wl-card-wrap.is-flipped').forEach(w=>wlFlipClose(w));
+}
+
+if(wlScrim) wlScrim.addEventListener('click',wlCloseAll);
+
+// ── EVENT DELEGATION on grid ───────────────────────────────────
+document.addEventListener('click',e=>{
+  // Spot button
+  const spotBtn=e.target.closest('.wl-spot-btn');
+  if(spotBtn){
+    e.stopPropagation();
+    const id=spotBtn.dataset.id;
+    const wrap=document.querySelector(`.wl-card-wrap[data-id="${id}"]`);
+    if(!wrap) return;
+    if(wlSpotted.has(id)){
+      wlSpotted.delete(id);
+      wrap.classList.remove('is-spotted');
+      spotBtn.textContent='+ Spot it';
+    } else {
+      wlSpotted.add(id);
+      wrap.classList.add('is-spotted');
+      spotBtn.textContent='✓ Spotted';
+      wlPlayAnimalSound(id);
+      if(wlSpotted.size===WL_ANIMALS.length){
+        setTimeout(wlPlayCelebrationSound,400);
+        setTimeout(wlShowCelebration,300);
+      }
+    }
+    wlSaveSpotted();
+    wlUpdateProgress();
+    return;
+  }
+
+  // Tap card front → flip open
+  const front=e.target.closest('.wl-card-front');
+  if(front){
+    const wrap=front.closest('.wl-card-wrap');
+    document.querySelectorAll('.wl-card-wrap.is-flipped').forEach(w=>{ if(w!==wrap) wlFlipClose(w); });
+    wrap.classList.contains('is-flipped') ? wlFlipClose(wrap) : wlFlipOpen(wrap);
+    return;
+  }
+
+  // Tap card back → flip close
+  const back=e.target.closest('.wl-card-back');
+  if(back) wlFlipClose(back.closest('.wl-card-wrap'));
+});
+
+// ESC key
+document.addEventListener('keydown',e=>{ if(e.key==='Escape') wlCloseAll(); });
+
+// ── CELEBRATION ────────────────────────────────────────────────
+function wlShowCelebration(){
+  const el=document.createElement('div');
+  el.id='wl-celebration';
+  el.innerHTML=`
+    <div class="wl-cel-inner">
+      <span class="wl-cel-emoji">🎉</span>
+      <div class="wl-cel-title">All 15 Spotted!</div>
+      <div class="wl-cel-sub">You've documented every creature in Iceland's wilderness. Incredible!</div>
+      <button class="wl-cel-btn" onclick="document.getElementById('wl-celebration').remove()">Close</button>
+    </div>`;
+  document.body.appendChild(el);
+  setTimeout(()=>{ if(el.parentNode) el.remove(); },7000);
+}
+
+// ── INIT ───────────────────────────────────────────────────────
+function wlInit(){
+  wlLoadSpotted();
+  wlLoadImages();
+}
+
+// Wire into TAB_SOUNDS
+document.addEventListener('DOMContentLoaded',()=>{
+  if(typeof TAB_SOUNDS!=='undefined') TAB_SOUNDS.wildlife=playWildlifeSound;
+  wlInit();
+});
+
 function closeToast(){document.getElementById('toast')?.classList.remove('show');}
 
 // ═══════════════════════════════════════════════════════════
@@ -2986,5 +4763,24 @@ function renderAurora(rows){
 }
 
 </script>
+
+<!-- ═══ TOUR DAY POPUP ═══ -->
+<div id="tour-popup" aria-modal="true" role="dialog">
+  <div class="tour-backdrop" onclick="closeTourPopup()"></div>
+  <div class="tour-card">
+    <button class="tour-close" onclick="closeTourPopup()" aria-label="Close">✕</button>
+    <div class="tour-eyebrow" id="tour-eyebrow">Day 1 · Today</div>
+    <div class="tour-icon"    id="tour-icon">🌊</div>
+    <div class="tour-name"    id="tour-name">Blue Lagoon</div>
+    <div class="tour-tagline" id="tour-tagline"></div>
+    <div class="tour-tips"    id="tour-tips"></div>
+    <button class="tour-dismiss-btn" onclick="closeTourPopup()">
+      Let’s go! 🚐
+    </button>
+
+    
+  </div>
+</div>
+
 </body>
 </html>
