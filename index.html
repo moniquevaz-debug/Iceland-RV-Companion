@@ -1750,6 +1750,26 @@ html {
   .search-sheet:not(.collapsed) .ss-expand-btn{transform:rotate(180deg);}
 }
 
+
+/* Collapse arrow — visible inside expanded form on mobile */
+@media(max-width:767px){
+  .ss-form-header{
+    display:flex;justify-content:flex-end;
+    margin-bottom:-4px;
+  }
+  .ss-collapse-arrow{
+    font-size:.95rem;color:var(--aur);
+    background:none;border:none;padding:2px 4px;
+    cursor:pointer;-webkit-appearance:none;
+    line-height:1;
+    -webkit-tap-highlight-color:transparent;
+    touch-action:manipulation;
+  }
+}
+@media(min-width:768px){
+  .ss-form-header{ display:none; }
+}
+
 </style>
 </head>
 <body>
@@ -1774,7 +1794,7 @@ html {
         </div>
       </div>
     </div>
-    <span class="tb-ver">v4.4</span>
+    <span class="tb-ver">v4.5</span>
     <div class="tb-spacer"></div>
     <div class="tb-right-btns">
       <button class="gps-btn off" id="gps-btn" onclick="toggleGPS()" title="Tap to enable GPS tracking">
@@ -1821,6 +1841,9 @@ html {
     </div>
     <!-- Full form (shown by default) -->
     <div class="ss-form" id="ss-form">
+      <div class="ss-form-header">
+        <button class="ss-collapse-arrow" onclick="collapseSearchSheet()" aria-label="Collapse search" title="Collapse">⌃</button>
+      </div>
       <div class="sel-row">
         <div class="sel-wrap">
           <span class="sel-label">📍 Departure</span>
