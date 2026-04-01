@@ -1899,6 +1899,109 @@ html {
   .tour-icon{ font-size:2.8rem; }
 }
 
+
+/* ── F-ROADS SECTION ─────────────────────────────────────── */
+.f-roads-section{
+  margin:12px 14px 0;
+  border:1px solid rgba(140,200,230,.12);
+  border-radius:12px;overflow:hidden;
+}
+.f-roads-header{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:10px 14px 8px;
+  background:rgba(255,255,255,.03);
+  border-bottom:1px solid rgba(140,200,230,.08);
+}
+.f-roads-title{
+  font-family:var(--fs);font-size:.9rem;font-weight:600;font-style:italic;
+  color:var(--ice);
+}
+.f-roads-link{
+  font-family:var(--fm);font-size:.52rem;color:var(--aur);
+  letter-spacing:.05em;text-decoration:none;
+  border:1px solid rgba(59,232,176,.25);border-radius:4px;
+  padding:3px 7px;
+  transition:all .3s;
+}
+.f-roads-link:hover{background:rgba(59,232,176,.1);}
+.f-roads-warning{
+  font-family:var(--fm);font-size:.58rem;
+  color:rgba(240,192,64,.85);line-height:1.65;
+  padding:8px 14px;
+  background:rgba(240,192,64,.06);
+  border-bottom:1px solid rgba(240,192,64,.12);
+}
+.f-live-label{
+  font-family:var(--fm);font-size:.52rem;color:var(--aur);
+  letter-spacing:.06em;padding:6px 14px 2px;
+}
+.f-roads-grid{
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:8px;padding:10px 10px;
+}
+@media(max-width:380px){.f-roads-grid{grid-template-columns:1fr;}}
+@media(min-width:640px){.f-roads-grid{grid-template-columns:repeat(3,1fr);}}
+.f-road-card{
+  background:rgba(255,255,255,.025);
+  border:1px solid rgba(140,200,230,.1);
+  border-radius:10px;padding:10px 11px;
+  display:flex;flex-direction:column;gap:4px;
+}
+.f-road-top{
+  display:flex;align-items:center;justify-content:space-between;
+}
+.f-road-num{
+  font-family:var(--fs);font-size:.82rem;font-weight:600;
+  font-style:italic;color:var(--ice);
+}
+.f-road-diff{
+  font-family:var(--fm);font-size:.46rem;letter-spacing:.06em;
+  text-transform:uppercase;
+}
+.f-road-name{
+  font-family:var(--fm);font-size:.54rem;color:var(--aur);
+  letter-spacing:.04em;
+}
+.f-road-desc{
+  font-family:var(--fm);font-size:.55rem;color:var(--muted);
+  line-height:1.55;flex:1;
+}
+.f-road-meta{
+  display:flex;flex-direction:column;gap:2px;
+  font-family:var(--fm);font-size:.5rem;color:rgba(214,238,248,.5);
+}
+.f-road-rv{
+  font-family:var(--fm);font-size:.5rem;
+  color:rgba(240,192,64,.8);margin-top:2px;
+  border-top:1px solid rgba(140,200,230,.07);
+  padding-top:4px;
+}
+.f-roads-note{
+  font-family:var(--fm);font-size:.52rem;color:var(--muted);
+  padding:6px 14px 10px;line-height:1.8;
+}
+.f-roads-note a{color:var(--gl);}
+@media(max-width:767px){
+  .f-roads-section{margin:8px 10px 0;}
+  .f-road-card{padding:8px 9px;}
+  .f-road-num{font-size:.75rem;}
+  .f-road-desc{font-size:.5rem;}
+  .f-roads-warning{font-size:.54rem;}
+}
+
+
+/* ── F-road live status badges ───────────────────────────── */
+.f-live-badge{
+  font-family:var(--fm);font-size:.44rem;letter-spacing:.05em;
+  padding:2px 6px;border-radius:5px;font-weight:600;
+}
+.f-badge-open{background:rgba(59,232,176,.15);color:var(--aur);border:1px solid rgba(59,232,176,.3);}
+.f-badge-closed{background:rgba(239,95,95,.15);color:var(--red);border:1px solid rgba(239,95,95,.3);}
+.f-badge-warn{background:rgba(240,192,64,.12);color:var(--gold);border:1px solid rgba(240,192,64,.25);}
+.f-badge-unknown{background:rgba(140,200,230,.08);color:var(--muted);border:1px solid rgba(140,200,230,.12);}
+.f-road-card.f-road-open{border-color:rgba(59,232,176,.25);}
+
 </style>
 </head>
 <body>
@@ -1923,7 +2026,7 @@ html {
         </div>
       </div>
     </div>
-    <span class="tb-ver">v4.8</span>
+    <span class="tb-ver">v4.9</span>
     <div class="tb-spacer"></div>
     <div class="tb-right-btns">
       <button class="gps-btn off" id="gps-btn" onclick="toggleGPS()" title="Tap to enable GPS tracking">
@@ -2309,6 +2412,76 @@ const ROAD_NOTICES=[
    legs:"all",
    updated:"Always relevant"},
 ];
+
+// ═══════════════════════════════════════════════════════════
+// F-ROADS REFERENCE DATA
+// Curated info on key F-roads near the Ring Road route.
+// Status: open/closed fetched from live data if available,
+// otherwise seasonal estimate based on historical dates.
+// ═══════════════════════════════════════════════════════════
+const F_ROADS = [
+  {num:"F35",  name:"Kjölur",          icon:"🟢",
+   desc:"Longest accessible F-road — connects south to north through highlands. No major river crossings. The most RV-friendly F-road.",
+   opens:"Early June",closes:"Late October",
+   difficulty:1, rivers:false, rv:"⚠️ Small campervans only — verify ground clearance",
+   near:[5,6], link:"https://road.is"},
+  {num:"F208N",name:"Fjallabaksleið N",icon:"🟡",
+   desc:"North approach to Landmannalaugar. Rough gravel, potholes, but no river crossings. Stunning rhyolite scenery.",
+   opens:"Late June",closes:"September",
+   difficulty:2, rivers:false, rv:"❌ RVs prohibited",
+   near:[1,2], link:"https://road.is"},
+  {num:"F208S",name:"Fjallabaksleið S",icon:"🔴",
+   desc:"South approach to Landmannalaugar. ~10 river crossings including deep ones. Spectacular but serious.",
+   opens:"Early July",closes:"September",
+   difficulty:3, rivers:true, rv:"❌ RVs prohibited",
+   near:[1,2], link:"https://road.is"},
+  {num:"F249", name:"Þórsmörk",        icon:"🔴",
+   desc:"Final crossing at Krossá river is one of Iceland's most challenging. Many take the highland bus instead.",
+   opens:"Late June",closes:"September",
+   difficulty:3, rivers:true, rv:"❌ RVs prohibited",
+   near:[1,2], link:"https://road.is"},
+  {num:"F26",  name:"Sprengisandur",   icon:"🟡",
+   desc:"Longest F-road (200+ km), crosses a barren volcanic desert. River crossings. No services — carry extra fuel.",
+   opens:"Late June",closes:"September",
+   difficulty:3, rivers:true, rv:"❌ RVs prohibited",
+   near:[5,6], link:"https://road.is"},
+  {num:"F88",  name:"Askja / Öskjuleið",icon:"🔴",
+   desc:"Leads to Askja Caldera and Víti Crater. Lunar landscape. Deep river crossings and remote terrain.",
+   opens:"Late June",closes:"September",
+   difficulty:3, rivers:true, rv:"❌ RVs prohibited",
+   near:[4,5], link:"https://road.is"},
+  {num:"F910", name:"Öskjuvatn",       icon:"🔴",
+   desc:"Continuation past Askja toward Kverkfjöll. Very remote, serious terrain, experienced drivers only.",
+   opens:"July",closes:"September",
+   difficulty:3, rivers:true, rv:"❌ RVs prohibited",
+   near:[4,5], link:"https://road.is"},
+  {num:"F347", name:"Kerlingarfjöll",  icon:"🟡",
+   desc:"Access to the colourful geothermal Kerlingarfjöll mountains. Off F35 Kjölur route. Moderate difficulty.",
+   opens:"Late June",closes:"September",
+   difficulty:2, rivers:false, rv:"❌ RVs prohibited",
+   near:[5,6], link:"https://road.is"},
+  {num:"F210", name:"Fjallabaksleið S2",icon:"🔴",
+   desc:"Parallel to F208 south, less traveled. Several river crossings. Very rough terrain through volcanic highlands.",
+   opens:"July",closes:"September",
+   difficulty:3, rivers:true, rv:"❌ RVs prohibited",
+   near:[2,3], link:"https://road.is"},
+  {num:"F550", name:"Kaldidalur",      icon:"🟢",
+   desc:"Short highland route between Þingvellir and Husafell. One of easiest F-roads. No river crossings.",
+   opens:"June",closes:"October",
+   difficulty:1, rivers:false, rv:"⚠️ Short wheelbase campervans only",
+   near:[0,1,7,8], link:"https://road.is"},
+  {num:"F570", name:"Snæfellsjökull",  icon:"🟡",
+   desc:"Circles Snæfellsjökull glacier on the peninsula. Moderate terrain, seasonal river crossings.",
+   opens:"Late June",closes:"September",
+   difficulty:2, rivers:true, rv:"❌ RVs prohibited",
+   near:[6,7], link:"https://road.is"},
+  {num:"F985", name:"Herðubreiðarlindir",icon:"🔴",
+   desc:"Access to 'Queen of Icelandic Mountains' Herðubreið. Very remote. Requires experienced highland driver.",
+   opens:"July",closes:"August",
+   difficulty:3, rivers:true, rv:"❌ RVs prohibited",
+   near:[4,5], link:"https://road.is"},
+];
+
 
 const ALT_ROUTES={
   "0-1":"Route 1 south. Well maintained year-round.",
@@ -2845,51 +3018,82 @@ function renderWeather(results){
 // ═══════════════════════════════════════════════════════════
 async function fetchRoads(fi,ti){
   const el=document.getElementById('road-content');
-  el.innerHTML='<div class="spinner"><div class="sp"></div>Checking road conditions…</div>';
+  el.innerHTML='<div class="spinner"><div class="sp"></div>Checking road conditions\u2026</div>';
   document.getElementById('road-links').style.display='block';
 
-  // Target: vegagerdin.is official road conditions JSON (English)
-  const TARGET='https://www.vegagerdin.is/vefur2.nsf/Faerd_listi_JSON?OpenAgent&lang=en';
+  const TARGET_JSON='https://www.vegagerdin.is/vefur2.nsf/Faerd_listi_JSON?OpenAgent&lang=en';
+  const TARGET_FROADS='https://www.vegagerdin.is/en/travel-info/mountain-roads';
 
-  // Three CORS proxies tried in order — if one fails, next is attempted
-  // Proxy URLs updated April 2026 based on current availability
   const PROXIES=[
-    'https://api.allorigins.win/raw?url='+encodeURIComponent(TARGET),
-    'https://corsproxy.io/?url='+encodeURIComponent(TARGET),
-    'https://api.codetabs.com/v1/proxy?quest='+encodeURIComponent(TARGET),
+    function(u){return 'https://api.allorigins.win/raw?url='+encodeURIComponent(u);},
+    function(u){return 'https://corsproxy.io/?url='+encodeURIComponent(u);},
+    function(u){return 'https://api.codetabs.com/v1/proxy?quest='+encodeURIComponent(u);},
   ];
 
-  async function tryProxy(url){
-    const ac=new AbortController();
-    const timer=setTimeout(()=>ac.abort(),9000);
-    let r;
-    try{ r=await fetch(url,{signal:ac.signal}); }
-    finally{ clearTimeout(timer); }
-    if(!r.ok) throw new Error('HTTP '+r.status);
-    const text=await r.text();
-    if(!text||text.trim()==='') throw new Error('Empty response');
-    const parsed=JSON.parse(text); // throws if not JSON
-    const arr=Array.isArray(parsed)?parsed
+  function safeFetch(url,ms){
+    ms=ms||9000;
+    var ac=new AbortController();
+    var timer=setTimeout(function(){ac.abort();},ms);
+    return fetch(url,{signal:ac.signal}).then(function(r){
+      clearTimeout(timer);
+      if(!r.ok) throw new Error('HTTP '+r.status);
+      return r.text();
+    }).catch(function(e){ clearTimeout(timer); throw e; });
+  }
+
+  function fetchViaProxies(targetUrl,parseFn){
+    var i=0;
+    function tryNext(){
+      if(i>=PROXIES.length) return Promise.resolve(null);
+      var proxyUrl=PROXIES[i++](targetUrl);
+      return safeFetch(proxyUrl).then(function(text){
+        if(!text||!text.trim()) throw new Error('Empty');
+        return parseFn(text);
+      }).catch(function(e){
+        console.warn('Proxy failed:',targetUrl.slice(-30),e.message);
+        return tryNext();
+      });
+    }
+    return tryNext();
+  }
+
+  function parseRoadJSON(text){
+    var parsed=JSON.parse(text);
+    var arr=Array.isArray(parsed)?parsed
       :(parsed.items||parsed.Faerd||parsed.results||parsed.data||null);
-    if(!arr||!arr.length) throw new Error('No data');
+    if(!arr||!arr.length) throw new Error('No records');
     return arr;
   }
 
-  (async()=>{
-    let liveData=null;
-    for(const proxy of PROXIES){
-      try{
-        liveData=await tryProxy(proxy);
-        if(liveData) break; // success
-      }catch(e){
-        console.warn('Roads proxy failed:',proxy,e.message);
+  function parseFRoadHTML(html){
+    var rows=[];
+    var trRx=/<tr[^>]*>([\s\S]*?)<\/tr>/gi;
+    var m;
+    while((m=trRx.exec(html))!==null){
+      var tds=[];
+      var tdRx=/<td[^>]*>([\s\S]*?)<\/td>/gi;
+      var tm;
+      while((tm=tdRx.exec(m[1]))!==null){
+        tds.push(tm[1].replace(/<[^>]+>/g,'').replace(/&amp;/g,'&')
+          .replace(/&lt;/g,'<').replace(/&gt;/g,'>').trim());
+      }
+      if(tds.length>=2 && /^F?\d/.test(tds[0])){
+        rows.push({num:tds[0], name:tds[1]||'', status:tds[tds.length-1]||''});
       }
     }
-    renderRoads(fi,ti,liveData, liveData?'vegagerdin':null);
-  })();
+    return rows.length>0?rows:null;
+  }
+
+  Promise.all([
+    fetchViaProxies(TARGET_JSON, parseRoadJSON),
+    fetchViaProxies(TARGET_FROADS, parseFRoadHTML),
+  ]).then(function(results){
+    renderRoads(fi, ti, results[0], results[0]?'vegagerdin':null, results[1]);
+  });
 }
 
-function renderRoads(fi,ti,liveData,liveSource){
+
+function renderRoads(fi,ti,liveData,liveSource,fRoadStatus){
   const el=document.getElementById('road-content');
   el.innerHTML='';
   let cnt=0;
@@ -2988,6 +3192,108 @@ function renderRoads(fi,ti,liveData,liveSource){
         el.appendChild(div);cnt++;
       });
   }
+
+  // ── F-ROADS SECTION ────────────────────────────────────────────
+  // Filter F_ROADS relevant to current route camps, plus all general
+  const relevantF = F_ROADS.filter(f =>
+    !f.near || f.near.some(n => n===fi || n===ti)
+  );
+  const allF = relevantF.length > 0 ? relevantF : F_ROADS.slice(0,6);
+
+  // Also pull any F-road entries from live data
+  let liveFroads = [];
+  if(liveData && Array.isArray(liveData)){
+    liveFroads = liveData.filter(f=>{
+      const road = String(f.Thjodvegur||f.road||f.roadNumber||'');
+      const title = String(f.Heiti||f.title||'').toLowerCase();
+      return road.match(/^[Ff]\d/) || title.includes('f-road') || title.includes('highland') || title.includes('fjallveg');
+    }).slice(0,5);
+  }
+
+  // Merge live fRoadStatus into F_ROADS curated data
+  // fRoadStatus = [{num, name, status}] from vegagerdin mountain roads page
+  var liveStatusMap={};
+  if(fRoadStatus && Array.isArray(fRoadStatus)){
+    fRoadStatus.forEach(function(r){
+      liveStatusMap[r.num.toUpperCase()]={status:r.status,name:r.name};
+    });
+  }
+
+  const fSection = document.createElement('div');
+  fSection.className = 'f-roads-section';
+  const hasLiveF = Object.keys(liveStatusMap).length > 0;
+  fSection.innerHTML = `
+    <div class="f-roads-header">
+      <span class="f-roads-title">🏔 F-Roads & Highland Status</span>
+      <a href="https://www.vegagerdin.is/en/travel-info/mountain-roads" target="_blank" class="f-roads-link">${hasLiveF?'🔴 Live':'Check'} ↗</a>
+    </div>`;
+
+  // Add live status banner if we got data
+  if(hasLiveF){
+    const liveBanner=document.createElement('div');
+    liveBanner.className='f-live-label';
+    liveBanner.textContent='🛰 Live status from vegagerdin.is — '+Object.keys(liveStatusMap).length+' F-roads';
+    fSection.appendChild(liveBanner);
+  }
+  fSection.innerHTML += `
+    <div class="f-roads-warning">
+      ⚠️ <strong>RV / Campervan rule:</strong> F-roads require a high-clearance 4×4.
+      Standard RVs are <strong>prohibited</strong> and insurance is void.
+      Your trip uses Ring Road (Route 1) — F-roads are detours only.
+    </div>
+    ${liveFroads.length > 0 ? `
+      <div class="f-live-label">🛰 Live alerts from vegagerdin.is:</div>
+      ${liveFroads.map(f=>{
+        const road = esc(String(f.Thjodvegur||f.road||'?'));
+        const title = esc(f.Heiti||f.title||'F-Road alert');
+        const body  = esc(f.FaerdLysing||f.Lysing||f.description||'');
+        return `<div class="rn wa" style="margin:4px 14px 0;">
+          <div class="rn-hd"><span class="rn-ico">🏔</span>
+          <span class="rn-title">F${road} — ${title}</span></div>
+          ${body?`<div class="rn-body">${body}</div>`:''}
+        </div>`;
+      }).join('')}
+    ` : ''}
+    <div class="f-roads-grid" id="f-roads-grid"></div>
+    <div class="f-roads-note">
+      <span>Season: typically <strong>late June – September</strong> · Check
+      <a href="https://road.is" target="_blank">road.is</a> daily · Hotline <strong>1777</strong></span>
+    </div>
+  `;
+  el.appendChild(fSection);
+
+  // Build F-road cards
+  const grid = fSection.querySelector('#f-roads-grid');
+  allF.forEach(f => {
+    const diff = ['','Easy','Moderate','Difficult'][f.difficulty]||'';
+    const diffColor = f.difficulty===1?'var(--aur)':f.difficulty===2?'var(--gold)':'var(--red)';
+    // Check if we have live status for this road
+    const liveS = liveStatusMap[f.num.toUpperCase()] || liveStatusMap[f.num.replace('N','').replace('S','').toUpperCase()];
+    const liveStatus = liveS ? liveS.status : null;
+    const statusBadge = liveStatus
+      ? (liveStatus.toLowerCase().includes('clos') || liveStatus.toLowerCase().includes('lok')
+          ? '<span class="f-live-badge f-badge-closed">🔴 CLOSED</span>'
+          : liveStatus.toLowerCase().includes('open') || liveStatus.toLowerCase().includes('opin')
+          ? '<span class="f-live-badge f-badge-open">🟢 OPEN</span>'
+          : `<span class="f-live-badge f-badge-warn">⚠️ ${esc(liveStatus)}</span>`)
+      : `<span class="f-live-badge f-badge-unknown">📅 ${f.opens}</span>`;
+    const card = document.createElement('div');
+    card.className = 'f-road-card'+(liveStatus&&liveStatus.toLowerCase().includes('open')?' f-road-open':'');
+    card.innerHTML = `
+      <div class="f-road-top">
+        <span class="f-road-num">${f.num}</span>
+        ${statusBadge}
+      </div>
+      <div class="f-road-name">${f.name}</div>
+      <div class="f-road-desc">${f.desc}</div>
+      <div class="f-road-meta">
+        ${f.rivers ? '<span>🌊 River crossings</span>' : '<span>✅ No river crossings</span>'}
+        <span style="color:${diffColor}">${diff}</span>
+      </div>
+      <div class="f-road-rv">${f.rv}</div>
+    `;
+    grid.appendChild(card);
+  });
 
   // Alternative route suggestion
   const alt=ALT_ROUTES[`${fi}-${ti}`]||ALT_ROUTES[`${ti}-${fi}`];
