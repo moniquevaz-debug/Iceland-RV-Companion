@@ -1795,6 +1795,110 @@ html {
 
 .np-num{display:block;line-height:1;}
 
+
+/* ═══════════════════════════════════════════════════════════
+   MOBILE FIXES — comprehensive pass
+   Ensures all interactive elements are comfortable on phones
+═══════════════════════════════════════════════════════════ */
+@media(max-width:767px){
+
+  /* ── Weather strip: smaller day cards on phone ─────────── */
+  .wx-strip{ padding:6px 10px; gap:5px; }
+  .wx-dc{
+    min-width:52px; padding:8px 6px;
+    border-radius:10px;
+  }
+  .wx-dd{ font-size:.5rem; }
+  .wx-di{ font-size:1.2rem; margin-bottom:3px; }
+  .wx-dhi{ font-size:.68rem; }
+  .wx-dlo{ font-size:.56rem; }
+  .wx-dw{ font-size:.5rem; }
+  .wx-grid{ gap:5px; margin:6px 10px 0; }
+  .wx-sk{ font-size:.48rem; }
+  .wx-sv{ font-size:.7rem; }
+  .wx-src{ padding:6px 12px; font-size:.5rem; }
+  .wx-loc{ font-size:.5rem; letter-spacing:1px; margin:8px 10px 4px; }
+
+  /* ── Gas card links: bigger tap targets ────────────────── */
+  .gclinks{ gap:6px; flex-wrap:wrap; }
+  .ml{
+    min-height:34px; min-width:60px;
+    display:inline-flex; align-items:center; justify-content:center;
+    font-size:.58rem; padding:5px 10px;
+  }
+
+  /* ── Pill: allow labels to overflow ntl container ─────── */
+  .ntl{ overflow-x:auto; overflow-y:visible; padding-bottom:18px; }
+  .np{ position:relative; }
+  .np-label{
+    position:absolute; bottom:-13px; left:50%;
+    transform:translateX(-50%);
+    font-size:.36rem; white-space:nowrap;
+    letter-spacing:.04em;
+  }
+
+  /* ── Aurora strip ──────────────────────────────────────── */
+  .au-strip{ padding:6px 10px 6px; gap:4px; }
+  .au-dc{ min-width:48px; padding:6px 7px; }
+  .au-dt{ font-size:.46rem; }
+  .au-dk{ font-size:.85rem; }
+
+  /* ── Road links bar ────────────────────────────────────── */
+  .road-links{
+    padding:6px 12px;
+    font-size:.55rem;
+    line-height:2;
+  }
+
+  /* ── Route summary: tighter on mobile ─────────────────── */
+  .rs-route{ font-size:.75rem; }
+  .rs-stat{ gap:2px; }
+  .rs-key{ font-size:.8rem; }
+  .rs-val{ font-size:.64rem; }
+
+  /* ── Aurora overlay: full height on small phones ───────── */
+  .au-overlay-panel{ max-height:92vh; }
+
+  /* ── Currency result: bigger text ─────────────────────── */
+  .curr-dir{
+    font-size:.5rem; margin-bottom:6px;
+  }
+
+  /* ── Wildlife modal img shorter on small phones ─────────  */
+  #wl-modal-img-wrap{ height:160px; }
+  #wl-modal-name{ font-size:1.2rem; }
+  .wl-info-label{ font-size:.44rem; }
+  .wl-info-value{ font-size:.56rem; }
+  .wl-behavior-text{ font-size:.54rem; }
+  .wl-fun-fact{ font-size:.54rem; }
+
+  /* ── Collapsed bar: bigger tap target ─────────────────── */
+  .ss-collapsed-bar{ min-height:42px; padding:10px 14px; }
+  .ss-route-summary{ font-size:.76rem; }
+
+  /* ── Bottom nav: ensure adventure button fits ─────────── */
+  .bn-lbl{ font-size:.48rem; }
+  .bn-ico{ font-size:1.2rem; }
+
+  /* ── Tour popup: ensure it doesn't cover keyboard ──────── */
+  #tour-popup{ align-items:flex-start; padding-top:10vh; }
+  .tour-card{ max-height:80vh; overflow-y:auto; }
+  .tour-tips{ max-height:35vh; overflow-y:auto; }
+}
+
+/* ── Very small screens (375px iPhone SE) ──────────────── */
+@media(max-width:390px){
+  .wl-card{ height:136px; }
+  .wl-card-name{ font-size:.7rem; bottom:28px; }
+  #wl-modal-img-wrap{ height:140px; }
+  .np{ width:30px; height:30px; font-size:.68rem; }
+  .gc{ padding:10px 10px 10px 12px; margin:6px 8px 0; }
+  .gcn{ font-size:.82rem; }
+  .au-overlay-panel{ padding:16px 14px 14px; }
+  .tour-name{ font-size:1.3rem; }
+  .tour-icon{ font-size:2.8rem; }
+}
+
 </style>
 </head>
 <body>
@@ -2744,44 +2848,45 @@ async function fetchRoads(fi,ti){
   el.innerHTML='<div class="spinner"><div class="sp"></div>Checking road conditions…</div>';
   document.getElementById('road-links').style.display='block';
 
-  let liveData=null, liveSource=null;
+  // Target: vegagerdin.is official road conditions JSON (English)
+  const TARGET='https://www.vegagerdin.is/vefur2.nsf/Faerd_listi_JSON?OpenAgent&lang=en';
 
-  // Strategy A: apis.is — Icelandic public API hub, CORS-open
-  try{
-    const _sigA=typeof AbortSignal.timeout==='function'
-      ? AbortSignal.timeout(8000)
-      : (()=>{const ac=new AbortController();setTimeout(()=>ac.abort(),8000);return ac.signal;})();
-    const r=await fetch('https://apis.is/safetravel',{signal:_sigA});
-    if(r.ok){
-      const j=await r.json();
-      const arr=j.results||j.items||(Array.isArray(j)?j:null);
-      if(arr&&arr.length){liveData=arr;liveSource='safetravel';}
-    }
-  }catch(_){}
+  // Three CORS proxies tried in order — if one fails, next is attempted
+  // Proxy URLs updated April 2026 based on current availability
+  const PROXIES=[
+    'https://api.allorigins.win/raw?url='+encodeURIComponent(TARGET),
+    'https://corsproxy.io/?url='+encodeURIComponent(TARGET),
+    'https://api.codetabs.com/v1/proxy?quest='+encodeURIComponent(TARGET),
+  ];
 
-  // Strategy B: vegagerdin.is JSON via allorigins CORS proxy
-  if(!liveData){
-    try{
-      const target='https://www.vegagerdin.is/vefur2.nsf/Faerd_listi_JSON?OpenAgent&lang=en';
-      const proxy='https://api.allorigins.win/raw?url='+encodeURIComponent(target);
-      const _sigB=typeof AbortSignal.timeout==='function'
-        ? AbortSignal.timeout(10000)
-        : (()=>{const ac=new AbortController();setTimeout(()=>ac.abort(),10000);return ac.signal;})();
-      const r=await fetch(proxy,{signal:_sigB});
-      if(r.ok){
-        const text=await r.text();
-        let parsed=null;
-        try{parsed=JSON.parse(text);}catch(_){}
-        if(parsed){
-          const arr=Array.isArray(parsed)?parsed
-            :(parsed.items||parsed.Faerd||parsed.data||null);
-          if(arr&&arr.length){liveData=arr;liveSource='vegagerdin';}
-        }
-      }
-    }catch(_){}
+  async function tryProxy(url){
+    const ac=new AbortController();
+    const timer=setTimeout(()=>ac.abort(),9000);
+    let r;
+    try{ r=await fetch(url,{signal:ac.signal}); }
+    finally{ clearTimeout(timer); }
+    if(!r.ok) throw new Error('HTTP '+r.status);
+    const text=await r.text();
+    if(!text||text.trim()==='') throw new Error('Empty response');
+    const parsed=JSON.parse(text); // throws if not JSON
+    const arr=Array.isArray(parsed)?parsed
+      :(parsed.items||parsed.Faerd||parsed.results||parsed.data||null);
+    if(!arr||!arr.length) throw new Error('No data');
+    return arr;
   }
 
-  renderRoads(fi,ti,liveData,liveSource);
+  (async()=>{
+    let liveData=null;
+    for(const proxy of PROXIES){
+      try{
+        liveData=await tryProxy(proxy);
+        if(liveData) break; // success
+      }catch(e){
+        console.warn('Roads proxy failed:',proxy,e.message);
+      }
+    }
+    renderRoads(fi,ti,liveData, liveData?'vegagerdin':null);
+  })();
 }
 
 function renderRoads(fi,ti,liveData,liveSource){
